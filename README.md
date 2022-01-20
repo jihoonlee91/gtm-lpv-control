@@ -15,6 +15,10 @@
    - SDPT3
    - ROLMIP
 
+4.
+
+   - MinGW-w64
+
 # Current Versions
 
 - MATLAB R2021b
