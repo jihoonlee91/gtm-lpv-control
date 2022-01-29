@@ -261,7 +261,7 @@ Trimcond.Xo       =Xtrim(Index.EOM);
 set_param('gtm_design','InlineParams',inlineflag);
 set_param('gtm_design','Dirty',dirtyflag);
 set_param('gtm_design','InitInArrayFormatMsg',initwarnflag);
-
+end
 %============================== SubFunctions ==============================
 function [f,g]=simio(xu,Xo,Index,target)
 %function [f,g]=gtmio(xu,Xo,Index,target,TrimWithStab)
@@ -308,7 +308,7 @@ if isfield(target,'rdeg'),     delta(15) =Xtweak(Index.EOM(6))-target.rdeg*pi/18
 f=xu(end);  %Lagrange Multiplier
 g=[dx(Index.EOM(1:6)); delta(:)-f; -delta(:)-f ]; % d/dt[uwv,pqr]=0 equality constraint,
 % minimize trim error with Lagrange multiplier
-
+end
 
 
 
