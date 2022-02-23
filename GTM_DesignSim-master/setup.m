@@ -50,7 +50,7 @@ open_system('gtm_design');
 loadmws(init_design('GTM'),'gtm_design');
 
 % Trim model, and load trimmed conditions
-appendmws(trimgtm(struct('eas',75, 'gamma',0)));
+% appendmws(trimgtm(struct('eas',75, 'gamma',0)));
 
 warning('on','Simulink:SL_MdlFileNotOnPath');
 

@@ -30,7 +30,8 @@ if isfield(target,'alpha'),    delta(3)  =yout(3)-target.alpha;   end % alpha
 if isfield(target,'beta'),     delta(4)  =yout(4)-target.beta;   end % beta
 if isfield(target,'gamma'),    delta(5)  =yout(5)-target.gamma;    end % gamma
 if isfield(target,'gndtrack'), delta(6)  =yout(6)-target.gndtrack;end % ground track
-if isfield(target,'roll'),     delta(7)  =Xtweak(Index.EOM(10))-target.roll*pi/180;end   % roll
+if isfield(target,'roll'),     delta(7)  =Xtweak(Index.EOM(10 ...
+        ))-target.roll*pi/180;end   % roll
 if isfield(target,'pitch'),    delta(8)  =Xtweak(Index.EOM(11))-target.pitch*pi/180;end   % pitch
 if isfield(target,'yaw'),      delta(9)  =Xtweak(Index.EOM(12))-target.yaw*pi/180;end   % yaw (heading)
 if isfield(target,'rollrate'), delta(10) =dx(Index.EOM(10))-target.rollrate*pi/180;  end  % phidot
