@@ -3,16 +3,18 @@ setup
 
 %% LPV modeling
 PitchSurf = 'elev';
-verbose = 0;
+verbose = 1;
 vabflag = 1;
 use_all_inputs = 0;
 Ts = 0;
 
-tasGridmps = 40:10:70; % [m/s]
+% tasGridmps = 40:10:70; % [m/s]
+tasGridmps = 50; % [m/s]
 numTAS = numel(tasGridmps);
 tasGridkts = convvel(tasGridmps,'m/s','kts'); % [kts]
 
-altGridm = 0:2000:10000; % [m]
+% altGridm = 0:2000:10000; % [m]
+altGridm = 0; % [m]
 numAlt = numel(altGridm);
 altGridft = convlength(altGridm,'m','ft'); % [ft]
 
