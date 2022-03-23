@@ -48,7 +48,7 @@ function [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose)
 ThrLim  = [ 0; 100];      % Throttle limits (%)
 EleLim  = [-30.0;  30.0]; % Elevator bounds (degrees)
 StbLim  = [-12.0;  4.0]; % Stabilizer bounds (degrees)
-AilLim  = [-25;  25];     % Aileron limits (degrees)
+AilLim  = [-12.5;  0];     % Aileron limits (degrees) -> Span variation limits (%)
 RudLim  = [-30;  30];     % Rudder limits (deg)
 
 
