@@ -18,6 +18,7 @@ __MWOPC_PART_BEGIN__ /[Content_Types].xml
   <Override ContentType="application/vnd.mathworks.simulink.configSetInfo+xml" PartName="/simulink/configSetInfo.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.graphicalInterface+xml" PartName="/simulink/graphicalInterface.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.mf0+xml" PartName="/simulink/modelDictionary.xml"/>
+  <Override ContentType="application/vnd.mathworks.simulink.pluginParameters+xml" PartName="/simulink/plugins/LogicAnalyzerPlugin.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.pluginParameters+xml" PartName="/simulink/plugins/SimscapeModelParametersPlugin.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.ScheduleCore+xml" PartName="/simulink/ScheduleCore.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.ScheduleEditor+xml" PartName="/simulink/ScheduleEditor.xml"/>
@@ -58,7 +59,7 @@ __MWOPC_PART_BEGIN__ /metadata/coreProperties.xml
   <dcterms:created xsi:type="dcterms:W3CDTF">2006-05-09T07:42:54Z</dcterms:created>
   <dc:creator>cox</dc:creator>
   <cp:lastModifiedBy>jihoo</cp:lastModifiedBy>
-  <dcterms:modified xsi:type="dcterms:W3CDTF">2022-03-23T05:14:04Z</dcterms:modified>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">2022-03-24T09:23:10Z</dcterms:modified>
   <cp:revision>$LastChangedRevision: 4850 $</cp:revision>
   <cp:version>R2021b</cp:version>
 </cp:coreProperties>
@@ -91,6 +92,7 @@ __MWOPC_PART_BEGIN__ /metadata/mwcorePropertiesReleaseInfo.xml
 __MWOPC_PART_BEGIN__ /simulink/_rels/blockdiagram.xml.rels
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="LogicAnalyzerPlugin" Target="plugins/LogicAnalyzerPlugin.xml" Type="http://schemas.mathworks.com/simulinkModel/2014/relationships/pluginParameters"/>
   <Relationship Id="ScheduleCore" Target="ScheduleCore.xml" Type="http://schemas.mathworks.com/simulink/2013/relationships/ScheduleCore"/>
   <Relationship Id="ScheduleEditor" Target="ScheduleEditor.xml" Type="http://schemas.mathworks.com/simulink/2013/relationships/ScheduleEditor"/>
   <Relationship Id="SimscapeModelParametersPlugin" Target="plugins/SimscapeModelParametersPlugin.xml" Type="http://schemas.mathworks.com/simulinkModel/2014/relationships/pluginParameters"/>
@@ -655,7 +657,7 @@ MWSout.lastrun=datestr(now);
     <ConfigManagerSettings>
       <P Name="ModifiedByFormat">%&lt;Auto&gt;</P>
       <P Name="ModifiedDateFormat">%&lt;Auto&gt;</P>
-      <P Name="RTWModifiedTimeStamp">569944899</P>
+      <P Name="RTWModifiedTimeStamp">570046982</P>
       <P Name="ModelVersionFormat">$LastChangedRevision: 4850 $</P>
     </ConfigManagerSettings>
     <EditorSettings>
@@ -1790,10 +1792,240 @@ Utilities/DocBlock</P>
 __MWOPC_PART_BEGIN__ /simulink/modelDictionary.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <MF0 version="1.1" defaultPackage="slid" packageUris="http://schema.mathworks.com/mf0/slid/R2020b_20191110">
-  <System type="System" uuid="4d0f4b10-a530-4ede-846b-1224f47b27e2">
-    <Interface type="Interface" uuid="7535d762-ba5b-4294-a4d7-a93c5e66109a"/>
+  <System type="System" uuid="b44cf363-61f1-4093-88bd-1e94ac823ab6">
+    <Parameter type="Parameter" uuid="5078eecc-86c9-42c1-8442-dc396c6e010b">
+      <Identifier>Cbar</Identifier>
+      <Name>Cbar</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="4db758bf-c849-416e-8fec-988703e78526">
+      <Identifier>DamageCase</Identifier>
+      <Name>DamageCase</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e1a019c5-0574-4330-973a-69830e35bd2f">
+      <Identifier>DamageOnsetTime</Identifier>
+      <Name>DamageOnsetTime</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="b9a0bc78-851d-422d-a033-c71063c78ca2">
+      <Identifier>DrydenModelSwitch</Identifier>
+      <Name>DrydenModelSwitch</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a2e8d832-4ecc-4023-a0eb-f4716e1b1b26">
+      <Identifier>FuelUsed_Init</Identifier>
+      <Name>FuelUsed_Init</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="0cd8535c-286f-4b35-9a01-554af3619559">
+      <Identifier>Inertia0</Identifier>
+      <Name>Inertia0</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="90e64b11-916f-478d-91dd-20aea8857ed7">
+      <Identifier>Inertia_shift_gear</Identifier>
+      <Name>Inertia_shift_gear</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="80cc7ed9-655c-47c4-ba3d-831fa70d11c3">
+      <Identifier>Ixx_model</Identifier>
+      <Name>Ixx_model</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="ba20f9d6-b46e-4c98-b519-645f61502427">
+      <Identifier>Iyy_model</Identifier>
+      <Name>Iyy_model</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="f7379b0b-c655-4c49-9b9e-547ddd71068f">
+      <Identifier>Izz_model</Identifier>
+      <Name>Izz_model</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="1354a8dd-86ea-4656-9c85-28f63a4d9828">
+      <Identifier>LandingGear</Identifier>
+      <Name>LandingGear</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="8dee3e06-fa1e-43c2-b7f1-47a7189bb58a">
+      <Identifier>LengON</Identifier>
+      <Name>LengON</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e675da37-5626-44a4-8a4d-2922f4004839">
+      <Identifier>LinearizeModeOn</Identifier>
+      <Name>LinearizeModeOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e9e0f518-5fb1-4687-bef4-9819179323eb">
+      <Identifier>RengON</Identifier>
+      <Name>RengON</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="bf3c3dc7-72ac-42b2-ac7b-4dbbb74afd44">
+      <Identifier>S</Identifier>
+      <Name>S</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d682644d-e0c9-403a-9bd0-5ce0bb687406">
+      <Identifier>SensorNoise</Identifier>
+      <Name>SensorNoise</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="19066133-d993-4b63-b410-f9a1340030e7">
+      <Identifier>StatesInp</Identifier>
+      <Name>StatesInp</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="1a31dfe8-0692-4039-956a-96b075c60a9a">
+      <Identifier>SurfaceDeadbandOn</Identifier>
+      <Name>SurfaceDeadbandOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="bb4e6e55-9e5e-4399-b195-72a0cd8de663">
+      <Identifier>Timestep</Identifier>
+      <Name>Timestep</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="67d3c32d-3fc4-4829-a6eb-58efcaf525cb">
+      <Identifier>TrimModeOn</Identifier>
+      <Name>TrimModeOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="4b290bc9-c1f8-4656-b790-f81587d07d12">
+      <Identifier>TrimWithStab</Identifier>
+      <Name>TrimWithStab</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d91e05de-b9cc-40bb-b5f4-bb62dc24d055">
+      <Identifier>WindDir</Identifier>
+      <Name>WindDir</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="5f91b143-e85d-4f59-97a1-0507200e20ab">
+      <Identifier>WindShearOn</Identifier>
+      <Name>WindShearOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="95132d04-d5c0-4ee7-85df-4ef7f66633d5">
+      <Identifier>WindSpd</Identifier>
+      <Name>WindSpd</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="039de3dd-f294-418b-9fd6-ce257eeeee1d">
+      <Identifier>aftfuel</Identifier>
+      <Name>aftfuel</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="38ec8f95-217c-4821-ace2-1928923848b9">
+      <Identifier>aftfuel_pos</Identifier>
+      <Name>aftfuel_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a090345e-f13a-4125-ba74-7c6b1372eaf7">
+      <Identifier>b</Identifier>
+      <Name>b</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="65cae289-7bfa-48f4-b466-9a01df3233bb">
+      <Identifier>bias</Identifier>
+      <Name>bias</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="5e7c1b43-b532-40b3-a564-fa46a424fede">
+      <Identifier>cg_pos0</Identifier>
+      <Name>cg_pos0</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e4adcd03-6234-4500-bb81-abadf62c9577">
+      <Identifier>cg_shift_gear</Identifier>
+      <Name>cg_shift_gear</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="f90cf572-a73c-4e2c-af70-0341039c4e5e">
+      <Identifier>engl_ang</Identifier>
+      <Name>engl_ang</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="2b971394-0582-4c18-be4b-e7a851601b4c">
+      <Identifier>engl_pos</Identifier>
+      <Name>engl_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="b5a51a71-1bf3-4683-926f-cbcc762fc185">
+      <Identifier>engr_ang</Identifier>
+      <Name>engr_ang</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="2cfc362f-4073-496e-a0eb-dc2f963088dd">
+      <Identifier>engr_pos</Identifier>
+      <Name>engr_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="6e7432c8-1a30-4f7a-9d92-78e73a75b2d2">
+      <Identifier>fuel_in_use</Identifier>
+      <Name>fuel_in_use</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a2435d29-604c-458b-8e22-f2d945a8338c">
+      <Identifier>fwdfuel</Identifier>
+      <Name>fwdfuel</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="c45ad4fe-3ad3-47b2-9f0e-79d6cc5e4ae9">
+      <Identifier>fwdfuel_pos</Identifier>
+      <Name>fwdfuel_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="cb9ba8e3-99c7-486e-9a3c-374879d85c6b">
+      <Identifier>le_mac</Identifier>
+      <Name>le_mac</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="5673319c-cd49-4071-bf95-368e53cfb216">
+      <Identifier>ram_drag_coef</Identifier>
+      <Name>ram_drag_coef</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d623c36e-fba6-43c1-a2eb-55c1a15e897e">
+      <Identifier>ref_cg</Identifier>
+      <Name>ref_cg</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a0099aec-3a87-431d-a4ab-1cb1cdb98e4a">
+      <Identifier>runway_alt</Identifier>
+      <Name>runway_alt</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="fe2a1dc3-4716-4cab-be37-bc077ac50c9f">
+      <Identifier>stall_cl_asym_enabled</Identifier>
+      <Name>stall_cl_asym_enabled</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="2bf7dcb5-2fad-4f40-95f5-58415e185c41">
+      <Identifier>symmetric_aero_on</Identifier>
+      <Name>symmetric_aero_on</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="0a90bca8-eb91-4e13-9d78-f6b5e4faa9d2">
+      <Identifier>u_gain_light</Identifier>
+      <Name>u_gain_light</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="2a0fb1c5-c98c-4a64-9a85-4996c1091209">
+      <Identifier>u_gain_moderate</Identifier>
+      <Name>u_gain_moderate</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="9d22b2b2-32e0-44bf-b099-7aadb93915b8">
+      <Identifier>u_gain_severe</Identifier>
+      <Name>u_gain_severe</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a79df21a-1f6b-49a9-9c8b-04d947694da8">
+      <Identifier>ugain</Identifier>
+      <Name>ugain</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="ab23fe7b-3024-47b7-b2a8-4bc962031896">
+      <Identifier>v_gain_light</Identifier>
+      <Name>v_gain_light</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="99b375b5-7d36-495f-a055-b1839dcb1ef6">
+      <Identifier>v_gain_moderate</Identifier>
+      <Name>v_gain_moderate</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="5b7bab35-4270-4401-a04f-0a3b2a8ac7c2">
+      <Identifier>v_gain_severe</Identifier>
+      <Name>v_gain_severe</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="954601d2-7f6b-4a35-a065-fa0108d4330b">
+      <Identifier>vgain</Identifier>
+      <Name>vgain</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="fc2c18a2-afd4-417d-8c04-a9c82ccbcb6b">
+      <Identifier>w0</Identifier>
+      <Name>w0</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="66afb462-a091-4f4a-99d3-6a8b0a0161b4">
+      <Identifier>w_gain_light</Identifier>
+      <Name>w_gain_light</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="91883753-f40d-4838-8e7e-8ae1b182d1b9">
+      <Identifier>w_gain_moderate</Identifier>
+      <Name>w_gain_moderate</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="dcd02970-5a7e-4c83-9a9f-e7b0efb022a3">
+      <Identifier>w_gain_severe</Identifier>
+      <Name>w_gain_severe</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="ff82f202-9d93-4315-8b60-c20536056b66">
+      <Identifier>wgain</Identifier>
+      <Name>wgain</Name>
+    </Parameter>
+    <Interface type="Interface" uuid="b12fbf9d-a9c7-4608-8ba0-fef17e873b20"/>
   </System>
 </MF0>
+__MWOPC_PART_BEGIN__ /simulink/plugins/LogicAnalyzerPlugin.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LogicAnalyzerPlugin>
+  <P Name="LogicAnalyzerSignalOrdering">2e8fb581-6a1e-4176-bd9a-7105a108ee0f</P>
+</LogicAnalyzerPlugin>
+
 __MWOPC_PART_BEGIN__ /simulink/plugins/SimscapeModelParametersPlugin.xml
 <?xml version="1.0" encoding="utf-8"?>
 <SimscapeModelParametersPlugin>
@@ -1803,20 +2035,20 @@ __MWOPC_PART_BEGIN__ /simulink/plugins/SimscapeModelParametersPlugin.xml
 __MWOPC_PART_BEGIN__ /simulink/ScheduleCore.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <sltp_graph version="1.1" packageUris="http://schema.mathworks.com/mf0/sltp_mm/R2021b_202106150630">
-  <sltp.mm.core.Context type="sltp.mm.core.Context" uuid="a518b5a7-e99e-4f20-8dac-ab6d72702b9d">
-    <globalData type="sltp.mm.core.GlobalData" uuid="6b307e06-bde9-4931-8e5c-a372043275f2">
+  <sltp.mm.core.Context type="sltp.mm.core.Context" uuid="70bb4776-0237-478a-b683-140832e4ec9d">
+    <globalData type="sltp.mm.core.GlobalData" uuid="66ddeedb-143c-45ce-a81e-ba72f4339562">
       <dataName>portLinearize Output</dataName>
       <type>RootOutport</type>
     </globalData>
-    <globalData type="sltp.mm.core.GlobalData" uuid="a7411cc3-45a1-49f5-992b-d40ca553c178">
+    <globalData type="sltp.mm.core.GlobalData" uuid="142f332a-6e5e-43b4-abe2-e1685cb4d5db">
       <dataName>portLinearizing Input</dataName>
       <type>RootInport</type>
     </globalData>
-    <globalData type="sltp.mm.core.GlobalData" uuid="8fc50dc9-e5a8-40f0-90c3-1803fb2709b5">
+    <globalData type="sltp.mm.core.GlobalData" uuid="dbaf41b8-210c-4b47-a508-2ca13511efd3">
       <dataName>portTrim Output</dataName>
       <type>RootOutport</type>
     </globalData>
-    <globalData type="sltp.mm.core.GlobalData" uuid="30957b6c-5cbc-425d-9caa-dc333d95118f">
+    <globalData type="sltp.mm.core.GlobalData" uuid="96dbadc4-ca2b-4c85-8205-6c1a8923ef6d">
       <dataName>portTrimming Input</dataName>
       <type>RootInport</type>
     </globalData>
@@ -1825,21 +2057,21 @@ __MWOPC_PART_BEGIN__ /simulink/ScheduleCore.xml
       <isSynchronized>true</isSynchronized>
       <panelState type="sltp.mm.core.EditorPanelState" uuid="577f922c-7132-4a6d-9468-95485b4a53e6"/>
     </editorState>
-    <rootTask type="sltp.mm.core.Task" uuid="12cb4dd2-6aac-4b26-b25d-9964b9143962">
-      <context type="sltp.mm.core.Context" uuid="a518b5a7-e99e-4f20-8dac-ab6d72702b9d"/>
+    <rootTask type="sltp.mm.core.Task" uuid="d67487d6-46eb-4e7e-b2c7-226c5d31b1ea">
+      <context type="sltp.mm.core.Context" uuid="70bb4776-0237-478a-b683-140832e4ec9d"/>
       <explicit>false</explicit>
       <name>Default</name>
       <priority>-2147483648</priority>
-      <subgraph type="sltp.mm.core.Graph" uuid="2b4dabe3-d602-4d76-8cf9-6a65e8e5b457">
-        <tasks type="sltp.mm.core.Task" uuid="9a66e954-fc12-4637-9ff9-a18eacba8700">
+      <subgraph type="sltp.mm.core.Graph" uuid="909727a4-a707-4179-98ba-3fcad2113e17">
+        <tasks type="sltp.mm.core.Task" uuid="47590587-9bed-448c-a393-d671a86dfd69">
           <baseTask>true</baseTask>
-          <context type="sltp.mm.core.Context" uuid="a518b5a7-e99e-4f20-8dac-ab6d72702b9d"/>
+          <context type="sltp.mm.core.Context" uuid="70bb4776-0237-478a-b683-140832e4ec9d"/>
           <explicit>false</explicit>
           <id>1</id>
           <isTimed>true</isTimed>
           <name>Cont</name>
           <priority>40</priority>
-          <rates type="sltp.mm.core.Rate" uuid="8ef52dbc-1d7e-45bf-a555-43a25f3997f7">
+          <rates type="sltp.mm.core.Rate" uuid="c23156bb-02d5-48dd-a129-52f74e279462">
             <annotation>Cont</annotation>
             <color>255</color>
             <hasBlocks>true</hasBlocks>
@@ -1849,7 +2081,7 @@ __MWOPC_PART_BEGIN__ /simulink/ScheduleCore.xml
             </rateSpec>
             <sti>0</sti>
           </rates>
-          <rates type="sltp.mm.core.Rate" uuid="c9d762fa-711d-475c-a523-0ada4adac5c6">
+          <rates type="sltp.mm.core.Rate" uuid="319756eb-d872-4e5a-b371-f681cd876497">
             <annotation>D1</annotation>
             <color>-436207361</color>
             <hasBlocks>true</hasBlocks>
@@ -1858,7 +2090,7 @@ __MWOPC_PART_BEGIN__ /simulink/ScheduleCore.xml
             </rateSpec>
             <sti>1</sti>
           </rates>
-          <rates type="sltp.mm.core.Rate" uuid="2d06310a-9415-4d18-b865-0b9a08dbfe29">
+          <rates type="sltp.mm.core.Rate" uuid="c2eb41b6-bd95-49cc-ac7f-55ea8ae3e0f4">
             <annotation>D2</annotation>
             <color>13697279</color>
             <hasBlocks>true</hasBlocks>
@@ -1867,7 +2099,7 @@ __MWOPC_PART_BEGIN__ /simulink/ScheduleCore.xml
             </rateSpec>
             <sti>2</sti>
           </rates>
-          <rates type="sltp.mm.core.Rate" uuid="c9c2bbb9-c8f8-480f-ad61-140ed015d2e5">
+          <rates type="sltp.mm.core.Rate" uuid="c20153ff-5e09-4172-91c3-92c9868afae6">
             <annotation>D3</annotation>
             <color>52479</color>
             <hasBlocks>true</hasBlocks>
@@ -31610,7 +31842,6 @@ __MWOPC_PART_BEGIN__ /simulink/systems/system_657.xml
 <System>
   <P Name="Location">[-7, -7, 2055, 1119]</P>
   <P Name="SystemRect">[0.000000, 0.000000, 0.000000, 0.000000]</P>
-  <P Name="Open">on</P>
   <P Name="SetExecutionDomain">off</P>
   <P Name="ExecutionDomainType">Deduce</P>
   <P Name="ModelBrowserWidth">200</P>
@@ -40474,6 +40705,7 @@ __MWOPC_PART_BEGIN__ /simulink/systems/system_root.xml
 <System>
   <P Name="Location">[-7, -7, 2055, 1119]</P>
   <P Name="SystemRect">[0.000000, 0.000000, 0.000000, 0.000000]</P>
+  <P Name="Open">on</P>
   <P Name="SetExecutionDomain">off</P>
   <P Name="ExecutionDomainType">Deduce</P>
   <P Name="ZoomFactor">201</P>
@@ -40657,6 +40889,13 @@ __MWOPC_PART_BEGIN__ /simulink/systems/system_root.xml
     <P Name="ZOrder">-14</P>
     <P Name="BackgroundColor">cyan</P>
     <P Name="LibraryVersion">$LastChangedRevision: 4702 $</P>
+    <LinkData>
+      <DialogParameters BlockName="Doublet&#xA;Generator">
+        <P Name="timeon">[2 12 7]</P>
+        <P Name="pulsewidth">[0.5 0.5 0.5]</P>
+        <P Name="amplitude">[0 0 0]</P>
+      </DialogParameters>
+    </LinkData>
     <P Name="SourceBlock">UserContent_lib/Input Generator</P>
     <P Name="SourceType">SubSystem</P>
     <InstanceData>
@@ -40705,7 +40944,7 @@ Administrator of the National and Aeronautics and Space Administration.
 
 No copyright is claimed in the United States under Title 17, U.S. Code.
 All Other Rights Reserved.</P>
-      <P Name="MaskDisplayString">GTM Design-Simulation Model\nRelease 13-08\nSubversion Info: $LastChangedRevision: 4850 $\nLast modified by jihoo on Wed Mar 23 13:58:59 2022\n\nCopyright 2009\nUnited States Government as represented by the \nAdministrator of the National and Aeronautics and Space Administration.\n\nNo copyright is claimed in the United States under Title 17, U.S. Code.\nAll Other Rights Reserved.</P>
+      <P Name="MaskDisplayString">GTM Design-Simulation Model\nRelease 13-08\nSubversion Info: $LastChangedRevision: 4850 $\nLast modified by jihoo on Thu Mar 24 18:22:42 2022\n\nCopyright 2009\nUnited States Government as represented by the \nAdministrator of the National and Aeronautics and Space Administration.\n\nNo copyright is claimed in the United States under Title 17, U.S. Code.\nAll Other Rights Reserved.</P>
       <P Name="HorizontalTextAlignment">Center</P>
       <P Name="LeftAlignmentValue">0.5</P>
     </InstanceData>
@@ -40715,15 +40954,15 @@ All Other Rights Reserved.</P>
     <P Name="Position">[845, 296, 895, 324]</P>
     <P Name="ZOrder">-16</P>
     <P Name="BackgroundColor">cyan</P>
-    <P Name="StopFcn">if strmatch(get_param(gcb,&apos;do_stopfcn_callback&apos;),...
-&apos;on&apos;,&apos;exact&apos;)                                       
-   if exist(&apos;logsout&apos;,&apos;var&apos;)                        
-       sout = CreateSimOut(logsout);                
-   else                                             
-        %disp(&apos;No Log Data Variable&apos;)               
-    end                                             
-clear logsout                                       
-end                                                 </P>
+    <P Name="StopFcn">% if strmatch(get_param(gcb,&apos;do_stopfcn_callback&apos;),...
+% &apos;on&apos;,&apos;exact&apos;)                                       
+%    if exist(&apos;logsout&apos;,&apos;var&apos;)                        
+%        sout = CreateSimOut(logsout);                
+%    else                                             
+%         %disp(&apos;No Log Data Variable&apos;)               
+%     end                                             
+% clear logsout                                       
+% end                                                 </P>
     <P Name="FontName">helvetica</P>
     <P Name="FontSize">12</P>
     <P Name="RequestExecContextInheritance">off</P>
@@ -40979,19 +41218,19 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
           <P Name="LoadSaveID" Class="char">75</P>
           <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
-          <P Name="ZoomFactor" Class="double">1.4081566068515499</P>
-          <P Name="Offset" Class="double">[-299.40917516218713, 15.057924003707171]</P>
-          <P Name="SceneRectInView" Class="double">[-299.40917516218713, 15.057924003707171, 1428.8183503243743, 632.88415199258566]</P>
+          <P Name="ZoomFactor" Class="double">1.4058631921824105</P>
+          <P Name="Offset" Class="double">[-300.5746061167747, 14.04170528266917]</P>
+          <P Name="SceneRectInView" Class="double">[-300.5746061167747, 14.04170528266917, 1431.1492122335494, 633.91658943466166]</P>
         </Object>
         <Object ObjectID="6">
           <P Name="IsActive" Class="logical">1</P>
           <P Name="IsTabbed" Class="logical">1</P>
-          <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
-          <P Name="LoadSaveID" Class="char">657</P>
+          <P Name="ViewObjType" Class="char">SimulinkTopLevel</P>
+          <P Name="LoadSaveID" Class="char">0</P>
           <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
-          <P Name="ZoomFactor" Class="double">0.8</P>
-          <P Name="Offset" Class="double">[-819.89295644114918, -26.538924930491248]</P>
-          <P Name="SceneRectInView" Class="double">[-819.89295644114918, -26.538924930491248, 2515.0, 1114.0]</P>
+          <P Name="ZoomFactor" Class="double">2.0051103368176539</P>
+          <P Name="Offset" Class="double">[-36.889900949953869, 8.01784059314167]</P>
+          <P Name="SceneRectInView" Class="double">[-36.889900949953869, 8.01784059314167, 1003.4360518999072, 444.46431881371637]</P>
         </Object>
         <Object ObjectID="7">
           <P Name="IsActive" Class="logical">0</P>
@@ -41017,23 +41256,43 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="IsActive" Class="logical">0</P>
           <P Name="IsTabbed" Class="logical">0</P>
           <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
-          <P Name="LoadSaveID" Class="char">83</P>
-          <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
-          <P Name="ZoomFactor" Class="double">0.41365131578947367</P>
-          <P Name="Offset" Class="double">[-2018.4520540711796, -811.91176470588243]</P>
-          <P Name="SceneRectInView" Class="double">[-2018.4520540711796, -811.91176470588243, 4864.0000000000009, 2154.4715705765411]</P>
-        </Object>
-        <Object ObjectID="10">
-          <P Name="IsActive" Class="logical">0</P>
-          <P Name="IsTabbed" Class="logical">0</P>
-          <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
           <P Name="LoadSaveID" Class="char">2558</P>
           <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
           <P Name="ZoomFactor" Class="double">1.0251781472684085</P>
           <P Name="Offset" Class="double">[-460.77333251274331, 0.34383688600553342]</P>
           <P Name="SceneRectInView" Class="double">[-460.77333251274331, 0.34383688600553342, 1962.5857275254866, 869.31232622798893]</P>
         </Object>
+        <Object ObjectID="10">
+          <P Name="IsActive" Class="logical">0</P>
+          <P Name="IsTabbed" Class="logical">0</P>
+          <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
+          <P Name="LoadSaveID" Class="char">657</P>
+          <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
+          <P Name="ZoomFactor" Class="double">0.8</P>
+          <P Name="Offset" Class="double">[-819.89295644114918, -26.538924930491248]</P>
+          <P Name="SceneRectInView" Class="double">[-819.89295644114918, -26.538924930491248, 2515.0, 1114.0]</P>
+        </Object>
         <Object ObjectID="11">
+          <P Name="IsActive" Class="logical">0</P>
+          <P Name="IsTabbed" Class="logical">0</P>
+          <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
+          <P Name="LoadSaveID" Class="char">566</P>
+          <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
+          <P Name="ZoomFactor" Class="double">2.0</P>
+          <P Name="Offset" Class="double">[-51.902574411657724, 38.347318946114]</P>
+          <P Name="SceneRectInView" Class="double">[-51.902574411657724, 38.347318946114, 1006.0, 445.6]</P>
+        </Object>
+        <Object ObjectID="12">
+          <P Name="IsActive" Class="logical">0</P>
+          <P Name="IsTabbed" Class="logical">0</P>
+          <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
+          <P Name="LoadSaveID" Class="char">83</P>
+          <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
+          <P Name="ZoomFactor" Class="double">0.41365131578947367</P>
+          <P Name="Offset" Class="double">[-2018.4520540711796, -811.91176470588243]</P>
+          <P Name="SceneRectInView" Class="double">[-2018.4520540711796, -811.91176470588243, 4864.0000000000009, 2154.4715705765411]</P>
+        </Object>
+        <Object ObjectID="13">
           <P Name="IsActive" Class="logical">0</P>
           <P Name="IsTabbed" Class="logical">0</P>
           <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
@@ -41043,17 +41302,7 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="Offset" Class="double">[-195.97131912264442, -73.8110843373494]</P>
           <P Name="SceneRectInView" Class="double">[-195.97131912264442, -73.8110843373494, 804.8, 356.48]</P>
         </Object>
-        <Object ObjectID="12">
-          <P Name="IsActive" Class="logical">0</P>
-          <P Name="IsTabbed" Class="logical">0</P>
-          <P Name="ViewObjType" Class="char">SimulinkTopLevel</P>
-          <P Name="LoadSaveID" Class="char">0</P>
-          <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
-          <P Name="ZoomFactor" Class="double">2.0051103368176539</P>
-          <P Name="Offset" Class="double">[-36.889900949953642, 8.0178405931417842]</P>
-          <P Name="SceneRectInView" Class="double">[-36.889900949953642, 8.0178405931417842, 1003.4360518999072, 444.46431881371637]</P>
-        </Object>
-        <Object ObjectID="13">
+        <Object ObjectID="14">
           <P Name="IsActive" Class="logical">0</P>
           <P Name="IsTabbed" Class="logical">0</P>
           <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
@@ -41063,7 +41312,7 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="Offset" Class="double">[99.261836882560488, -48.637534652217738]</P>
           <P Name="SceneRectInView" Class="double">[99.261836882560488, -48.637534652217738, 824.656013734879, 365.27506930443548]</P>
         </Object>
-        <Object ObjectID="14">
+        <Object ObjectID="15">
           <P Name="IsActive" Class="logical">0</P>
           <P Name="IsTabbed" Class="logical">0</P>
           <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
@@ -41073,7 +41322,7 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="Offset" Class="double">[-493.14166203274669, 208.38198331788658]</P>
           <P Name="SceneRectInView" Class="double">[-493.14166203274669, 208.38198331788658, 1609.6, 712.96]</P>
         </Object>
-        <Object ObjectID="15">
+        <Object ObjectID="16">
           <P Name="IsActive" Class="logical">0</P>
           <P Name="IsTabbed" Class="logical">0</P>
           <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
@@ -41082,16 +41331,6 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
           <P Name="ZoomFactor" Class="double">1.2438040345821326</P>
           <P Name="Offset" Class="double">[-277.35205123378125, 44.744207599629306]</P>
           <P Name="SceneRectInView" Class="double">[-277.35205123378125, 44.744207599629306, 1617.6181649675625, 716.51158480074139]</P>
-        </Object>
-        <Object ObjectID="16">
-          <P Name="IsActive" Class="logical">0</P>
-          <P Name="IsTabbed" Class="logical">0</P>
-          <P Name="ViewObjType" Class="char">SimulinkSubsys</P>
-          <P Name="LoadSaveID" Class="char">566</P>
-          <P Name="Extents" Class="double">[2515.0, 1114.0]</P>
-          <P Name="ZoomFactor" Class="double">2.0</P>
-          <P Name="Offset" Class="double">[-51.902574411657739, 38.347318946114015]</P>
-          <P Name="SceneRectInView" Class="double">[-51.902574411657739, 38.347318946114015, 1006.0, 445.6]</P>
         </Object>
         <Object ObjectID="17">
           <P Name="IsActive" Class="logical">0</P>
@@ -41366,18 +41605,6 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
       </Array>
       <Array PropName="DockComponentsInfo" Type="Simulink.DockComponentInfo" Dimension="1*2">
         <Object ObjectID="44">
-          <P Name="Type" Class="char">GLUE2:PropertyInspector</P>
-          <P Name="ID" Class="char">Property Inspector</P>
-          <P Name="Visible" Class="logical">0</P>
-          <P Name="CreateCallback" Class="char"/>
-          <P Name="UserData" Class="char"/>
-          <P Name="Floating" Class="logical">0</P>
-          <P Name="DockPosition" Class="char">Right</P>
-          <P Name="Width" Class="int32">512</P>
-          <P Name="Height" Class="int32">384</P>
-          <P Name="Minimized" Class="char">Unset</P>
-        </Object>
-        <Object ObjectID="45">
           <P Name="Type" Class="char">Simulink:Editor:ReferencedFiles</P>
           <P Name="ID" Class="char">Referenced Files</P>
           <P Name="Visible" Class="logical">0</P>
@@ -41386,6 +41613,18 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
 </P>
           <P Name="Floating" Class="logical">0</P>
           <P Name="DockPosition" Class="char">Left</P>
+          <P Name="Width" Class="int32">512</P>
+          <P Name="Height" Class="int32">384</P>
+          <P Name="Minimized" Class="char">Unset</P>
+        </Object>
+        <Object ObjectID="45">
+          <P Name="Type" Class="char">GLUE2:PropertyInspector</P>
+          <P Name="ID" Class="char">Property Inspector</P>
+          <P Name="Visible" Class="logical">0</P>
+          <P Name="CreateCallback" Class="char"/>
+          <P Name="UserData" Class="char"/>
+          <P Name="Floating" Class="logical">0</P>
+          <P Name="DockPosition" Class="char">Right</P>
           <P Name="Width" Class="int32">512</P>
           <P Name="Height" Class="int32">384</P>
           <P Name="Minimized" Class="char">Unset</P>
