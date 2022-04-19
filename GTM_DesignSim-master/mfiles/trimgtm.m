@@ -48,7 +48,7 @@ function [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose)
 ThrLim  = [ 0; 100];      % Throttle limits (%)
 EleLim  = [-30.0;  30.0]; % Elevator bounds (degrees)
 StbLim  = [-12.0;  4.0]; % Stabilizer bounds (degrees)
-AilLim  = [-12.5;  0];     % Aileron limits (degrees) -> Span variation limits (%)
+AilLim  = [-12.5;  12.5];     % Aileron limits (degrees) -> Span variation limits (%), need to be adjusted according to morphing
 RudLim  = [-30;  30];     % Rudder limits (deg)
 
 
@@ -217,6 +217,7 @@ if (verbose),
     fprintf('\n  ');
     for i=1:length(fn),  if (target.(fn{i})==0),   fprintf(1,'%s: %5.2f   ',fn{i},target.(fn{i})); end, end
     fprintf(1,'\n\nTrim conditions (Err=%5.3e)\n',Err);
+    fprintf(1,'  morphing: %5.2f\t\tmorphingL: %5.2f\t\tmorphingR: %8.2f\n',MWS.bias.morphing,MWS.bias.morphing-MWS.bias.aileron,MWS.bias.morphing+MWS.bias.aileron);
     fprintf(1,'  gamma: %5.2f\t\ttas: %5.2f\t\talt: %8.2f\n',yout(5),yout(2),Xtrim(Index.EOM(9)));
     fprintf(1,'  eas: %5.2f\t\talpha: %5.2f\t\tbeta: %5.2f\n',yout(1),yout(3),yout(4));
     fprintf(1,'  pdeg: %5.2f\t\tqdeg: %5.2f\t\trdeg: %5.2f\n',Xtrim(Index.EOM(4:6))*180/pi);
