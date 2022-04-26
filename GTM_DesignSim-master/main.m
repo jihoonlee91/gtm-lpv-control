@@ -1,4 +1,4 @@
-%%
+%% Initialization
 close all
 clear all
 clc
@@ -6,7 +6,7 @@ clc
 setup
 addpath(genpath('./LPVToolsV1.0/'));
 
-%% LPV modeling
+%% Trimming
 PitchSurf = 'elev';
 verbose = 1;
 vabflag = 1;
@@ -14,7 +14,7 @@ use_all_inputs = 0;
 Ts = 0;
 
 % tasGridmps = 40:10:70; % [m/s]
-tasGridmps = convvel([80], 'kts','m/s'); % [m/s]
+tasGridmps = convvel([97.25], 'kts','m/s'); % [m/s]
 numTAS = numel(tasGridmps);
 tasGridkts = convvel(tasGridmps,'m/s','kts'); % [kts]
 tasParam = pgrid('tas',tasGridkts);
@@ -25,8 +25,8 @@ numAlt = numel(altGridm);
 altGridft = convlength(altGridm,'m','ft'); % [ft]
 altParam = pgrid('alt',altGridft);
 
-morphGrid = -12.5; % between -25 and 0
-numMORPH = numel(morphGrid);
+morphGrid = 0; % between -25 and 0
+numMorph = numel(morphGrid);
 morphParam = pgrid('morph',morphGrid);
 
 MWS = grabmws('gtm_design');
@@ -34,7 +34,7 @@ MWS = grabmws('gtm_design');
 isFeasible = zeros(numTAS,numAlt);
 for i = 1:numTAS
     for j = 1:numAlt
-        for k = 1:numAlt
+        for k = 1:numMorph
             targetTASkts = tasGridkts(i);
             targetTASmps = tasGridmps(j);
             targetMORPH = morphGrid(k);
@@ -49,20 +49,32 @@ for i = 1:numTAS
 
             loadmws(MWS,'gtm_design');
             [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose);
+            mwsGrid(i,j,k) = MWS;
             if (Err < 1e-3)
-                [sys,londyn,latdyn]=linmodel(MWS,vabflag,use_all_inputs,Ts);
                 disp(['TAS ',num2str(targetTASmps),' m/s at altitude ',num2str(targetAltm),' m : Done'])
                 isFeasible(i,j,k) = 1;
             else
                 Tc=struct('alpha',NaN,'elevator',NaN,'throttle',NaN);
                 disp(['TAS ',num2str(targetTASmps),' m/s at altitude ',num2str(targetAltm),' m : Fail'])
             end
-            Glon(:,:,i,j,k) = londyn;
-            Glat(:,:,i,j,k) = latdyn;
         end
     end
 end
 
+%% Linearization
+for i = 1:numTAS
+    for j = 1:numAlt
+        for k = 1:numMorph
+            if isFeasible(i,j,k) == 1
+                [sys,londyn,latdyn]=linmodel(mwsGrid(i,j,k),vabflag,use_all_inputs,Ts);
+                Glon(:,:,i,j,k) = londyn;
+                Glat(:,:,i,j,k) = latdyn;
+            end
+        end
+    end
+end
+
+%% LPV modeling
 Domain = rgrid(tasParam,altParam,morphParam);
 lpvLon = pss(Glon,Domain);
 lpvLat = pss(Glat,Domain);
