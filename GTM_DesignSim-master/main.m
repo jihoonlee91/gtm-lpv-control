@@ -13,18 +13,19 @@ vabflag = 1;
 use_all_inputs = 0;
 Ts = 0;
 
-% tasGridmps = 40:10:70; % [m/s]
-tasGridmps = convvel([97.25], 'kts','m/s'); % [m/s]
+% tasGridmps = convvel([70 85], 'kts','m/s'); % [m/s]
+tasGridmps = convvel(80, 'kts','m/s'); % [m/s]
 numTAS = numel(tasGridmps);
-tasGridkts = convvel(tasGridmps,'m/s','kts'); % [kts]
+tasGridkts = convvel(tasGridmps,'m/s','kts'); % 70~85 [kts]
 tasParam = pgrid('tas',tasGridkts);
 
-% altGridm = 0:2000:10000; % [m]
-altGridm = convlength([800], 'ft','m'); % [m]
+% altGridm = convlength([700 1100], 'ft','m'); % [m]
+altGridm = convlength(800, 'ft','m'); % [m]
 numAlt = numel(altGridm);
-altGridft = convlength(altGridm,'m','ft'); % [ft]
+altGridft = convlength(altGridm,'m','ft'); % 700~1100 [ft]
 altParam = pgrid('alt',altGridft);
 
+% morphGrid = [-25 0]; % between -25 and 0
 morphGrid = 0; % between -25 and 0
 numMorph = numel(morphGrid);
 morphParam = pgrid('morph',morphGrid);
@@ -50,6 +51,8 @@ for i = 1:numTAS
             loadmws(MWS,'gtm_design');
             [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose);
             mwsGrid(i,j,k) = MWS;
+            XtrimGrid(i,j,k) = Xtrim;
+            TrimcondGrid(i,j,k) = Trimcond;
             if (Err < 1e-3)
                 disp(['TAS ',num2str(targetTASmps),' m/s at altitude ',num2str(targetAltm),' m : Done'])
                 isFeasible(i,j,k) = 1;
@@ -78,6 +81,9 @@ end
 Domain = rgrid(tasParam,altParam,morphParam);
 lpvLon = pss(Glon,Domain);
 lpvLat = pss(Glat,Domain);
+
+%% Longitudinal control design (baseline controller)
+
 
 %% Longitudinal control design
 % Define weights:
