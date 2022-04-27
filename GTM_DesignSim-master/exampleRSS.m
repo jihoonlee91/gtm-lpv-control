@@ -2,10 +2,10 @@
 P = rss(3,2,2); 
 K = rss(1,1,2); 
 A = rss(1,1,1); 
-W = rss(1,1,1); 
-systemnames = 'W A K P'; 
-input_to_P = '[W;A]'; 
-input_to_W = '[deltemp]'; 
+Www = rss(1,1,1); 
+systemnames = 'Www A K P'; 
+input_to_P = '[Www;A]'; 
+input_to_Www = '[deltemp]'; 
 input_to_K = '[P(2)+noise;setpoint]'; 
 input_to_A = '[K]'; 
 inputvar = '[noise;deltemp;setpoint]'; 

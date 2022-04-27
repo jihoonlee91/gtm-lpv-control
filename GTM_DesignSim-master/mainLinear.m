@@ -77,30 +77,51 @@ end
 
 %% LPV modeling
 Domain = rgrid(tasParam,altParam,morphParam);
-GTMlon = pss(Glon,Domain);
+G = pss(Glon,Domain);
 GTMlat = pss(Glat,Domain);
 
 %% Longitudinal control design (baseline controller)
 % Weights
-Modela = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
-Perfa = tf([0.1,5.973],[1,0.176]);
-Delev = 0.01;
-Welev = tf([0.8,42.91],[1,119.2]);
-Nq = 0.1;
-Na = 0.01;
+M = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+P = tf([0.1,5.973],[1,0.176]);
+% D = 0.01;
+W = tf([0.8,42.91],[1,119.2]);
+% Nq = 0.1;
+% Na = 0.01;
+
+M = tf(1,[1,0]);
+P = tf(1,[1,0]);
+% D = 0.01;
+W = tf(1,[1,0]);
 
 % Control interconnection
-systemnames = 'GTMlon Modela Perfa Delev Welev Na Nq';
-inputvar = '[Pilotlon;Noisea;Noiseq;u]';
-outputvar = '[Perfa;Welev;Pilotlon-GTMlon(1)-Na;GTMlon(2)+Nq]';
-input_to_GTMlon = '[u+Delev]';
-input_to_Modela = '[Pilotlon]';
-input_to_Perfa = '[Modela-GTMlon(1)]';
-input_to_Delev = '[Distelev]';
-input_to_Welev = '[u+Delev]';
-input_to_Na = '[Noisea]';
-input_to_Nq = '[Noiseq]';
-H = sysic
+systemnames = ' G M P W ';
+inputvar = '[ p{1}; d{1}; na{1}; nq{1}; u ]';
+outputvar = '[ P; W; p-G(1)-0.01*na; G(2)+0.1*nq ]';
+input_to_G = '[ u+0.01*d ]';
+input_to_M = '[ p ]';
+input_to_P = '[ M-G(1) ]';
+input_to_W = '[ u+0.01*d ]';
+sysoutname = 'H';
+cleanupsysic = 'yes'; 
+sysic
+
+%%
+% Control interconnection (closed-loop)
+% systemnames = ' GTMlon Modela Perfa Delev Welev Na Nq K ';
+% inputvar = '[ Pilotlon{1}; Distelev{1}; Noisea{1}; Noiseq{1} ]';
+% outputvar = '[ Perfa; Welev ]';
+% input_to_GTMlon = '[ K+Delev ]';
+% input_to_Modela = '[ Pilotlon ]';
+% input_to_Perfa = '[ Modela-GTMlon(1) ]';
+% input_to_Delev = '[ Distelev ]';
+% input_to_Welev = '[ K+Delev ]';
+% input_to_Na = '[ Noisea ]';
+% input_to_Nq = '[ Noiseq ]';
+% input_to_K = '[ Pilotlon-GTMlon(1)-Na; GTMlon(2)+Nq ]';
+% sysoutname = 'H';
+% cleanupsysic = 'yes'; 
+% sysic
 
 %% Longitudinal synthesis
 % Basis function,
