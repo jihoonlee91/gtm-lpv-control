@@ -21,7 +21,7 @@ tasParam = pgrid('tasParam',tasGridkts);
 tasParam.RateBounds = 10*[-1,1];
 
 % altGridm = convlength([700 1100], 'ft','m'); % [m]
-altGridm = convlength(800, 'ft','m'); % [m]
+altGridm = convlength(1000, 'ft','m'); % [m]
 numAlt = numel(altGridm);
 altGridft = convlength(altGridm,'m','ft'); % 700~1100 [ft]
 altParam = pgrid('altParam',altGridft);
@@ -93,14 +93,14 @@ N_alp = 0.01;
 N_q = 0.1;
 
 % Control interconnection
-systemnames = ' P_lon Model_alp Perf_alp W_elev D_elev N_alp N_q ';
+systemnames = ' P_lon Model_alp Perf_alp D_elev W_elev N_alp N_q ';
 inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1}; u ]';
 outputvar = '[ Perf_alp; W_elev; Pilot_lon-P_lon(1)-N_alp; P_lon(2)+N_q ]';
 input_to_P_lon = '[ u+D_elev ]';
 input_to_Model_alp = '[ Pilot_lon ]';
 input_to_Perf_alp = '[ Model_alp-P_lon(1) ]';
-input_to_W_elev = '[ u+D_elev ]';
 input_to_D_elev = '[ Dist_elev ]';
+input_to_W_elev = '[ u+D_elev ]';
 input_to_N_alp = '[ Noise_alp ]';
 input_to_N_q = '[ Noise_q ]';
 sysoutname = 'G_lon';
@@ -121,11 +121,10 @@ Yb = Xb;
 opt = lpvsynOptions('BackOffFactor',1.02);
 nmeas = 2; % # of measurements
 ncont = 1; % # of controls
-[K_lon,gamma_lon,info] = lpvsyn(G_lon,nmeas,ncont,Xb,Yb,opt);
-% [K_lon,CL_lon,gamma] = hinfsyn(G_lon,nmeas,ncont);
+[K_lon,gamma_lon,info_lon] = lpvsyn(G_lon,nmeas,ncont,Xb,Yb,opt);
 K_lon
 gamma_lon
-info
+info_lon
 
 %% Analysis
 % Closed-loop interconnection
@@ -144,3 +143,82 @@ sysoutname = 'CL_lon';
 cleanupsysic = 'yes'; 
 sysic
 CL_lon
+
+%% Lateral control design (baseline controller)
+% Weights
+% s = tf('s');
+Model_bet = tf(7.78,[1,3.92,7.78])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+Model_p = tf(-52.56,[1,0.04])*tf([1,-0.02],[1,6.47])*tf([1,7.5,34.67],[1,8.75,39.06])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+Perf_bet = tf([0.1,5.973],[1,0.176]);
+Perf_p = tf([0.1,5.973],[1,0.299]);
+D_ail = 0.01;
+D_rud = 0.01;
+W_ail = tf([0.8,42.91],[1,119.2]);
+W_rud = tf([0.8,42.91],[1,119.2]);
+N_bet = 0.01;
+N_p = 0.1;
+N_r = 0.1;
+
+% Control interconnection
+systemnames = ' P_lat Model_bet Model_p Perf_bet Perf_p D_ail D_rud W_ail W_rud N_bet N_p N_r ';
+inputvar = '[ Pilot_lat{1}; Pilot_ped{1}; Dist_ail{1}; Dist_rud{1}; Noise_bet{1}; Noise_p{1}; Noise_r{1}; u{2} ]';
+outputvar = '[ Perf_bet; Perf_p; W_ail; W_rud; Pilot_lat; Pilot_ped-P_lat(1)-N_bet; P_lat(2)+N_p; P_lat(3)+N_r ]';
+input_to_P_lat = '[ u(1)+D_ail; u(2)+D_rud ]';
+input_to_Model_bet = '[ Pilot_ped ]';
+input_to_Model_p = '[ Pilot_lat ]';
+input_to_Perf_bet = '[ Model_bet-P_lat(1) ]';
+input_to_Perf_p = '[ Model_p-P_lat(2) ]';
+input_to_D_ail = '[ Dist_ail ]';
+input_to_D_rud = '[ Dist_rud ]';
+input_to_W_ail = '[ u(1)+D_ail ]';
+input_to_W_rud = '[ u(2)+D_rud ]';
+input_to_N_bet = '[ Noise_bet ]';
+input_to_N_p = '[ Noise_p ]';
+input_to_N_r = '[ Noise_r ]';
+sysoutname = 'G_lat';
+cleanupsysic = 'yes'; 
+sysic
+G_lat
+
+%% Lateral synthesis
+% Basis function
+b1 = basis(1,0);
+btas = basis(tasParam,'tasParam',1);
+balt = basis(altParam,'altParam',1);
+bmorph = basis(morphParam,'morphParam',1);
+Xb = [b1;btas;balt;bmorph];
+Yb = Xb;
+
+% Synthesize two-degree of freedom controller.
+opt = lpvsynOptions('BackOffFactor',1.02);
+nmeas = 3; % # of measurements
+ncont = 2; % # of controls
+[K_lat,gamma_lat,info_lat] = lpvsyn(G_lat,nmeas,ncont,Xb,Yb,opt);
+K_lat
+gamma_lat
+info_lat
+
+%% Analysis
+% K_lat = rss(18,2,4);
+
+% Closed-loop interconnection
+systemnames = ' P_lat Model_bet Model_p Perf_bet Perf_p D_ail D_rud W_ail W_rud N_bet N_p N_r K_lat ';
+inputvar = '[ Pilot_lat{1}; Pilot_ped{1}; Dist_ail{1}; Dist_rud{1}; Noise_bet{1}; Noise_p{1}; Noise_r{1} ]';
+outputvar = '[ Perf_bet; Perf_p; W_ail; W_rud ]';
+input_to_P_lat = '[ K_lat(1)+D_ail; K_lat(2)+D_rud ]';
+input_to_Model_bet = '[ Pilot_ped ]';
+input_to_Model_p = '[ Pilot_lat ]';
+input_to_Perf_bet = '[ Model_bet-P_lat(1) ]';
+input_to_Perf_p = '[ Model_p-P_lat(2) ]';
+input_to_D_ail = '[ Dist_ail ]';
+input_to_D_rud = '[ Dist_rud ]';
+input_to_W_ail = '[ K_lat(1)+D_ail ]';
+input_to_W_rud = '[ K_lat(2)+D_rud ]';
+input_to_N_bet = '[ Noise_bet ]';
+input_to_N_p = '[ Noise_p ]';
+input_to_N_r = '[ Noise_r ]';
+input_to_K_lat = '[ Pilot_lat; Pilot_ped-P_lat(1)-N_bet; P_lat(2)+N_p; P_lat(3)+N_r ]';
+sysoutname = 'CL_lat';
+cleanupsysic = 'yes'; 
+sysic
+CL_lat
