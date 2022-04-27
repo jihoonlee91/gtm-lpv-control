@@ -17,18 +17,21 @@ Ts = 0;
 tasGridmps = convvel(80, 'kts','m/s'); % [m/s]
 numTAS = numel(tasGridmps);
 tasGridkts = convvel(tasGridmps,'m/s','kts'); % 70~85 [kts]
-tasParam = pgrid('tas',tasGridkts);
+tasParam = pgrid('tasParam',tasGridkts);
+tasParam.RateBounds = 10*[-1,1];
 
 % altGridm = convlength([700 1100], 'ft','m'); % [m]
 altGridm = convlength(800, 'ft','m'); % [m]
 numAlt = numel(altGridm);
 altGridft = convlength(altGridm,'m','ft'); % 700~1100 [ft]
-altParam = pgrid('alt',altGridft);
+altParam = pgrid('altParam',altGridft);
+altParam.RateBounds = 100*[-1,1];
 
 % morphGrid = [-25 0]; % between -25 and 0
 morphGrid = 0; % between -25 and 0
 numMorph = numel(morphGrid);
-morphParam = pgrid('morph',morphGrid);
+morphParam = pgrid('morphParam',morphGrid);
+morphParam.RateBounds = 10*[-1,1];
 
 MWS = grabmws('gtm_design');
 
@@ -68,8 +71,8 @@ for i = 1:numTAS
         for k = 1:numMorph
             if isFeasible(i,j,k) == 1
                 [sys,londyn,latdyn]=linmodel(mwsGrid(i,j,k),vabflag,use_all_inputs,Ts);
-                Glon(:,:,i,j,k) = ss(londyn.A,londyn.B(:,1),londyn.C([2,3],:),londyn.D([2,3],1));
-                Glat(:,:,i,j,k) = ss(latdyn.A,latdyn.B(:,[1,2]),latdyn.C([1,2,3],:),latdyn.D([1,2,3],[1,2]));
+                GTM_lon(:,:,i,j,k) = ss(londyn.A,londyn.B(:,1),londyn.C([2,3],:),londyn.D([2,3],1));
+                GTM_lat(:,:,i,j,k) = ss(latdyn.A,latdyn.B(:,[1,2]),latdyn.C([1,2,3],:),latdyn.D([1,2,3],[1,2]));
             end
         end
     end
@@ -77,72 +80,67 @@ end
 
 %% LPV modeling
 Domain = rgrid(tasParam,altParam,morphParam);
-G = pss(Glon,Domain);
-GTMlat = pss(Glat,Domain);
+P_lon = pss(GTM_lon,Domain);
+P_lat = pss(GTM_lat,Domain);
 
 %% Longitudinal control design (baseline controller)
 % Weights
-M = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
-P = tf([0.1,5.973],[1,0.176]);
-% D = 0.01;
-W = tf([0.8,42.91],[1,119.2]);
-% Nq = 0.1;
-% Na = 0.01;
-
-M = tf(1,[1,0]);
-P = tf(1,[1,0]);
-% D = 0.01;
-W = tf(1,[1,0]);
+Model_alp = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+Perf_alp = tf([0.1,5.973],[1,0.176]);
+D_elev = 0.01;
+W_elev = tf([0.8,42.91],[1,119.2]);
+N_alp = 0.01;
+N_q = 0.1;
 
 % Control interconnection
-systemnames = ' G M P W ';
-inputvar = '[ p{1}; d{1}; na{1}; nq{1}; u ]';
-outputvar = '[ P; W; p-G(1)-0.01*na; G(2)+0.1*nq ]';
-input_to_G = '[ u+0.01*d ]';
-input_to_M = '[ p ]';
-input_to_P = '[ M-G(1) ]';
-input_to_W = '[ u+0.01*d ]';
-sysoutname = 'H';
+systemnames = ' P_lon Model_alp Perf_alp W_elev D_elev N_alp N_q ';
+inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1}; u ]';
+outputvar = '[ Perf_alp; W_elev; Pilot_lon-P_lon(1)-N_alp; P_lon(2)+N_q ]';
+input_to_P_lon = '[ u+D_elev ]';
+input_to_Model_alp = '[ Pilot_lon ]';
+input_to_Perf_alp = '[ Model_alp-P_lon(1) ]';
+input_to_W_elev = '[ u+D_elev ]';
+input_to_D_elev = '[ Dist_elev ]';
+input_to_N_alp = '[ Noise_alp ]';
+input_to_N_q = '[ Noise_q ]';
+sysoutname = 'G_lon';
 cleanupsysic = 'yes'; 
 sysic
-
-%%
-% Control interconnection (closed-loop)
-% systemnames = ' GTMlon Modela Perfa Delev Welev Na Nq K ';
-% inputvar = '[ Pilotlon{1}; Distelev{1}; Noisea{1}; Noiseq{1} ]';
-% outputvar = '[ Perfa; Welev ]';
-% input_to_GTMlon = '[ K+Delev ]';
-% input_to_Modela = '[ Pilotlon ]';
-% input_to_Perfa = '[ Modela-GTMlon(1) ]';
-% input_to_Delev = '[ Distelev ]';
-% input_to_Welev = '[ K+Delev ]';
-% input_to_Na = '[ Noisea ]';
-% input_to_Nq = '[ Noiseq ]';
-% input_to_K = '[ Pilotlon-GTMlon(1)-Na; GTMlon(2)+Nq ]';
-% sysoutname = 'H';
-% cleanupsysic = 'yes'; 
-% sysic
+G_lon
 
 %% Longitudinal synthesis
-% Basis function,
-% b1 = basis(1,0);
-% bcos = basis(pcos,'rho',-psin);
-% bsin = basis(psin,'rho',pcos);
-% Xb = [b1;bcos;bsin];
-% Yb = Xb;
-% 
-% % Synthesize two-degree of freedom controller.
-% b0 = basis(1,0);
-% b1 = basis(eta1,'eta1',1);
-% b2 = basis(eta2,'eta2',1);
-% Xb = [b0;b1;b1^2;b2;b2^2;b1*b2];
-% Yb = Xb;
-% opt = lpvsynOptions('BackOffFactor',1.02);
-% nmeas = 4; % # of measurements
-% ncont = 1; % # of controls
-% 
-% [Knr,Gamma,Info] = lpvsyn(G,nmeas,ncont,Xb,Yb,opt);
-% 
-% % LPV Rate-Bounded Control Design
-% opt = lpvsynOptions('BackOffFactor',1.02);
-% [Klpv,normlpv] = lpvsyn(H,2,2,Xb,Yb,opt);
+% Basis function
+b1 = basis(1,0);
+btas = basis(tasParam,'tasParam',1);
+balt = basis(altParam,'altParam',1);
+bmorph = basis(morphParam,'morphParam',1);
+Xb = [b1;btas;balt;bmorph];
+Yb = Xb;
+
+% Synthesize two-degree of freedom controller.
+opt = lpvsynOptions('BackOffFactor',1.02);
+nmeas = 2; % # of measurements
+ncont = 1; % # of controls
+[K_lon,gamma_lon,info] = lpvsyn(G_lon,nmeas,ncont,Xb,Yb,opt);
+% [K_lon,CL_lon,gamma] = hinfsyn(G_lon,nmeas,ncont);
+K_lon
+gamma_lon
+info
+
+%% Analysis
+% Closed-loop interconnection
+systemnames = ' P_lon Model_alp Perf_alp W_elev D_elev N_alp N_q K_lon ';
+inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1} ]';
+outputvar = '[ Perf_alp; W_elev ]';
+input_to_P_lon = '[ K_lon+D_elev ]';
+input_to_Model_alp = '[ Pilot_lon ]';
+input_to_Perf_alp = '[ Model_alp-P_lon(1) ]';
+input_to_W_elev = '[ K_lon+D_elev ]';
+input_to_D_elev = '[ Dist_elev ]';
+input_to_N_alp = '[ Noise_alp ]';
+input_to_N_q = '[ Noise_q ]';
+input_to_K_lon = '[ Pilot_lon-P_lon(1)-N_alp; P_lon(2)+N_q ]';
+sysoutname = 'CL_lon';
+cleanupsysic = 'yes'; 
+sysic
+CL_lon
