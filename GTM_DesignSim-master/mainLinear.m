@@ -68,8 +68,8 @@ for i = 1:numTAS
         for k = 1:numMorph
             if isFeasible(i,j,k) == 1
                 [sys,londyn,latdyn]=linmodel(mwsGrid(i,j,k),vabflag,use_all_inputs,Ts);
-                Glon(:,:,i,j,k) = londyn;
-                Glat(:,:,i,j,k) = latdyn;
+                Glon(:,:,i,j,k) = ss(londyn.A,londyn.B(:,1),londyn.C([2,3],:),londyn.D([2,3],1));
+                Glat(:,:,i,j,k) = ss(latdyn.A,latdyn.B(:,[1,2]),latdyn.C([1,2,3],:),latdyn.D([1,2,3],[1,2]));
             end
         end
     end
@@ -77,38 +77,51 @@ end
 
 %% LPV modeling
 Domain = rgrid(tasParam,altParam,morphParam);
-GTM_lon = pss(Glon,Domain);
-GTM_lat = pss(Glat,Domain);
+GTMlon = pss(Glon,Domain);
+GTMlat = pss(Glat,Domain);
 
 %% Longitudinal control design (baseline controller)
 % Weights
-Model_a = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
-Perf_a = tf([0.1,5.973],[1,0.176]);
-D_elev = 0.01;
-W_elev = tf([0.8,42.91],[1,119.2]);
-N_q = 0.1;
-N_a = 0.01;
+Modela = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+Perfa = tf([0.1,5.973],[1,0.176]);
+Delev = 0.01;
+Welev = tf([0.8,42.91],[1,119.2]);
+Nq = 0.1;
+Na = 0.01;
 
 % Control interconnection
-systemnames = 'GTM_lon Model_a Perf_a D_elev W_elev N_q N_a';
-input_to_GTM_lon = '[u+D_elev]';
-input_to_Model_a = '[Pilot_lon]';
-input_to_Perf_a = '[Model_a-GTM_lon(2)]';
-input_to_D_elev = '[Dist_elev]';
-input_to_W_elev = '[u+D_elev]';
-input_to_N_q = '[Noise_q]';
-input_to_N_a = '[Noise_a]';
-inputvar = '[Pilot_lon{1};Noise_q{1};Noise_a{1};u{1}]';
-outputvar = '[Perf_a;W_elev;Pilot_lon-GTM_lon(2)-N_a;GTM_lon(3)+N_q]';
-H = sysic;
+systemnames = 'GTMlon Modela Perfa Delev Welev Na Nq';
+inputvar = '[Pilotlon;Noisea;Noiseq;u]';
+outputvar = '[Perfa;Welev;Pilotlon-GTMlon(1)-Na;GTMlon(2)+Nq]';
+input_to_GTMlon = '[u+Delev]';
+input_to_Modela = '[Pilotlon]';
+input_to_Perfa = '[Modela-GTMlon(1)]';
+input_to_Delev = '[Distelev]';
+input_to_Welev = '[u+Delev]';
+input_to_Na = '[Noisea]';
+input_to_Nq = '[Noiseq]';
+H = sysic
 
+%% Longitudinal synthesis
 % Basis function,
-b1 = basis(1,0);
-bcos = basis(pcos,'rho',-psin);
-bsin = basis(psin,'rho',pcos);
-Xb = [b1;bcos;bsin];
-Yb = Xb;
-
-% LPV Rate-Bounded Control Design
-opt = lpvsynOptions('BackOffFactor',1.02);
-[Klpv,normlpv] = lpvsyn(H,2,2,Xb,Yb,opt);
+% b1 = basis(1,0);
+% bcos = basis(pcos,'rho',-psin);
+% bsin = basis(psin,'rho',pcos);
+% Xb = [b1;bcos;bsin];
+% Yb = Xb;
+% 
+% % Synthesize two-degree of freedom controller.
+% b0 = basis(1,0);
+% b1 = basis(eta1,'eta1',1);
+% b2 = basis(eta2,'eta2',1);
+% Xb = [b0;b1;b1^2;b2;b2^2;b1*b2];
+% Yb = Xb;
+% opt = lpvsynOptions('BackOffFactor',1.02);
+% nmeas = 4; % # of measurements
+% ncont = 1; % # of controls
+% 
+% [Knr,Gamma,Info] = lpvsyn(G,nmeas,ncont,Xb,Yb,opt);
+% 
+% % LPV Rate-Bounded Control Design
+% opt = lpvsynOptions('BackOffFactor',1.02);
+% [Klpv,normlpv] = lpvsyn(H,2,2,Xb,Yb,opt);
