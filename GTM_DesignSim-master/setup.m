@@ -19,14 +19,14 @@ rehash path
 % Close model if open, prompt if changed.
 if  not(isempty(find_system('SearchDepth',0,'Name','gtm_design')))
     if strcmp(get_param('gtm_design','Dirty'),'on');
-        savechanges=input('  gtm_design model has been changed, save changes (y/N) ?','s');
-        if ~isempty(savechanges) && strcmpi(savechanges(1),'y');
+%         savechanges=input('  gtm_design model has been changed, save changes (y/N) ?','s');
+%         if ~isempty(savechanges) && strcmpi(savechanges(1),'y');
 	  fprintf(1,'Saving System...');
 	  clearmws % Suppreses warning mesage about model workspace
 	  clear savechanges % clear temporary response variable
 	  save_system('gtm_design');
 	  fprintf(1,' Done.\n');
-        end
+%         end
     end
     % terminate if left in paused state. matlab will not close paused model.
     if strcmp(get_param('gtm_design','SimulationStatus'),'paused'),

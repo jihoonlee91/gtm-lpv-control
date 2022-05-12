@@ -1,15 +1,22 @@
 % Define the time-varying real parameter.
-rho = pgrid('rho',linspace(-pi,pi,7));
-rho.RateBounds = [-5 5];
+% rho = pgrid('rho',linspace(-pi,pi,7));
+% rho.RateBounds = [-5 5];
+rhoData = linspace(-pi,pi,7);
+domain = rgrid('rho',rhoData);
 % Define the A, B, C, and D matrices of the LPV system in Equation (1)
-pcos = cos(rho);
-psin = sin(rho);
-A = [0.75 2 pcos psin;0 0.5 -psin pcos;0 0 -10 0; 0 0 0 -10];
-B = [0 0 0;3 0 0;0 10 0;0 0 10];
+% pcos = cos(rho);
+% psin = sin(rho);
+a = ureal('a',1,'Percentage',[-10 10]);
+% A = [0.75 2 pcos psin;0 0.5 -psin pcos;0 0 -10 0; 0 0 0 -10];
+B = [0 0 0;a 0 0;0 10 0;0 0 10];
 C = [1 0 0 0;0 1 0 0];
 D = zeros(2,3);
+for i = 1:length(rhoData)
+    A = [0.75 2 cos(rhoData(i)) sin(rhoData(i));0 0.5 -sin(rhoData(i)) cos(rhoData(i));0 0 -10 0; 0 0 0 -10];
+    Data(:,:,i) = uss(A,B,C,D);
+end
 % Form the grid-based parameter-varying state-space system:
-G = pss(A,B,C,D)
+G = upss(Data,domain);
 % Weights
 %% Synthesis for gridded LPV systems
 Wp = eye(2);
@@ -38,3 +45,4 @@ Yb = Xb;
 opt = lpvsynOptions('BackOffFactor',1.02);
 [Klpv,normlpv] = lpvsyn(H,2,2,Xb,Yb,opt);
 Klpv
+normlpv

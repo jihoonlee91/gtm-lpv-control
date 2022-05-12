@@ -17,10 +17,11 @@ SimVars=trimgtm(struct('alpha',3, 'gamma',0));
 
 % Load Simulation Variables (at trim condition) into Model Workspace
 loadmws(SimVars);
+MWS = grabmws
 
 % Linearize model about this condition
 fprintf(1,'Linearizing...')
-[sys,londyn,latdyn]=linmodel();
+[sys,londyn,latdyn]=linmodel(MWS,1);
 fprintf(1,' Done\n');
 
 % Construct 1 degree double sequence. 

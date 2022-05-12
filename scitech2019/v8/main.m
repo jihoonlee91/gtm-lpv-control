@@ -109,7 +109,7 @@ CL = sysic;
 
 %% step response
 opt = stepDataOptions('StepAmplitude',pi/180);
-fig1 = figure('position',[-1918 -158 958 993]);
+% fig1 = figure('position',[-1918 -158 958 993]);
 step(CL,opt,4)
 drawnow
 
