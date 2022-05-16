@@ -64,6 +64,7 @@ appendmws(struct('LinearizeModeOn',1),'gtm_design');
 %% Run sim for 0.1 seconds.
 % This initializes some states that are not set by trimgtm, e.g.
 % memory blocks, filter states, etc.
+% In the Data Import/Export pane of the Configuration Parameters dialog box, Single simulation output is selected by default. If the Single simulation output is not selected, the simulation results are returned as a time vector.
 [t,Xtime,y]=sim('gtm_design',[0 0.1]);
 Xo=Xtime(end,:);
 

@@ -18,6 +18,7 @@ __MWOPC_PART_BEGIN__ /[Content_Types].xml
   <Override ContentType="application/vnd.mathworks.simulink.configSetInfo+xml" PartName="/simulink/configSetInfo.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.graphicalInterface+xml" PartName="/simulink/graphicalInterface.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.mf0+xml" PartName="/simulink/modelDictionary.xml"/>
+  <Override ContentType="application/vnd.mathworks.simulink.pluginParameters+xml" PartName="/simulink/plugins/LogicAnalyzerPlugin.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.pluginParameters+xml" PartName="/simulink/plugins/SimscapeModelParametersPlugin.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.ScheduleCore+xml" PartName="/simulink/ScheduleCore.xml"/>
   <Override ContentType="application/vnd.mathworks.simulink.ScheduleEditor+xml" PartName="/simulink/ScheduleEditor.xml"/>
@@ -55,10 +56,9 @@ __MWOPC_PART_BEGIN__ /metadata/coreProperties.xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <cp:category>model</cp:category>
-  <dcterms:created xsi:type="dcterms:W3CDTF">2022-04-26T17:03:55Z</dcterms:created>
-  <dc:creator>jihoo</dc:creator>
-  <cp:lastModifiedBy>jihoo</cp:lastModifiedBy>
-  <dcterms:modified xsi:type="dcterms:W3CDTF">2022-05-13T18:53:59Z</dcterms:modified>
+  <dcterms:created xsi:type="dcterms:W3CDTF">2022-05-16T08:47:02Z</dcterms:created>
+  <cp:lastModifiedBy>Jihoon Lee</cp:lastModifiedBy>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">2022-05-16T08:47:02Z</dcterms:modified>
   <cp:revision>$LastChangedRevision: 4850 $</cp:revision>
   <cp:version>R2021b</cp:version>
 </cp:coreProperties>
@@ -74,7 +74,7 @@ __MWOPC_PART_BEGIN__ /metadata/mwcoreProperties.xml
 __MWOPC_PART_BEGIN__ /metadata/mwcorePropertiesExtension.xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <mwcoreProperties xmlns="http://schemas.mathworks.com/package/2014/corePropertiesExtension">
-  <uuid>daf668b7-20ed-4c87-a011-810d6cf70b6e</uuid>
+  <uuid>72ffec9f-4056-408c-89fb-56f343b000a3</uuid>
 </mwcoreProperties>
 
 __MWOPC_PART_BEGIN__ /metadata/mwcorePropertiesReleaseInfo.xml
@@ -91,6 +91,7 @@ __MWOPC_PART_BEGIN__ /metadata/mwcorePropertiesReleaseInfo.xml
 __MWOPC_PART_BEGIN__ /simulink/_rels/blockdiagram.xml.rels
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="LogicAnalyzerPlugin" Target="plugins/LogicAnalyzerPlugin.xml" Type="http://schemas.mathworks.com/simulinkModel/2014/relationships/pluginParameters"/>
   <Relationship Id="ScheduleCore" Target="ScheduleCore.xml" Type="http://schemas.mathworks.com/simulink/2013/relationships/ScheduleCore"/>
   <Relationship Id="ScheduleEditor" Target="ScheduleEditor.xml" Type="http://schemas.mathworks.com/simulink/2013/relationships/ScheduleEditor"/>
   <Relationship Id="SimscapeModelParametersPlugin" Target="plugins/SimscapeModelParametersPlugin.xml" Type="http://schemas.mathworks.com/simulinkModel/2014/relationships/pluginParameters"/>
@@ -667,7 +668,7 @@ MWSout.lastrun=datestr(now);
     <ConfigManagerSettings>
       <P Name="ModifiedByFormat">%&lt;Auto&gt;</P>
       <P Name="ModifiedDateFormat">%&lt;Auto&gt;</P>
-      <P Name="RTWModifiedTimeStamp">574385046</P>
+      <P Name="RTWModifiedTimeStamp">574623805</P>
       <P Name="ModelVersionFormat">$LastChangedRevision: 4850 $</P>
     </ConfigManagerSettings>
     <EditorSettings>
@@ -793,11 +794,11 @@ __MWOPC_PART_BEGIN__ /simulink/configSet0.xml
         <P Name="Decimation">1</P>
         <P Name="ExternalInput">[t, u]</P>
         <P Name="FinalStateName">xFinal</P>
-        <P Name="InitialState">[]</P>
+        <P Name="InitialState">xInitial</P>
         <P Name="LimitDataPoints">off</P>
         <P Name="MaxDataPoints">1000</P>
         <P Name="LoadExternalInput">off</P>
-        <P Name="LoadInitialState">on</P>
+        <P Name="LoadInitialState">off</P>
         <P Name="SaveFinalState">off</P>
         <P Name="SaveOperatingPoint">off</P>
         <P Name="SaveFormat">Dataset</P>
@@ -843,7 +844,7 @@ __MWOPC_PART_BEGIN__ /simulink/configSet0.xml
         <P Name="BlockReduction">off</P>
         <P Name="BooleanDataType">off</P>
         <P Name="ConditionallyExecuteInputs">on</P>
-        <P Name="DefaultParameterBehavior">Inlined</P>
+        <P Name="DefaultParameterBehavior">Tunable</P>
         <P Name="UseDivisionForNetSlopeComputation">off</P>
         <P Name="GainParamInheritBuiltInType">off</P>
         <P Name="UseFloatMulNetSlope">off</P>
@@ -852,7 +853,7 @@ __MWOPC_PART_BEGIN__ /simulink/configSet0.xml
         <P Name="UseSpecifiedMinMax">off</P>
         <P Name="InlineInvariantSignals">off</P>
         <P Name="OptimizeBlockIOStorage">on</P>
-        <P Name="BufferReuse">off</P>
+        <P Name="BufferReuse">on</P>
         <P Name="EnhancedBackFolding">off</P>
         <P Name="CachingGlobalReferences">off</P>
         <P Name="GlobalBufferReuse">on</P>
@@ -978,7 +979,7 @@ __MWOPC_PART_BEGIN__ /simulink/configSet0.xml
         <P Name="ChecksumConsistencyForSSReuse">none</P>
         <P Name="PregeneratedLibrarySubsystemCodeDiagnostic">warning</P>
         <P Name="MatchCodeGenerationContextForUpdateDiagram">none</P>
-        <P Name="InitInArrayFormatMsg">none</P>
+        <P Name="InitInArrayFormatMsg">warning</P>
         <P Name="StrictBusMsg">ErrorLevel1</P>
         <P Name="BusNameAdapt">WarnAndRepair</P>
         <P Name="NonBusSignalsTreatedAsBus">none</P>
@@ -1456,7 +1457,7 @@ __MWOPC_PART_BEGIN__ /simulink/configSet0.xml
     </Array>
     <P Name="Name">Configuration</P>
     <P Name="CurrentDlgPage">Data Import//Export</P>
-    <P Name="ConfigPrmDlgPosition">[ 71, 71, 900, 710 ]</P>
+    <P Name="ConfigPrmDlgPosition">[ 0, 0, 0, 0 ]</P>
     <P Name="ExtraOptions"/>
   </Object>
 </ConfigSet>
@@ -1808,10 +1809,240 @@ Utilities/DocBlock</P>
 __MWOPC_PART_BEGIN__ /simulink/modelDictionary.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <MF0 version="1.1" defaultPackage="slid" packageUris="http://schema.mathworks.com/mf0/slid/R2020b_20191110">
-  <System type="System" uuid="ede6c9e2-aa48-42ef-bad2-120e1002a944">
-    <Interface type="Interface" uuid="69dac126-e050-4cd7-a7d5-9e6e5373c146"/>
+  <System type="System" uuid="fdf713c8-47ce-45fe-a319-1a8c8a419f6f">
+    <Parameter type="Parameter" uuid="91b0e20f-8778-441c-bfeb-c46e8bf794d2">
+      <Identifier>Cbar</Identifier>
+      <Name>Cbar</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="64119c16-7252-4e79-9df7-b550d384b6c8">
+      <Identifier>DamageCase</Identifier>
+      <Name>DamageCase</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="1f691389-ef55-419a-b0ee-61828c5daf05">
+      <Identifier>DamageOnsetTime</Identifier>
+      <Name>DamageOnsetTime</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="640fda1d-b2a7-47f9-a23f-75234aad3f0a">
+      <Identifier>DrydenModelSwitch</Identifier>
+      <Name>DrydenModelSwitch</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="394eb219-69b8-4423-9b53-01b6d8653974">
+      <Identifier>FuelUsed_Init</Identifier>
+      <Name>FuelUsed_Init</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="4a1a0d0f-7482-491c-8fd6-45542367d7f9">
+      <Identifier>Inertia0</Identifier>
+      <Name>Inertia0</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="153781b1-a1b5-4e55-a6c3-6f6151d07cc8">
+      <Identifier>Inertia_shift_gear</Identifier>
+      <Name>Inertia_shift_gear</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="8f26adc8-5c98-4f88-86c7-c3fcfc8451a6">
+      <Identifier>Ixx_model</Identifier>
+      <Name>Ixx_model</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="eba4baae-1d7e-4a77-9adb-0262b2e30f7e">
+      <Identifier>Iyy_model</Identifier>
+      <Name>Iyy_model</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="cf2d2acb-ca36-4541-8fd4-dfd9307601e4">
+      <Identifier>Izz_model</Identifier>
+      <Name>Izz_model</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="6f5bf255-b837-4201-9500-b043194d212e">
+      <Identifier>LandingGear</Identifier>
+      <Name>LandingGear</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="33cfab7a-d281-4edd-a196-73e8f7b517db">
+      <Identifier>LengON</Identifier>
+      <Name>LengON</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e3115b7d-406f-442e-bad2-71c7f0996837">
+      <Identifier>LinearizeModeOn</Identifier>
+      <Name>LinearizeModeOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="cd83d58e-cbd6-4c59-9bfe-72bdac82d4b9">
+      <Identifier>RengON</Identifier>
+      <Name>RengON</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="77c12b5a-3750-4856-91cc-fff91d4c8d54">
+      <Identifier>S</Identifier>
+      <Name>S</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="58644d06-80a6-401d-ac59-bd9c82ba0c30">
+      <Identifier>SensorNoise</Identifier>
+      <Name>SensorNoise</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="cafa5a42-8252-4446-92c7-d88b82dec326">
+      <Identifier>StatesInp</Identifier>
+      <Name>StatesInp</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="cb5d4f53-f129-405f-a9d2-286b4999c546">
+      <Identifier>SurfaceDeadbandOn</Identifier>
+      <Name>SurfaceDeadbandOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="cb7e5356-c696-4ca8-aa23-5ad28651677f">
+      <Identifier>Timestep</Identifier>
+      <Name>Timestep</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="99a366ed-567d-4a38-bcab-9a25e9574474">
+      <Identifier>TrimModeOn</Identifier>
+      <Name>TrimModeOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="bc20ed0c-e58f-43db-9d36-345f037d3a05">
+      <Identifier>TrimWithStab</Identifier>
+      <Name>TrimWithStab</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="2eceaa39-636f-4afa-aafc-fbd0c080beeb">
+      <Identifier>WindDir</Identifier>
+      <Name>WindDir</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="da607c2b-d2a2-4f06-bbec-a0000f8a5863">
+      <Identifier>WindShearOn</Identifier>
+      <Name>WindShearOn</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e0bb2576-1b0e-4a74-86f9-60f38afe78bd">
+      <Identifier>WindSpd</Identifier>
+      <Name>WindSpd</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a7163429-4725-4a81-8d35-e8951c3e4d12">
+      <Identifier>aftfuel</Identifier>
+      <Name>aftfuel</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="3393f1a0-523d-422b-bae4-4f717b08bdf7">
+      <Identifier>aftfuel_pos</Identifier>
+      <Name>aftfuel_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="3d637a17-6fa1-44d7-b0c8-c470c15a9828">
+      <Identifier>b</Identifier>
+      <Name>b</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d9a415e0-88d4-4de3-930b-2ff58e023687">
+      <Identifier>bias</Identifier>
+      <Name>bias</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="fa0676fe-f342-4f72-9116-1dce109882a3">
+      <Identifier>cg_pos0</Identifier>
+      <Name>cg_pos0</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="07b09b99-b5c4-4991-8cef-f6c44532e6dc">
+      <Identifier>cg_shift_gear</Identifier>
+      <Name>cg_shift_gear</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="026e0535-24f5-4d8c-afe4-d1baac1a2d46">
+      <Identifier>engl_ang</Identifier>
+      <Name>engl_ang</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="1482a703-7b8f-4659-bd6d-fa048226c2bd">
+      <Identifier>engl_pos</Identifier>
+      <Name>engl_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d16b3927-0717-4a30-a967-e8a7dedd15bb">
+      <Identifier>engr_ang</Identifier>
+      <Name>engr_ang</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="96996bb4-d973-4984-af4c-a3ff71c21907">
+      <Identifier>engr_pos</Identifier>
+      <Name>engr_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="6b9a25f0-a698-4bb6-bd37-0c3690f4fe6d">
+      <Identifier>fuel_in_use</Identifier>
+      <Name>fuel_in_use</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="6696281e-2383-4ef1-81dd-c9dcdd80a875">
+      <Identifier>fwdfuel</Identifier>
+      <Name>fwdfuel</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="b8370e7f-0e5a-4d06-925f-8f80728a3530">
+      <Identifier>fwdfuel_pos</Identifier>
+      <Name>fwdfuel_pos</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="b7bcd2e3-203a-4937-8f8c-0c23c4a746a3">
+      <Identifier>le_mac</Identifier>
+      <Name>le_mac</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="8632a428-b8bc-4da0-8c78-5edf01fe1760">
+      <Identifier>ram_drag_coef</Identifier>
+      <Name>ram_drag_coef</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="43ab6259-a776-4193-8698-a3fd369a0089">
+      <Identifier>ref_cg</Identifier>
+      <Name>ref_cg</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="5a255e1c-0710-4869-bcf4-bac69c504dd6">
+      <Identifier>runway_alt</Identifier>
+      <Name>runway_alt</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="88fca942-4260-4865-9ac9-d3812d15f045">
+      <Identifier>stall_cl_asym_enabled</Identifier>
+      <Name>stall_cl_asym_enabled</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="bed9210c-c245-4e79-b26b-541dcbff7f9d">
+      <Identifier>symmetric_aero_on</Identifier>
+      <Name>symmetric_aero_on</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e67833cb-c88d-42a5-9227-eac9dd3e5842">
+      <Identifier>u_gain_light</Identifier>
+      <Name>u_gain_light</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="64dfcef7-dd55-4d9b-b85e-79df08b6d13e">
+      <Identifier>u_gain_moderate</Identifier>
+      <Name>u_gain_moderate</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="8a22820e-8365-4606-8da4-fe1fb31fdf25">
+      <Identifier>u_gain_severe</Identifier>
+      <Name>u_gain_severe</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="f0c2e4b6-a2c0-4727-99b5-ad00e306722c">
+      <Identifier>ugain</Identifier>
+      <Name>ugain</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d9081206-3941-41c7-b4f1-c77ced470c75">
+      <Identifier>v_gain_light</Identifier>
+      <Name>v_gain_light</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="74e44c2b-eedd-4ddd-b72d-4817c9637b95">
+      <Identifier>v_gain_moderate</Identifier>
+      <Name>v_gain_moderate</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="453e6ef2-7eee-4ca9-b59e-40ccbc302426">
+      <Identifier>v_gain_severe</Identifier>
+      <Name>v_gain_severe</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="ae218484-452d-45aa-a1d9-acde7a95cfa5">
+      <Identifier>vgain</Identifier>
+      <Name>vgain</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="e84b5da1-2efa-47eb-b09f-02a5b17ac50b">
+      <Identifier>w0</Identifier>
+      <Name>w0</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a24451db-8a17-415e-9c6e-1fc974542541">
+      <Identifier>w_gain_light</Identifier>
+      <Name>w_gain_light</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="d80ff81a-8ffd-47b8-8fe9-538e15abdd7b">
+      <Identifier>w_gain_moderate</Identifier>
+      <Name>w_gain_moderate</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="eb86c74b-92e3-4c94-a5ff-7c8ec6dd6b11">
+      <Identifier>w_gain_severe</Identifier>
+      <Name>w_gain_severe</Name>
+    </Parameter>
+    <Parameter type="Parameter" uuid="a9a04a7a-5282-44dc-9ade-07c1fb83de65">
+      <Identifier>wgain</Identifier>
+      <Name>wgain</Name>
+    </Parameter>
+    <Interface type="Interface" uuid="2e1daf64-cffa-40ec-b944-e792bc26eb9c"/>
   </System>
 </MF0>
+__MWOPC_PART_BEGIN__ /simulink/plugins/LogicAnalyzerPlugin.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LogicAnalyzerPlugin>
+  <P Name="LogicAnalyzerSignalOrdering">2e8fb581-6a1e-4176-bd9a-7105a108ee0f</P>
+</LogicAnalyzerPlugin>
+
 __MWOPC_PART_BEGIN__ /simulink/plugins/SimscapeModelParametersPlugin.xml
 <?xml version="1.0" encoding="utf-8"?>
 <SimscapeModelParametersPlugin>
@@ -1821,16 +2052,95 @@ __MWOPC_PART_BEGIN__ /simulink/plugins/SimscapeModelParametersPlugin.xml
 __MWOPC_PART_BEGIN__ /simulink/ScheduleCore.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <sltp_graph version="1.1" packageUris="http://schema.mathworks.com/mf0/sltp_mm/R2021b_202106150630">
-  <sltp.mm.core.Context type="sltp.mm.core.Context" uuid="40ad9a84-4be9-4265-a9d7-2ac82f5a19b2">
+  <sltp.mm.core.Context type="sltp.mm.core.Context" uuid="0193dcc2-0649-43ed-bf07-2d5bffbd988c">
+    <globalData type="sltp.mm.core.GlobalData" uuid="1443162d-b558-49e6-975d-0d51ca422d6a">
+      <dataName>portAcc</dataName>
+      <type>RootOutport</type>
+    </globalData>
+    <globalData type="sltp.mm.core.GlobalData" uuid="a176b0d6-2c35-41e6-ac72-c7d8696f9298">
+      <dataName>portLinearize Output</dataName>
+      <type>RootOutport</type>
+    </globalData>
+    <globalData type="sltp.mm.core.GlobalData" uuid="48428a0e-31b0-4ca6-b020-56bada41c9f2">
+      <dataName>portLinearizing Input</dataName>
+      <type>RootInport</type>
+    </globalData>
+    <globalData type="sltp.mm.core.GlobalData" uuid="9875bf16-4527-40b7-b49d-a8bf05447ef0">
+      <dataName>portTrim Output</dataName>
+      <type>RootOutport</type>
+    </globalData>
+    <globalData type="sltp.mm.core.GlobalData" uuid="b4dfd411-6be8-4efd-8607-cdfc1f08b460">
+      <dataName>portTrimming Input</dataName>
+      <type>RootInport</type>
+    </globalData>
+    <priorityDirection>HighNumberLast</priorityDirection>
     <editorState type="sltp.mm.core.EditorState" uuid="9df05f41-7968-481f-b79d-527b4f1321c3">
+      <isSynchronized>true</isSynchronized>
       <panelState type="sltp.mm.core.EditorPanelState" uuid="40da8f93-4e91-4dea-8fad-7cb4d6af9cdb"/>
     </editorState>
-    <rootTask type="sltp.mm.core.Task" uuid="991bc5c0-111d-43ba-b4f5-1681983e0fd5">
-      <context type="sltp.mm.core.Context" uuid="40ad9a84-4be9-4265-a9d7-2ac82f5a19b2"/>
+    <rootTask type="sltp.mm.core.Task" uuid="a2583e74-51fe-4266-8de2-80853d404473">
+      <context type="sltp.mm.core.Context" uuid="0193dcc2-0649-43ed-bf07-2d5bffbd988c"/>
       <explicit>false</explicit>
       <name>Default</name>
       <priority>-2147483648</priority>
-      <subgraph type="sltp.mm.core.Graph" uuid="ebdadd90-4023-4651-84c3-03f8ae0dc5ed"/>
+      <subgraph type="sltp.mm.core.Graph" uuid="3be65d0b-80af-4e56-aa51-eff399ac591c">
+        <tasks type="sltp.mm.core.Task" uuid="fa295ea1-1f4d-4866-91a1-1cc9eb14a8b1">
+          <baseTask>true</baseTask>
+          <context type="sltp.mm.core.Context" uuid="0193dcc2-0649-43ed-bf07-2d5bffbd988c"/>
+          <explicit>false</explicit>
+          <id>1</id>
+          <isTimed>true</isTimed>
+          <name>Cont</name>
+          <priority>40</priority>
+          <rates type="sltp.mm.core.Rate" uuid="72e50435-8071-4af5-819b-90fbd6cd7756">
+            <annotation>Cont</annotation>
+            <color>255</color>
+            <hasBlocks>true</hasBlocks>
+            <identifier>Continuous00</identifier>
+            <rateSpec type="sltp.mm.core.RateSpec">
+              <period>0.0</period>
+            </rateSpec>
+            <sti>0</sti>
+          </rates>
+          <rates type="sltp.mm.core.Rate" uuid="21267516-4e07-45aa-98d6-b594ecc84850">
+            <annotation>FiM</annotation>
+            <color>-2139062017</color>
+            <hasBlocks>true</hasBlocks>
+            <rateSpec type="sltp.mm.core.RateSpec">
+              <offset>1.0</offset>
+              <period>0.0</period>
+            </rateSpec>
+            <sti>1</sti>
+          </rates>
+          <rates type="sltp.mm.core.Rate" uuid="b068c716-a65c-4e8d-8ea1-97e21e760c2c">
+            <annotation>D1</annotation>
+            <color>-436207361</color>
+            <hasBlocks>true</hasBlocks>
+            <rateSpec type="sltp.mm.core.RateSpec">
+              <period>.005</period>
+            </rateSpec>
+            <sti>2</sti>
+          </rates>
+          <rates type="sltp.mm.core.Rate" uuid="83380e6e-bf01-4342-b12e-a3ca729760d0">
+            <annotation>D2</annotation>
+            <color>13697279</color>
+            <hasBlocks>true</hasBlocks>
+            <rateSpec type="sltp.mm.core.RateSpec">
+              <period>.02</period>
+            </rateSpec>
+            <sti>3</sti>
+          </rates>
+          <rates type="sltp.mm.core.Rate" uuid="12eeb46f-de49-40ca-8618-344817e5e62a">
+            <annotation>D3</annotation>
+            <color>52479</color>
+            <hasBlocks>true</hasBlocks>
+            <rateSpec type="sltp.mm.core.RateSpec">
+              <period>.125</period>
+            </rateSpec>
+            <sti>4</sti>
+          </rates>
+        </tasks>
+      </subgraph>
     </rootTask>
   </sltp.mm.core.Context>
 </sltp_graph>
@@ -1838,13 +2148,85 @@ __MWOPC_PART_BEGIN__ /simulink/ScheduleEditor.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <sltp_editor version="1.1" packageUris="http://schema.mathworks.com/mf0/DiagramEditor/R2019a_20181107 http://schema.mathworks.com/mf0/SltpSyntax/R2021b_202101212121">
   <sltp.mm.syntax.Context type="sltp.mm.syntax.Context" uuid="8713f0e2-d538-47a3-a90d-9cc851987371">
+    <globalData type="sltp.mm.syntax.GlobalData" uuid="e5e05bf3-b674-451e-9fd9-3b4f0b61f4f2">
+      <dataName>portAcc</dataName>
+      <type>RootOutport</type>
+    </globalData>
+    <globalData type="sltp.mm.syntax.GlobalData" uuid="ee1116bd-447d-4405-b9ee-5af45ea8f05c">
+      <dataName>portLinearize Output</dataName>
+      <type>RootOutport</type>
+    </globalData>
+    <globalData type="sltp.mm.syntax.GlobalData" uuid="34f422d6-ba87-4ff3-9cb6-f2a831a5127f">
+      <dataName>portLinearizing Input</dataName>
+      <type>RootInport</type>
+    </globalData>
+    <globalData type="sltp.mm.syntax.GlobalData" uuid="39bcf6a6-a5da-4d0b-adc2-97693c0d56cd">
+      <dataName>portTrim Output</dataName>
+      <type>RootOutport</type>
+    </globalData>
+    <globalData type="sltp.mm.syntax.GlobalData" uuid="41c674fd-8067-4df3-a7b2-f553477765a0">
+      <dataName>portTrimming Input</dataName>
+      <type>RootInport</type>
+    </globalData>
     <rootGraph type="sltp.mm.syntax.Graph" uuid="b91dd139-45fd-40d0-9116-cad9d0437f2e">
-      <priorityDirection>HighNumberFirst</priorityDirection>
+      <children type="sltp.mm.syntax.Node" uuid="efff7991-ffe4-4a33-8c54-efa835832b3a">
+        <priority>40</priority>
+        <rates type="sltp.mm.syntax.RateData">
+          <color>#000000</color>
+          <hasBlocks>true</hasBlocks>
+          <rate>0</rate>
+          <title>Cont</title>
+        </rates>
+        <rates type="sltp.mm.syntax.RateData">
+          <color>#808080</color>
+          <hasBlocks>true</hasBlocks>
+          <rate>[0, 1]</rate>
+          <title>FiM</title>
+        </rates>
+        <rates type="sltp.mm.syntax.RateData">
+          <color>#e60000</color>
+          <hasBlocks>true</hasBlocks>
+          <rate>0.005</rate>
+          <title>D1</title>
+        </rates>
+        <rates type="sltp.mm.syntax.RateData">
+          <color>#00d100</color>
+          <hasBlocks>true</hasBlocks>
+          <rate>0.02</rate>
+          <title>D2</title>
+        </rates>
+        <rates type="sltp.mm.syntax.RateData">
+          <color>#0000cc</color>
+          <hasBlocks>true</hasBlocks>
+          <rate>0.125</rate>
+          <title>D3</title>
+        </rates>
+        <title>Cont</title>
+        <type>base</type>
+        <diagramElement type="diagram.editor.model.Entity" uuid="6cf4a3ba-9197-4b38-9b79-f5cc0f58f153"/>
+        <subgraph type="sltp.mm.syntax.Graph" uuid="00fbfdcd-1dcb-4db5-b2be-435bfcacdd83">
+          <title>Cont</title>
+          <diagramElement type="diagram.editor.model.Diagram" uuid="40499d56-44fe-4732-b612-7d116604bcfb"/>
+        </subgraph>
+      </children>
       <title>Default</title>
       <diagramElement type="diagram.editor.model.Diagram" uuid="df5bf0bf-e12b-4340-873c-99af06702df7"/>
     </rootGraph>
   </sltp.mm.syntax.Context>
   <diagram.editor.model.Diagram type="diagram.editor.model.Diagram" uuid="df5bf0bf-e12b-4340-873c-99af06702df7">
+    <entities type="diagram.editor.model.Entity" uuid="6cf4a3ba-9197-4b38-9b79-f5cc0f58f153">
+      <position>0,0</position>
+      <size>0,0,0,0</size>
+      <syntaxElement type="sltp.mm.syntax.Node" uuid="efff7991-ffe4-4a33-8c54-efa835832b3a"/>
+      <title>Cont</title>
+      <type>base</type>
+      <subDiagram type="diagram.editor.model.Diagram" uuid="40499d56-44fe-4732-b612-7d116604bcfb">
+        <position>0,0</position>
+        <syntaxElement type="sltp.mm.syntax.Graph" uuid="00fbfdcd-1dcb-4db5-b2be-435bfcacdd83"/>
+        <title>Cont</title>
+        <type>graph.Graph</type>
+      </subDiagram>
+    </entities>
     <syntaxElement type="sltp.mm.syntax.Graph" uuid="b91dd139-45fd-40d0-9116-cad9d0437f2e"/>
     <title>Default</title>
     <type>graph.Graph</type>
@@ -27846,6 +28228,7 @@ __MWOPC_PART_BEGIN__ /simulink/systems/system_2933.xml
 <System>
   <P Name="Location">[-7, -7, 2055, 1119]</P>
   <P Name="SystemRect">[0.000000, 0.000000, 0.000000, 0.000000]</P>
+  <P Name="Open">on</P>
   <P Name="SetExecutionDomain">off</P>
   <P Name="ExecutionDomainType">Deduce</P>
   <P Name="ModelBrowserWidth">200</P>
@@ -29228,6 +29611,7 @@ __MWOPC_PART_BEGIN__ /simulink/systems/system_3054.xml
 <System>
   <P Name="Location">[-7, -7, 2055, 1119]</P>
   <P Name="SystemRect">[0.000000, 0.000000, 0.000000, 0.000000]</P>
+  <P Name="Open">on</P>
   <P Name="SetExecutionDomain">off</P>
   <P Name="ExecutionDomainType">Deduce</P>
   <P Name="ModelBrowserWidth">200</P>
@@ -42278,8 +42662,9 @@ __MWOPC_PART_BEGIN__ /simulink/systems/system_974.xml
 __MWOPC_PART_BEGIN__ /simulink/systems/system_root.xml
 <?xml version="1.0" encoding="utf-8"?>
 <System>
-  <P Name="Location">[-7, -7, 2055, 1119]</P>
+  <P Name="Location">[2041, -7, 4103, 1119]</P>
   <P Name="SystemRect">[0.000000, 0.000000, 0.000000, 0.000000]</P>
+  <P Name="Open">on</P>
   <P Name="SetExecutionDomain">off</P>
   <P Name="ExecutionDomainType">Deduce</P>
   <P Name="ZoomFactor">169</P>
@@ -42524,7 +42909,7 @@ Administrator of the National and Aeronautics and Space Administration.
 
 No copyright is claimed in the United States under Title 17, U.S. Code.
 All Other Rights Reserved.</P>
-      <P Name="MaskDisplayString">GTM Design-Simulation Model\nRelease 13-08\nSubversion Info: $LastChangedRevision: 4850 $\nLast modified by jihoo on Thu May 12 19:55:00 2022\n\nCopyright 2009\nUnited States Government as represented by the \nAdministrator of the National and Aeronautics and Space Administration.\n\nNo copyright is claimed in the United States under Title 17, U.S. Code.\nAll Other Rights Reserved.</P>
+      <P Name="MaskDisplayString">GTM Design-Simulation Model\nRelease 13-08\nSubversion Info: $LastChangedRevision: 4850 $\nLast modified by  on \n\nCopyright 2009\nUnited States Government as represented by the \nAdministrator of the National and Aeronautics and Space Administration.\n\nNo copyright is claimed in the United States under Title 17, U.S. Code.\nAll Other Rights Reserved.</P>
       <P Name="HorizontalTextAlignment">Center</P>
       <P Name="LeftAlignmentValue">0.5</P>
     </InstanceData>
@@ -42809,7 +43194,7 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
   <Object PropName="BdWindowsInfo" ObjectID="1" ClassName="Simulink.BDWindowsInfo">
     <Object PropName="WindowsInfo" ObjectID="2" ClassName="Simulink.WindowInfo">
       <P Name="IsActive" Class="logical">1</P>
-      <P Name="Location" Class="double">[-7.0, -7.0, 2062.0, 1126.0]</P>
+      <P Name="Location" Class="double">[2041.0, -7.0, 2062.0, 1126.0]</P>
       <Object PropName="ModelBrowserInfo" ObjectID="3" ClassName="Simulink.ModelBrowserInfo">
         <P Name="Visible" Class="logical">0</P>
         <P Name="DockPosition" Class="char">Left</P>
@@ -43565,18 +43950,6 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
       </Array>
       <Array PropName="DockComponentsInfo" Type="Simulink.DockComponentInfo" Dimension="1*2">
         <Object ObjectID="79">
-          <P Name="Type" Class="char">GLUE2:PropertyInspector</P>
-          <P Name="ID" Class="char">Property Inspector</P>
-          <P Name="Visible" Class="logical">0</P>
-          <P Name="CreateCallback" Class="char"/>
-          <P Name="UserData" Class="char"/>
-          <P Name="Floating" Class="logical">0</P>
-          <P Name="DockPosition" Class="char">Right</P>
-          <P Name="Width" Class="int32">512</P>
-          <P Name="Height" Class="int32">384</P>
-          <P Name="Minimized" Class="char">Unset</P>
-        </Object>
-        <Object ObjectID="80">
           <P Name="Type" Class="char">Simulink:Editor:ReferencedFiles</P>
           <P Name="ID" Class="char">Referenced Files</P>
           <P Name="Visible" Class="logical">0</P>
@@ -43585,6 +43958,18 @@ __MWOPC_PART_BEGIN__ /simulink/windowsInfo.xml
 </P>
           <P Name="Floating" Class="logical">0</P>
           <P Name="DockPosition" Class="char">Left</P>
+          <P Name="Width" Class="int32">512</P>
+          <P Name="Height" Class="int32">384</P>
+          <P Name="Minimized" Class="char">Unset</P>
+        </Object>
+        <Object ObjectID="80">
+          <P Name="Type" Class="char">GLUE2:PropertyInspector</P>
+          <P Name="ID" Class="char">Property Inspector</P>
+          <P Name="Visible" Class="logical">0</P>
+          <P Name="CreateCallback" Class="char"/>
+          <P Name="UserData" Class="char"/>
+          <P Name="Floating" Class="logical">0</P>
+          <P Name="DockPosition" Class="char">Right</P>
           <P Name="Width" Class="int32">512</P>
           <P Name="Height" Class="int32">384</P>
           <P Name="Minimized" Class="char">Unset</P>
