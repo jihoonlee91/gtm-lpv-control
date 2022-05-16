@@ -10,7 +10,7 @@ MWS = grabmws('gtm_design');
 
 %% Setting
 PitchSurf = 'elev'; % pitch surface
-verbose = 0; % trim output display off
+verbose = 1; % trim output display off
 vabflag = 1; % wind-axis linear state
 use_all_inputs = 0; % control surface as groups
 Ts = 0; % continuous-time model
@@ -46,7 +46,6 @@ Pilot_lat = 0;
 Pilot_ped = 0;
 
 %% Trimming
-tic
 for i = 1:num_tas
     for j = 1:num_alt
         for k = 1:num_mor
@@ -64,45 +63,104 @@ for i = 1:num_tas
 
             [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose);
             MWS_grid(i,j,k) = MWS;
+            tas_trim(i,j,k) = Trimcond.tas;
+            alt_trim(i,j,k) = Trimcond.altitude;
+            mor_trim(i,j,k) = mor;
+            alp_trim(i,j,k) = Trimcond.tas;
+            throttle_trim(i,j,k) = Trimcond.throttle;
+            aileron_trim(i,j,k) = Trimcond.aileron;
+            elevator_trim(i,j,k) = Trimcond.elevator;
+            rudder_trim(i,j,k) = Trimcond.rudder;
 
             if (Err < 1e-3)
-                disp(['TRIM @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : DONE'])
+%                 disp(['TRIM @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : DONE'])
             else
 %                 Trimcond=struct('alpha',NaN,'elevator',NaN,'throttle',NaN);
                 error(['TRIM @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : FAIL'])
             end
+            disp('-------------------------------------------------------------------')
         end
     end
 end
-toc
 
 %% Linearization
-tic
+f_ele = 5; % [Hz]
+f_ail = 5; % [Hz]
+f_rud = 5; % [Hz]
+
+clearvars GTM_lon GTM_lat
 for i = 1:num_tas
     for j = 1:num_alt
         for k = 1:num_mor
             trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+            
+            % linearization
+            [gtmdyn,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
+            londyn
+            latdyn
 
-            [sys,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
+            V0 = tas_grid(i);
+            Z_dele = londyn.B(2,1)*V0;
+            Z_alp = londyn.A(2,2)*V0;
+%             M_dele = londyn.B(3,1);
+%             M_alp = londyn.A(3,2);
+            
+            % Augmentation (altitude & first-order elevator dynamics)
+%             Alon = londyn.A;
+%             Blon = [londyn.B(:,4)+londyn.B(:,5),londyn.B(:,1)]; % delt delec
+%             Clon = eye(4);
+%             Dlon = zeros(4,2);
+%             londyn_aug = ss(Alon,Blon,Clon,Dlon);
+%             set(londyn_aug,'Statename',{'tas','alpha','q','theta'},...
+%                            'Inputname',{'delt','dele'},...
+%                            'Outputname',{'tas','alpha','q','theta'})
 
-            GTM_lon(:,:,i,j,k) = ss(londyn.A,londyn.B(:,1),londyn.C(2:3,:),londyn.D(2:3,1));
-            GTM_lon(:,:,i,j,k).StateName = londyn.StateName;
-            GTM_lon(:,:,i,j,k).InputName = londyn.InputName(1);
-            GTM_lon(:,:,i,j,k).OutputName = londyn.OutputName(2:3);
+            % Augmentation (altitude & first-order elevator dynamics)
+            Alon = [londyn.A,zeros(4,1);[0,-V0,0,V0],0]; % V alp q theta h
+            Blon = [londyn.B(:,4)+londyn.B(:,5),londyn.B(:,1);
+                zeros(1,2)]; % delt delec
+            Clon = [eye(5);
+                Alon(1,:)
+                [0,Z_alp,0,0,0]]; % V alp q theta h Ax Az
+            Dlon = [zeros(6,2);
+                0,Z_dele];
+            londyn_aug = ss(Alon,Blon,Clon,Dlon);
+            set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt'},...
+                           'Inputname',{'delt','dele'},...
+                           'Outputname',{'tas','alpha','q','theta','alt','Ax','Az'})
+
+            % Augmentation (altitude & first-order elevator dynamics)
+%             Alon = [londyn.A,zeros(4,1),londyn.B(:,1);[0,-V0,0,V0;zeros(1,4)],[zeros(1,2);0,-2*pi*f_ele]]; % V alp q theta h dele
+%             Blon = [[londyn.B(:,4)+londyn.B(:,5);zeros(2,1)],[zeros(5,1);2*pi*f_ele]]; % delt delec
+%             Clon = [eye(6);[0,Z_alp,0,0,0,Z_dele]]; % V alp q theta h dele Az
+%             Dlon = zeros(7,2);
+%             londyn_aug = ss(Alon,Blon,Clon,Dlon);
+%             set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt','dele'},...
+%                            'Inputname',{'delt','delec'},...
+%                            'Outputname',{'tas','alpha','q','theta','alt','dele','Az'})
+
+            GTM_lon(:,:,i,j,k) = londyn_aug;
+
+%             GTM_lon(:,:,i,j,k) = ss(londyn.A,londyn.B(:,1),londyn.C(2:3,:),londyn.D(2:3,1));
+%             GTM_lon(:,:,i,j,k).StateName = londyn.StateName;
+%             GTM_lon(:,:,i,j,k).InputName = londyn.InputName(1);
+%             GTM_lon(:,:,i,j,k).OutputName = londyn.OutputName(2:3);
 
             GTM_lat(:,:,i,j,k) = ss(latdyn.A,latdyn.B(:,[1,2]),latdyn.C(1:3,:),latdyn.D(1:3,1:2));
             GTM_lat(:,:,i,j,k).StateName = latdyn.StateName;
             GTM_lat(:,:,i,j,k).InputName = latdyn.InputName(1:2);
             GTM_lat(:,:,i,j,k).OutputName = latdyn.OutputName(1:3);
 
-            disp(['LINEARIZATION @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : DONE'])
+%             figure, bode(londyn_aug), grid on, title('Longitudinal Dynamics')
+%             figure, bode(latdyn_aug), grid on, title('Lateral Dynamics')
+
+            disp('-------------------------------------------------------------------')
         end
     end
 end
-toc
 
-nmeas_lon = 2; % # of measurements
-ncont_lon = 1; % # of controls
+nmeas_lon = 7; % # of measurements
+ncont_lon = 2; % # of controls
 
 nmeas_lat = 4; % # of measurements
 ncont_lat = 2; % # of controls
@@ -111,6 +169,154 @@ ncont_lat = 2; % # of controls
 Domain = rgrid(tas_param,alt_param,mor_param);
 P_lon = pss(GTM_lon,Domain);
 P_lat = pss(GTM_lat,Domain);
+
+%% Longitudinal H-infinity control design
+s = tf('s');
+% Weight function design
+Model_tas = (0.15^2)/(s^2+2*1*0.15+0.15^2);
+Model_alt = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+
+Perf_tas = 100*(s/100+1)/(s/0.005+1);
+Perf_alt = tf([0.1,5.973],[1,0.176]);
+
+D_thro = 0.01;
+D_elev = 0.01;
+
+W_thro = 0.1*(s/0.5+1)/(s/100+1);
+W_elev = 0.001;
+
+N_tas = 0.01;
+N_alp = 0.01;
+N_q = 0.01;
+N_theta = 0.01;
+N_alt = 0.01;
+N_Ax = 0.01;
+N_Az = 0.01;
+
+tic
+for i = 1:num_tas
+    for j = 1:num_alt
+        for k = 1:num_mor
+            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+            
+            LTI_lon = GTM_lon(:,:,i,j,k);
+            
+            % LTI control interconnection
+            systemnames = ' LTI_lon Model_tas Model_alt Perf_tas Perf_alt D_thro D_elev W_thro W_elev N_tas N_alp N_q N_theta N_alt N_Ax N_Az';
+            inputvar = '[ tas_c{1}; alt_c{1}; Dist_thro{1}; Dist_elev{1}; Noise_tas{1}; Noise_alp{1}; Noise_q{1}; Noise_the{1}; Noise_alt{1}; Noise_Ax{1}; Noise_Az{1}; u{2} ]';
+            outputvar = '[ Perf_tas; Perf_alp; W_thro; W_elev; tas_c-LTI_lon(1)-N_tas; alt_c-LTI_lon(5)-N_alt; LTI_lon(2)+N_alp; LTI_lon(3)+N_q; LTI_lon(4)+N_theta; LTI_lon(6)+N_Ax; LTI_lon(7)+N_Az ]';
+            
+            input_to_LTI_lon = '[ u(1)+D_thro; u(2)+D_elev ]';
+            
+            input_to_Model_tas = '[ tas_c ]';
+            input_to_Model_alt = '[ alt_c ]';
+            
+            input_to_Perf_tas = '[ Model_tas-LTI_lon(1) ]';
+            input_to_Perf_alt = '[ Model_alt-LTI_lon(5) ]';
+            
+            input_to_D_thro = '[ Dist_thro ]';
+            input_to_D_elev = '[ Dist_elev ]';
+            
+            input_to_W_thro = '[ u(1)+D_thro ]';
+            input_to_W_elev = '[ u(2)+D_elev ]';
+            
+            input_to_N_tas = '[ Noise_tas ]';
+            input_to_N_alp = '[ Noise_alp ]';
+            input_to_N_q = '[ Noise_q ]';
+            input_to_N_theta = '[ Noise_the ]';
+            input_to_N_alt = '[ Noise_alt ]';
+            input_to_N_Ax = '[ Noise_Ax ]';
+            input_to_N_Az = '[ Noise_Az ]';
+            
+            sysoutname = 'LTI_G_lon';
+            cleanupsysic = 'yes'; 
+            sysic
+            
+            % Synthesis
+            [K_lon_hinfs(:,:,i,j,k),~,gamma_lon_hinfs(i,j,k)] = hinfsyn(LTI_G_lon,nmeas_lon,ncont_lon);
+            disp(['H-Infinity Synthesis DONE'])
+            gamma_lon_hinfs
+            K_lon_hinf = K_lon_hinfs(:,:,i,j,k);
+            
+            % Closed-loop interconnection
+%             systemnames = ' LTI_lon Model_alp Perf_alp W_elev D_elev N_alp N_q K_lon_hinf ';
+%             inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1} ]';
+%             outputvar = '[ Perf_alp; W_elev; LTI_lon ]';
+%             input_to_LTI_lon = '[ K_lon_hinf+D_elev ]';
+%             input_to_Model_alp = '[ Pilot_lon ]';
+%             input_to_Perf_alp = '[ Model_alp-LTI_lon(1) ]';
+%             input_to_W_elev = '[ K_lon_hinf+D_elev ]';
+%             input_to_D_elev = '[ Dist_elev ]';
+%             input_to_N_alp = '[ Noise_alp ]';
+%             input_to_N_q = '[ Noise_q ]';
+%             input_to_K_lon_hinf = '[ Pilot_lon-LTI_lon(1)-N_alp; LTI_lon(2)+N_q ]';
+%             sysoutname = 'CL_lon_hinf';
+%             cleanupsysic = 'yes'; 
+%             sysic
+% 
+%             CL_lon_hinfs(:,:,i,j,k) = CL_lon_hinf;
+        end
+    end
+end
+
+%% Longitudinal H-infinity control design (augmented system)
+% Weight function design
+Model_tas = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+Model_alt = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
+Perf_tas = tf([0.1,5.973],[1,0.176]);
+Perf_alt = tf([0.1,5.973],[1,0.176]);
+D_elev = 0.01;
+W_elev = [tf([0.8,42.91],[1,119.2]),0;0,tf([0.8,42.91],[1,119.2])];
+N_alp = 0.01;
+N_q = 0.1;
+
+for i = 1:num_tas
+    for j = 1:num_alt
+        for k = 1:num_mor
+            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+            
+            LTI_lon = GTM_lon(:,:,i,j,k);
+            
+            % LTI control interconnection
+            systemnames = ' LTI_lon W_elev Model_tas Model_alt Perf_tas Perf_alt';
+            inputvar = '[ tas_c{1}; alt_c{1}; u{2} ]';
+            outputvar = '[ W_elev; tas_c-LTI_lon(1); alt_c-LTI_lon(5); LTI_lon(2); LTI_lon(3); LTI_lon(4); LTI_lon(6); LTI_lon(7) ]';
+            input_to_LTI_lon = '[ u ]';
+            input_to_Model_tas = '[ tas_c ]';
+            input_to_Model_alt = '[ alt_c ]';
+            input_to_Perf_tas = '[ Model_tas-LTI_lon(1) ]';
+            input_to_Perf_alt = '[ Model_alt-LTI_lon(5) ]';
+%             input_to_D_elev = '[ Dist_elev ]';
+            input_to_W_elev = '[ u ]';
+%             input_to_N_alp = '[ Noise_alp ]';
+%             input_to_N_q = '[ Noise_q ]';
+            sysoutname = 'LTI_G_lon';
+            cleanupsysic = 'yes'; 
+            sysic
+            
+            % Synthesis
+            [K_lon_hinf,~,gamma_lon_hinfs(i,j,k)] = hinfsyn(LTI_G_lon,nmeas_lon,ncont_lon);
+            disp(['H-Infinity Synthesis DONE'])
+            gamma_lon_hinfs
+            K_lon_hinfs(:,:,i,j,k) = K_lon_hinf;
+            
+%             Closed-loop interconnection
+            systemnames = ' LTI_lon K_lon_hinf ';
+            inputvar = '[ tas_c{1}; alt_c{1} ]';
+            outputvar = '[ LTI_lon(1); LTI_lon(5) ]';
+            input_to_LTI_lon = '[ K_lon_hinf ]';
+            input_to_K_lon_hinf = '[ tas_c-LTI_lon(1); alt_c-LTI_lon(5); LTI_lon(2); LTI_lon(3); LTI_lon(4); LTI_lon(6); LTI_lon(7) ]';
+            sysoutname = 'CL_lon_hinf';
+            cleanupsysic = 'yes'; 
+            sysic
+
+            CL_lon_hinfs(:,:,i,j,k) = CL_lon_hinf;
+        end
+    end
+end
+figure, bode(CL_lon_hinf), grid on
+figure, step(CL_lon_hinf,[0,200])
+grid on
 
 %% Longitudinal H-infinity control design
 % Weight function design
