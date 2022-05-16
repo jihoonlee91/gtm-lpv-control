@@ -21,7 +21,7 @@ RateBoundOn = 0;
 % Parameter grid
 tas_grid = [80]; % 70~85 [kts]
 alt_grid = [1000]; % 700~1100 [ft]
-mor_grid = [0]; % between -25 and 0 [%]
+mor_grid = [-12.5]; % between -25 and 0 [%]
 num_tas = numel(tas_grid);
 num_alt = numel(alt_grid);
 num_mor = numel(mor_grid);
@@ -47,40 +47,39 @@ Pilot_ped = 0;
 
 %% Trimming
 for i = 1:num_tas
-    for j = 1:num_alt
-        for k = 1:num_mor
-            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+for j = 1:num_alt
+for k = 1:num_mor
+    trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
 
-            tas = tas_grid(i);
-            alt = alt_grid(j);
-            mor = mor_grid(k);
+    tas = tas_grid(i);
+    alt = alt_grid(j);
+    mor = mor_grid(k);
 
-            target = struct('gamma',0,'tas',tas);
-            MWS.StatesInp(9) = alt;
-            MWS.bias.morphing = mor;
+    target = struct('gamma',0,'tas',tas);
+    MWS.StatesInp(9) = alt;
+    MWS.bias.morphing = mor;
 
-            loadmws(MWS,'gtm_design');
+    loadmws(MWS,'gtm_design');
 
-            [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose);
-            MWS_grid(i,j,k) = MWS;
-            tas_trim(i,j,k) = Trimcond.tas;
-            alt_trim(i,j,k) = Trimcond.altitude;
-            mor_trim(i,j,k) = mor;
-            alp_trim(i,j,k) = Trimcond.tas;
-            throttle_trim(i,j,k) = Trimcond.throttle;
-            aileron_trim(i,j,k) = Trimcond.aileron;
-            elevator_trim(i,j,k) = Trimcond.elevator;
-            rudder_trim(i,j,k) = Trimcond.rudder;
+    [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose);
+    MWS_grid(i,j,k) = MWS;
+    tas_trim(i,j,k) = Trimcond.tas;
+    alt_trim(i,j,k) = Trimcond.altitude;
+    mor_trim(i,j,k) = mor;
+    alp_trim(i,j,k) = Trimcond.alpha;
+    throttle_trim(i,j,k) = Trimcond.throttle;
+    aileron_trim(i,j,k) = Trimcond.aileron;
+    elevator_trim(i,j,k) = Trimcond.elevator;
+    rudder_trim(i,j,k) = Trimcond.rudder;
 
-            if (Err < 1e-3)
-%                 disp(['TRIM @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : DONE'])
-            else
-%                 Trimcond=struct('alpha',NaN,'elevator',NaN,'throttle',NaN);
-                error(['TRIM @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : FAIL'])
-            end
-            disp('-------------------------------------------------------------------')
-        end
+    if (Err < 1e-3)
+        disp(['TRIM @ ',num2str(trim_point),'/',num2str(num_tas*num_alt*num_mor),' : DONE'])
+    else
+        error('TRIM FAIL')
     end
+    disp('-------------------------------------------------------------------')
+end
+end
 end
 
 %% Linearization
@@ -90,46 +89,71 @@ f_rud = 5; % [Hz]
 
 clearvars GTM_lon GTM_lat
 for i = 1:num_tas
-    for j = 1:num_alt
-        for k = 1:num_mor
-            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
-            
-            % linearization
-            [gtmdyn,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
-            londyn
-            latdyn
+for j = 1:num_alt
+for k = 1:num_mor
+    trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+    
+    % linearization
+    [gtmdyn,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
+    londyn.B(:,1:3) = londyn.B(:,1:3)*180/pi;
+    londyn.B(:,4:5) = londyn.B(:,4:5)*100;
+    latdyn.B(:,1) = latdyn.B(:,1)*100;
+    latdyn.B(:,2:4) = latdyn.B(:,2:4)*180/pi;
+    londyn
+    latdyn
 
-            V0 = tas_grid(i);
-            Z_dele = londyn.B(2,1)*V0;
-            Z_alp = londyn.A(2,2)*V0;
+    V0 = tas_grid(i);
+    Z_dele = londyn.B(2,1)*V0;
+    Z_alp = londyn.A(2,2)*V0;
 %             M_dele = londyn.B(3,1);
 %             M_alp = londyn.A(3,2);
-            
-            % Augmentation (altitude & first-order elevator dynamics)
+    
+    % Augmentation (short-period)
+    Alon = londyn.A(2:3,2:3);
+    Blon = londyn.B(2:3,1); % delec
+    Clon = eye(2);
+    Dlon = zeros(2,1);
+    londyn_aug = ss(Alon,Blon,Clon,Dlon);
+    set(londyn_aug,'Statename',{'alpha','q'},...
+                   'Inputname',{'dele'},...
+                   'Outputname',{'alpha','q'})
+
+    % Augmentation (Default)
 %             Alon = londyn.A;
 %             Blon = [londyn.B(:,4)+londyn.B(:,5),londyn.B(:,1)]; % delt delec
-%             Clon = eye(4);
-%             Dlon = zeros(4,2);
+%             Clon = [eye(3) zeros(3,1)];
+%             Dlon = zeros(3,2);
 %             londyn_aug = ss(Alon,Blon,Clon,Dlon);
 %             set(londyn_aug,'Statename',{'tas','alpha','q','theta'},...
 %                            'Inputname',{'delt','dele'},...
-%                            'Outputname',{'tas','alpha','q','theta'})
+%                            'Outputname',{'tas','alpha','q'})
 
-            % Augmentation (altitude & first-order elevator dynamics)
-            Alon = [londyn.A,zeros(4,1);[0,-V0,0,V0],0]; % V alp q theta h
-            Blon = [londyn.B(:,4)+londyn.B(:,5),londyn.B(:,1);
-                zeros(1,2)]; % delt delec
-            Clon = [eye(5);
-                Alon(1,:)
-                [0,Z_alp,0,0,0]]; % V alp q theta h Ax Az
-            Dlon = [zeros(6,2);
-                0,Z_dele];
-            londyn_aug = ss(Alon,Blon,Clon,Dlon);
-            set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt'},...
-                           'Inputname',{'delt','dele'},...
-                           'Outputname',{'tas','alpha','q','theta','alt','Ax','Az'})
+    % Augmentation
+%             Alon = [londyn.A,zeros(4,1);[0,-V0,0,V0],0]; % V alp q theta h
+%             Blon = [londyn.B(:,4)+londyn.B(:,5),londyn.B(:,1);
+%                 zeros(1,2)]; % delt delec
+%             Clon = [eye(5);
+%                 Alon(1,:)
+%                 [0,Z_alp,0,0,0]]; % V alp q theta h Ax Az
+%             Dlon = [zeros(6,2);
+%                 0,Z_dele];
+%             londyn_aug = ss(Alon,Blon,Clon,Dlon);
+%             set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt'},...
+%                            'Inputname',{'delt','dele'},...
+%                            'Outputname',{'tas','alpha','q','theta','alt','Ax','Az'})
 
-            % Augmentation (altitude & first-order elevator dynamics)
+    % Augmentation
+%             Alon = [londyn.A,zeros(4,1);[0,-V0,0,V0],0]; % V alp q theta h
+%             Blon = [londyn.B(:,4)+londyn.B(:,5),londyn.B(:,1);
+%                 zeros(1,2)]; % delt delec
+%             Clon = eye(5); % V alp q theta h Ax Az
+%             Dlon = zeros(5,2);
+%             londyn_aug = ss(Alon,Blon,Clon,Dlon);
+%             set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt'},...
+%                            'Inputname',{'delt','dele'},...
+%                            'Outputname',{'tas','alpha','q','theta','alt'})
+
+    % Augmentation (altitude & first-order elevator dynamics)
 %             Alon = [londyn.A,zeros(4,1),londyn.B(:,1);[0,-V0,0,V0;zeros(1,4)],[zeros(1,2);0,-2*pi*f_ele]]; % V alp q theta h dele
 %             Blon = [[londyn.B(:,4)+londyn.B(:,5);zeros(2,1)],[zeros(5,1);2*pi*f_ele]]; % delt delec
 %             Clon = [eye(6);[0,Z_alp,0,0,0,Z_dele]]; % V alp q theta h dele Az
@@ -139,28 +163,28 @@ for i = 1:num_tas
 %                            'Inputname',{'delt','delec'},...
 %                            'Outputname',{'tas','alpha','q','theta','alt','dele','Az'})
 
-            GTM_lon(:,:,i,j,k) = londyn_aug;
+    GTM_lon(:,:,i,j,k) = londyn_aug;
 
 %             GTM_lon(:,:,i,j,k) = ss(londyn.A,londyn.B(:,1),londyn.C(2:3,:),londyn.D(2:3,1));
 %             GTM_lon(:,:,i,j,k).StateName = londyn.StateName;
 %             GTM_lon(:,:,i,j,k).InputName = londyn.InputName(1);
 %             GTM_lon(:,:,i,j,k).OutputName = londyn.OutputName(2:3);
 
-            GTM_lat(:,:,i,j,k) = ss(latdyn.A,latdyn.B(:,[1,2]),latdyn.C(1:3,:),latdyn.D(1:3,1:2));
-            GTM_lat(:,:,i,j,k).StateName = latdyn.StateName;
-            GTM_lat(:,:,i,j,k).InputName = latdyn.InputName(1:2);
-            GTM_lat(:,:,i,j,k).OutputName = latdyn.OutputName(1:3);
+    GTM_lat(:,:,i,j,k) = ss(latdyn.A,latdyn.B(:,[1,2]),latdyn.C(1:3,:),latdyn.D(1:3,1:2));
+    GTM_lat(:,:,i,j,k).StateName = latdyn.StateName;
+    GTM_lat(:,:,i,j,k).InputName = latdyn.InputName(1:2);
+    GTM_lat(:,:,i,j,k).OutputName = latdyn.OutputName(1:3);
 
 %             figure, bode(londyn_aug), grid on, title('Longitudinal Dynamics')
 %             figure, bode(latdyn_aug), grid on, title('Lateral Dynamics')
 
-            disp('-------------------------------------------------------------------')
-        end
-    end
+    disp('-------------------------------------------------------------------')
+end
+end
 end
 
-nmeas_lon = 7; % # of measurements
-ncont_lon = 2; % # of controls
+nmeas_lon = 2; % # of measurements
+ncont_lon = 1; % # of controls
 
 nmeas_lat = 4; % # of measurements
 ncont_lat = 2; % # of controls
@@ -171,154 +195,6 @@ P_lon = pss(GTM_lon,Domain);
 P_lat = pss(GTM_lat,Domain);
 
 %% Longitudinal H-infinity control design
-s = tf('s');
-% Weight function design
-Model_tas = (0.15^2)/(s^2+2*1*0.15+0.15^2);
-Model_alt = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
-
-Perf_tas = 100*(s/100+1)/(s/0.005+1);
-Perf_alt = tf([0.1,5.973],[1,0.176]);
-
-D_thro = 0.01;
-D_elev = 0.01;
-
-W_thro = 0.1*(s/0.5+1)/(s/100+1);
-W_elev = 0.001;
-
-N_tas = 0.01;
-N_alp = 0.01;
-N_q = 0.01;
-N_theta = 0.01;
-N_alt = 0.01;
-N_Ax = 0.01;
-N_Az = 0.01;
-
-tic
-for i = 1:num_tas
-    for j = 1:num_alt
-        for k = 1:num_mor
-            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
-            
-            LTI_lon = GTM_lon(:,:,i,j,k);
-            
-            % LTI control interconnection
-            systemnames = ' LTI_lon Model_tas Model_alt Perf_tas Perf_alt D_thro D_elev W_thro W_elev N_tas N_alp N_q N_theta N_alt N_Ax N_Az';
-            inputvar = '[ tas_c{1}; alt_c{1}; Dist_thro{1}; Dist_elev{1}; Noise_tas{1}; Noise_alp{1}; Noise_q{1}; Noise_the{1}; Noise_alt{1}; Noise_Ax{1}; Noise_Az{1}; u{2} ]';
-            outputvar = '[ Perf_tas; Perf_alp; W_thro; W_elev; tas_c-LTI_lon(1)-N_tas; alt_c-LTI_lon(5)-N_alt; LTI_lon(2)+N_alp; LTI_lon(3)+N_q; LTI_lon(4)+N_theta; LTI_lon(6)+N_Ax; LTI_lon(7)+N_Az ]';
-            
-            input_to_LTI_lon = '[ u(1)+D_thro; u(2)+D_elev ]';
-            
-            input_to_Model_tas = '[ tas_c ]';
-            input_to_Model_alt = '[ alt_c ]';
-            
-            input_to_Perf_tas = '[ Model_tas-LTI_lon(1) ]';
-            input_to_Perf_alt = '[ Model_alt-LTI_lon(5) ]';
-            
-            input_to_D_thro = '[ Dist_thro ]';
-            input_to_D_elev = '[ Dist_elev ]';
-            
-            input_to_W_thro = '[ u(1)+D_thro ]';
-            input_to_W_elev = '[ u(2)+D_elev ]';
-            
-            input_to_N_tas = '[ Noise_tas ]';
-            input_to_N_alp = '[ Noise_alp ]';
-            input_to_N_q = '[ Noise_q ]';
-            input_to_N_theta = '[ Noise_the ]';
-            input_to_N_alt = '[ Noise_alt ]';
-            input_to_N_Ax = '[ Noise_Ax ]';
-            input_to_N_Az = '[ Noise_Az ]';
-            
-            sysoutname = 'LTI_G_lon';
-            cleanupsysic = 'yes'; 
-            sysic
-            
-            % Synthesis
-            [K_lon_hinfs(:,:,i,j,k),~,gamma_lon_hinfs(i,j,k)] = hinfsyn(LTI_G_lon,nmeas_lon,ncont_lon);
-            disp(['H-Infinity Synthesis DONE'])
-            gamma_lon_hinfs
-            K_lon_hinf = K_lon_hinfs(:,:,i,j,k);
-            
-            % Closed-loop interconnection
-%             systemnames = ' LTI_lon Model_alp Perf_alp W_elev D_elev N_alp N_q K_lon_hinf ';
-%             inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1} ]';
-%             outputvar = '[ Perf_alp; W_elev; LTI_lon ]';
-%             input_to_LTI_lon = '[ K_lon_hinf+D_elev ]';
-%             input_to_Model_alp = '[ Pilot_lon ]';
-%             input_to_Perf_alp = '[ Model_alp-LTI_lon(1) ]';
-%             input_to_W_elev = '[ K_lon_hinf+D_elev ]';
-%             input_to_D_elev = '[ Dist_elev ]';
-%             input_to_N_alp = '[ Noise_alp ]';
-%             input_to_N_q = '[ Noise_q ]';
-%             input_to_K_lon_hinf = '[ Pilot_lon-LTI_lon(1)-N_alp; LTI_lon(2)+N_q ]';
-%             sysoutname = 'CL_lon_hinf';
-%             cleanupsysic = 'yes'; 
-%             sysic
-% 
-%             CL_lon_hinfs(:,:,i,j,k) = CL_lon_hinf;
-        end
-    end
-end
-
-%% Longitudinal H-infinity control design (augmented system)
-% Weight function design
-Model_tas = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
-Model_alt = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
-Perf_tas = tf([0.1,5.973],[1,0.176]);
-Perf_alt = tf([0.1,5.973],[1,0.176]);
-D_elev = 0.01;
-W_elev = [tf([0.8,42.91],[1,119.2]),0;0,tf([0.8,42.91],[1,119.2])];
-N_alp = 0.01;
-N_q = 0.1;
-
-for i = 1:num_tas
-    for j = 1:num_alt
-        for k = 1:num_mor
-            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
-            
-            LTI_lon = GTM_lon(:,:,i,j,k);
-            
-            % LTI control interconnection
-            systemnames = ' LTI_lon W_elev Model_tas Model_alt Perf_tas Perf_alt';
-            inputvar = '[ tas_c{1}; alt_c{1}; u{2} ]';
-            outputvar = '[ W_elev; tas_c-LTI_lon(1); alt_c-LTI_lon(5); LTI_lon(2); LTI_lon(3); LTI_lon(4); LTI_lon(6); LTI_lon(7) ]';
-            input_to_LTI_lon = '[ u ]';
-            input_to_Model_tas = '[ tas_c ]';
-            input_to_Model_alt = '[ alt_c ]';
-            input_to_Perf_tas = '[ Model_tas-LTI_lon(1) ]';
-            input_to_Perf_alt = '[ Model_alt-LTI_lon(5) ]';
-%             input_to_D_elev = '[ Dist_elev ]';
-            input_to_W_elev = '[ u ]';
-%             input_to_N_alp = '[ Noise_alp ]';
-%             input_to_N_q = '[ Noise_q ]';
-            sysoutname = 'LTI_G_lon';
-            cleanupsysic = 'yes'; 
-            sysic
-            
-            % Synthesis
-            [K_lon_hinf,~,gamma_lon_hinfs(i,j,k)] = hinfsyn(LTI_G_lon,nmeas_lon,ncont_lon);
-            disp(['H-Infinity Synthesis DONE'])
-            gamma_lon_hinfs
-            K_lon_hinfs(:,:,i,j,k) = K_lon_hinf;
-            
-%             Closed-loop interconnection
-            systemnames = ' LTI_lon K_lon_hinf ';
-            inputvar = '[ tas_c{1}; alt_c{1} ]';
-            outputvar = '[ LTI_lon(1); LTI_lon(5) ]';
-            input_to_LTI_lon = '[ K_lon_hinf ]';
-            input_to_K_lon_hinf = '[ tas_c-LTI_lon(1); alt_c-LTI_lon(5); LTI_lon(2); LTI_lon(3); LTI_lon(4); LTI_lon(6); LTI_lon(7) ]';
-            sysoutname = 'CL_lon_hinf';
-            cleanupsysic = 'yes'; 
-            sysic
-
-            CL_lon_hinfs(:,:,i,j,k) = CL_lon_hinf;
-        end
-    end
-end
-figure, bode(CL_lon_hinf), grid on
-figure, step(CL_lon_hinf,[0,200])
-grid on
-
-%% Longitudinal H-infinity control design
 % Weight function design
 Model_alp = tf(16,[1,5.6,16])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
 Perf_alp = tf([0.1,5.973],[1,0.176]);
@@ -327,71 +203,64 @@ W_elev = tf([0.8,42.91],[1,119.2]);
 N_alp = 0.01;
 N_q = 0.1;
 
-tic
+clearvars K_lon_hinfs gamma_lon_hinfs CL_lon_hinfs
 for i = 1:num_tas
-    for j = 1:num_alt
-        for k = 1:num_mor
-            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
-            
-            LTI_lon = GTM_lon(:,:,i,j,k);
-            
-            % LTI control interconnection
-            systemnames = ' LTI_lon Model_alp Perf_alp D_elev W_elev N_alp N_q ';
-            inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1}; u ]';
-            outputvar = '[ Perf_alp; W_elev; Pilot_lon-LTI_lon(1)-N_alp; LTI_lon(2)+N_q ]';
-            input_to_LTI_lon = '[ u+D_elev ]';
-            input_to_Model_alp = '[ Pilot_lon ]';
-            input_to_Perf_alp = '[ Model_alp-LTI_lon(1) ]';
-            input_to_D_elev = '[ Dist_elev ]';
-            input_to_W_elev = '[ u+D_elev ]';
-            input_to_N_alp = '[ Noise_alp ]';
-            input_to_N_q = '[ Noise_q ]';
-            sysoutname = 'LTI_G_lon';
-            cleanupsysic = 'yes'; 
-            sysic
-            
-            % Synthesis
-            [K_lon_hinfs(:,:,i,j,k),~,gamma_lon_hinfs(i,j,k)] = hinfsyn(LTI_G_lon,nmeas_lon,ncont_lon);
-            disp(['H-Infinity Synthesis DONE'])
-            gamma_lon_hinfs
-            K_lon_hinf = K_lon_hinfs(:,:,i,j,k);
-            
-            % Closed-loop interconnection
-            systemnames = ' LTI_lon Model_alp Perf_alp W_elev D_elev N_alp N_q K_lon_hinf ';
-            inputvar = '[ Pilot_lon{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1} ]';
-            outputvar = '[ Perf_alp; W_elev; LTI_lon ]';
-            input_to_LTI_lon = '[ K_lon_hinf+D_elev ]';
-            input_to_Model_alp = '[ Pilot_lon ]';
-            input_to_Perf_alp = '[ Model_alp-LTI_lon(1) ]';
-            input_to_W_elev = '[ K_lon_hinf+D_elev ]';
-            input_to_D_elev = '[ Dist_elev ]';
-            input_to_N_alp = '[ Noise_alp ]';
-            input_to_N_q = '[ Noise_q ]';
-            input_to_K_lon_hinf = '[ Pilot_lon-LTI_lon(1)-N_alp; LTI_lon(2)+N_q ]';
-            sysoutname = 'CL_lon_hinf';
-            cleanupsysic = 'yes'; 
-            sysic
+for j = 1:num_alt
+for k = 1:num_mor
+    trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+    
+    LTI_lon = GTM_lon(:,:,i,j,k);
+    
+    % LTI control interconnection
+    systemnames = ' LTI_lon Model_alp Perf_alp D_elev W_elev N_alp N_q ';
+    inputvar = '[ alp_c{1}; Dist_elev{1}; Noise_alp{1}; Noise_q{1}; u{1} ]';
+    outputvar = '[ Perf_alp; W_elev; alp_c-LTI_lon(1)-N_alp; LTI_lon(2)+N_q ]';
+    input_to_LTI_lon = '[ u+D_elev ]';
+    input_to_Model_alp = '[ alp_c ]';
+    input_to_Perf_alp = '[ Model_alp-LTI_lon(1) ]';
+    input_to_D_elev = '[ Dist_elev ]';
+    input_to_W_elev = '[ u+D_elev ]';
+    input_to_N_alp = '[ Noise_alp ]';
+    input_to_N_q = '[ Noise_q ]';
+    sysoutname = 'LTI_G_lon';
+    cleanupsysic = 'yes'; 
+    sysic
+    
+    % Synthesis
+    [K_lon_hinf,~,gamma_lon_hinf] = hinfsyn(LTI_G_lon,nmeas_lon,ncont_lon);
+    gamma_lon_hinf
+    gamma_lon_hinfs(i,j,k) = gamma_lon_hinf;
+    K_lon_hinfs(:,:,i,j,k) = K_lon_hinf;
+    
+    % Closed-loop interconnection
+    systemnames = ' LTI_lon K_lon_hinf ';
+    inputvar = '[ alp_c{1} ]';
+    outputvar = '[ LTI_lon ]';
+    input_to_LTI_lon = '[ K_lon_hinf ]';
+    input_to_K_lon_hinf = '[ alp_c-LTI_lon(1); LTI_lon(2) ]';
+    sysoutname = 'CL_lon_hinf';
+    cleanupsysic = 'yes'; 
+    sysic
 
-            CL_lon_hinfs(:,:,i,j,k) = CL_lon_hinf;
-        end
-    end
+    CL_lon_hinfs(:,:,i,j,k) = CL_lon_hinf;
 end
-toc
+end
+end
 
 % Frequency domain analysis
 w = logspace(-2,2,50);
 for i = 1:num_tas
-    for j = 1:num_alt
-        for k = 1:num_mor
-            trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
-            [mag_P_lon,phase_P_lon] = bode(GTM_lon(:,:,i,j,k),w);
-            mag_elev_to_alpha_P_lon(:,trim_point) = mag2db(squeeze(mag_P_lon(1,1,:)));
-            phase_elev_to_alpha_P_lon(:,trim_point) = squeeze(phase_P_lon(1,1,:));
-            [mag_CL_lon_hinfs,phase_CL_lon_hinfs] = bode(CL_lon_hinfs(:,:,i,j,k),w);
-            mag_elev_to_alpha_CL_lon_hinfs(:,trim_point) = mag2db(squeeze(mag_CL_lon_hinfs(3,1,:))).';
-            phase_elev_to_alpha_CL_lon_hinfs(:,trim_point) = squeeze(phase_CL_lon_hinfs(3,1,:)).';
-        end
-    end
+for j = 1:num_alt
+for k = 1:num_mor
+    trim_point = (i-1)*num_alt*num_mor + (j-1)*num_mor + k;
+    [mag_P_lon,phase_P_lon] = bode(GTM_lon(:,:,i,j,k),w);
+    mag_elev_to_alpha_P_lon(:,trim_point) = mag2db(squeeze(mag_P_lon(1,1,:)));
+    phase_elev_to_alpha_P_lon(:,trim_point) = squeeze(phase_P_lon(1,1,:));
+    [mag_CL_lon_hinfs,phase_CL_lon_hinfs] = bode(CL_lon_hinfs(:,:,i,j,k),w);
+    mag_elev_to_alpha_CL_lon_hinfs(:,trim_point) = mag2db(squeeze(mag_CL_lon_hinfs(1,1,:))).';
+    phase_elev_to_alpha_CL_lon_hinfs(:,trim_point) = squeeze(phase_CL_lon_hinfs(1,1,:)).';
+end
+end
 end
 
 [mag_Model_alp_raw,phase_Model_alp_raw] = bode(Model_alp,w);
@@ -474,11 +343,13 @@ sysic
 Model_bet = tf(7.78,[1,3.92,7.78])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
 Model_p = tf(-52.56,[1,0.04])*tf([1,-0.02],[1,6.47])*tf([1,7.5,34.67],[1,8.75,39.06])*tf(31.42,[1,31.42])*tf([-1,64.52],[1,64.52]);
 Perf_bet = tf([0.1,5.973],[1,0.176]);
-Perf_p = tf([0.1,5.973],[1,0.299]);
+Perf_p = 0.1*tf([0.1,5.973],[1,0.299]);
 D_ail = 0.01;
 D_rud = 0.01;
-W_ail = tf([0.8,42.91],[1,119.2]);
-W_rud = tf([0.8,42.91],[1,119.2]);
+% W_ail = tf([0.8,42.91],[1,119.2]);
+% W_rud = tf([0.8,42.91],[1,119.2]);
+W_ail = 0.01;
+W_rud = 0.01;
 N_bet = 0.01;
 N_p = 0.1;
 N_r = 0.1;
@@ -509,36 +380,27 @@ for i = 1:num_tas
             sysic
 
             % Controller synthesis
-            [K_lat_hinfs(:,:,i,j,k),A,gamma_lat_hinfs(i,j,k)] = hinfsyn(LTI_G_lat,nmeas_lat,ncont_lat);
-            disp(['H-Infinity Synthesis DONE'])
-            gamma_lat_hinfs
-            K_lat_hinf = K_lat_hinfs(:,:,i,j,k);
+            [K_lat_hinf,~,gamma_lat_hinf] = hinfsyn(LTI_G_lat,nmeas_lat,ncont_lat);
+            gamma_lat_hinf
+            K_lat_hinfs(:,:,i,j,k) = K_lat_hinf;
             
             % Closed-loop interconnection
-            systemnames = ' LTI_lat Model_bet Model_p Perf_bet Perf_p D_ail D_rud W_ail W_rud N_bet N_p N_r K_lat_hinf ';
-            inputvar = '[ Pilot_lat{1}; Pilot_ped{1}; Dist_ail{1}; Dist_rud{1}; Noise_bet{1}; Noise_p{1}; Noise_r{1} ]';
+            systemnames = ' LTI_lat K_lat_hinf ';
+            inputvar = '[ Pilot_lat{1}; Pilot_ped{1} ]';
             outputvar = '[ LTI_lat ]';
-            input_to_LTI_lat = '[ LTI_lat(1)+D_ail; LTI_lat(2)+D_rud ]';
-            input_to_Model_bet = '[ Pilot_ped ]';
-            input_to_Model_p = '[ Pilot_lat ]';
-            input_to_Perf_bet = '[ Model_bet-LTI_lat(1) ]';
-            input_to_Perf_p = '[ Model_p-LTI_lat(2) ]';
-            input_to_D_ail = '[ Dist_ail ]';
-            input_to_D_rud = '[ Dist_rud ]';
-            input_to_W_ail = '[ LTI_lat(1)+D_ail ]';
-            input_to_W_rud = '[ LTI_lat(2)+D_rud ]';
-            input_to_N_bet = '[ Noise_bet ]';
-            input_to_N_p = '[ Noise_p ]';
-            input_to_N_r = '[ Noise_r ]';
-            input_to_K_lat_hinf = '[ Pilot_lat; Pilot_ped-LTI_lat(1)-N_bet; LTI_lat(2)+N_p; LTI_lat(3)+N_r ]';
+            input_to_LTI_lat = '[ K_lat_hinf(1); K_lat_hinf(2) ]';
+            input_to_K_lat_hinf = '[ Pilot_lat; Pilot_ped-LTI_lat(1); LTI_lat(2); LTI_lat(3) ]';
             sysoutname = 'CL_lat_hinf';
             cleanupsysic = 'yes'; 
             sysic
-
             CL_lat_hinfs(:,:,i,j,k) = CL_lat_hinf;
+            
+            step(CL_lat_hinf)
+
         end
     end
 end
+step(CL_lat_hinf)
 
 %% Lateral LPV control design
 % Control interconnection
