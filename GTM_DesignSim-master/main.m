@@ -49,7 +49,7 @@ s = tf('s');
 
 %% Trim calculation
 if isfile('./result/Trim.mat') == 0
-    clearvars MWS_grid alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
+    clearvars MWS_grid tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
     clearvars sys_alp_trim sys_pitch_trim sys_throttle_trim sys_aileron_trim sys_elevator_trim sys_rudder_trim
     count = 0;
     for i = 1:num_tas
@@ -75,9 +75,9 @@ if isfile('./result/Trim.mat') == 0
         % save trim results
         MWS_grid(i,j,k)      = MWS;
     
-%         tas_trim(i,j,k)      = convvel(Trimcond.tas,'kts','ft/s'); % [ft/s]
-%         alt_trim(i,j,k)      = Trimcond.altitude; % [ft]
-%         mor_trim(i,j,k)      = mor*100; % [%]
+        tas_trim(i,j,k)      = convvel(Trimcond.tas,'kts','ft/s'); % [ft/s]
+        alt_trim(i,j,k)      = Trimcond.altitude; % [ft]
+        mor_trim(i,j,k)      = mor*100; % [%]
         
         alp_trim(i,j,k)      = Trimcond.alpha; % [deg]
         pitch_trim(i,j,k)    = Trimcond.pitch; % [deg]
@@ -85,7 +85,11 @@ if isfile('./result/Trim.mat') == 0
         aileron_trim(i,j,k)  = Trimcond.aileron; % [deg]
         elevator_trim(i,j,k) = Trimcond.elevator; % [deg]
         rudder_trim(i,j,k)   = Trimcond.rudder; % [deg]
-    
+
+        sys_tas_trim(:,:,i,j,k)      = ss(0,0,0,tas_trim(i,j,k)); % [deg]
+        sys_alt_trim(:,:,i,j,k)      = ss(0,0,0,alt_trim(i,j,k)); % [deg]
+        sys_mor_trim(:,:,i,j,k)      = ss(0,0,0,mor_trim(i,j,k)); % [deg]
+
         sys_alp_trim(:,:,i,j,k)      = ss(0,0,0,alp_trim(i,j,k)); % [deg]
         sys_pitch_trim(:,:,i,j,k)    = ss(0,0,0,pitch_trim(i,j,k)); % [deg]
         sys_throttle_trim(:,:,i,j,k) = ss(0,0,0,throttle_trim(i,j,k)); % [%]
@@ -96,6 +100,10 @@ if isfile('./result/Trim.mat') == 0
     end
     end
     
+    sch_tas_trim      = pss(sys_tas_trim,Domain); % [deg]
+    sch_alt_trim      = pss(sys_alt_trim,Domain); % [deg]
+    sch_mor_trim      = pss(sys_mor_trim,Domain); % [deg]
+
     sch_alp_trim      = pss(sys_alp_trim,Domain); % [deg]
     sch_pitch_trim    = pss(sys_pitch_trim,Domain); % [deg]
     sch_throttle_trim = pss(sys_throttle_trim,Domain); % [%]
@@ -103,7 +111,7 @@ if isfile('./result/Trim.mat') == 0
     sch_elevator_trim = pss(sys_elevator_trim,Domain); % [deg]
     sch_rudder_trim   = pss(sys_rudder_trim,Domain); % [deg]
     
-    save Trim.mat MWS_grid sch_alp_trim sch_pitch_trim sch_throttle_trim sch_aileron_trim sch_elevator_trim sch_rudder_trim
+    save Trim.mat MWS_grid sch_tas_trim sch_alt_trim sch_mor_trim sch_alp_trim sch_pitch_trim sch_throttle_trim sch_aileron_trim sch_elevator_trim sch_rudder_trim tas_trim alt_trim mor_trim
     disp('Trim Data Saved')
 else
     load Trim.mat
@@ -240,7 +248,7 @@ Ideal_An = (omega_An^2)/(s^2+2*zeta_An*omega_An*s+omega_An^2);
 
 % Weight function design
 Model_An  = Ideal_An*Ele*Pade30;
-Perf_An   = 100*tf([0.1,5.973],[1,0.176]);
+Perf_An   = 200*tf([0.1,5.973],[1,0.176]);
 W_elev    = (0.8*s+42.91)/(s+119.2);
 N_alp     = 0.031*pi/180*(s+10)/(s+100); % 0.031 deg/s
 N_q       = 0.3857*pi/180*(s+10)/(s+100); % 0.3857 deg/s
@@ -251,10 +259,9 @@ DL = [Pade15 0 0;
       0 Pade15 0;
       0 0 Pade15];
 Ele_Delay = Pade10;
-% AA_lon = [AA 0 0;
-%           0 AA 0;
-%           0 0 AA];
-AA_lon = eye(3);
+AA_lon = [AA 0 0;
+          0 AA 0;
+          0 0 AA];
 N = [N_alp 0 0;
      0 N_q 0;
      0 0 N_An];
@@ -279,7 +286,6 @@ cleanupsysic       = 'yes';
 sysic
 
 %% Longitudinal LPV synthesis
-G_lon.Domain = Domain;
 if isfile('./result/K_lon_lpv.mat') == 0
     tic
     [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,4,1);
@@ -295,31 +301,31 @@ disp(['Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(gamma_lon_lpv)])
 
 %% Longitudinal rate-bounded LPV synthesis
 % Basis function
-b0 = basis(1,0);
-tas_param = pgrid('tas_param',tas_grid);
-alt_param = pgrid('alt_param',alt_grid);
-mor_param = pgrid('mor_param',mor_grid);
-btas = basis(tas_param,'tas_param',1);
-balt = basis(alt_param,'alt_param',1);
-bmor = basis(mor_param,'mor_param',1);
-Xb = [b0;btas;balt;bmor;btas^2;balt^2;bmor^2];
-% Xb = [b0;btas;balt;bmor];
-Yb = Xb;
-
-G_lon.Domain = DomainRB;
-if isfile('./result/K_lon_rblpv.mat') == 0
-    tic
-    [K_lon_rblpv,gamma_lon_rblpv,info_lon_rblpv] = lpvsyn(G_lon,4,1,Xb,Yb); % Elapsed time is 366 seconds with 4 basis functions
-    SynTime_lon_rblpv = toc;
-    save K_lon_rblpv.mat K_lon_rblpv gamma_lon_rblpv info_lon_rblpv SynTime_lon_rblpv
-else
-    disp('Longitudinal Rate-Bounded LPV Synthesis Skipped & Data Loaded')
-    load K_lon_rblpv.mat
-end
-G_lon.Domain = Domain;
-% disp(['Min Gamma (Longitudinal Rate-Bounded LPV) = ',num2str(info_lon_rblpv.MinGamma)])
-disp(['Gamma (Longitudinal Rate-Bounded LPV) = ',num2str(gamma_lon_rblpv)])
-% disp(['Back-Off Factor (Longitudinal Rate-Bounded LPV) = ',num2str((gamma_lon_rblpv/info_lon_rblpv.MinGamma-1)*100),' %'])
+% b0 = basis(1,0);
+% tas_param = pgrid('rho1_tas_param',tas_grid);
+% alt_param = pgrid('rho2_alt_param',alt_grid);
+% mor_param = pgrid('rho3_mor_param',mor_grid);
+% btas = basis(tas_param,'rho1_tas_param',1);
+% balt = basis(alt_param,'rho2_alt_param',1);
+% bmor = basis(mor_param,'rho3_mor_param',1);
+% Xb = [b0;btas;balt;bmor;btas^2;balt^2;bmor^2];
+% % Xb = [b0;btas;balt;bmor];
+% Yb = Xb;
+% 
+% G_lon.Domain = DomainRB;
+% if isfile('./result/K_lon_rblpv.mat') == 0
+%     tic
+%     [K_lon_rblpv,gamma_lon_rblpv,info_lon_rblpv] = lpvsyn(G_lon,4,1,Xb,Yb); % Elapsed time is 366 seconds with 4 basis functions
+%     SynTime_lon_rblpv = toc;
+%     save K_lon_rblpv.mat K_lon_rblpv gamma_lon_rblpv info_lon_rblpv SynTime_lon_rblpv
+% else
+%     disp('Longitudinal Rate-Bounded LPV Synthesis Skipped & Data Loaded')
+%     load K_lon_rblpv.mat
+% end
+% G_lon.Domain = Domain;
+% % disp(['Min Gamma (Longitudinal Rate-Bounded LPV) = ',num2str(info_lon_rblpv.MinGamma)])
+% disp(['Gamma (Longitudinal Rate-Bounded LPV) = ',num2str(gamma_lon_rblpv)])
+% % disp(['Back-Off Factor (Longitudinal Rate-Bounded LPV) = ',num2str((gamma_lon_rblpv/info_lon_rblpv.MinGamma-1)*100),' %'])
 
 %% Longitudinal H_infinity synthesis
 if isfile('./result/K_lon_hinf.mat') == 0
@@ -327,7 +333,7 @@ if isfile('./result/K_lon_hinf.mat') == 0
     for i = 1:num_tas
     for j = 1:num_alt
     for k = 1:num_mor 
-        G_lon_LTI = G_lon.value('tas_param',tas_grid(i),'alt_param',alt_grid(j),'mor_param',mor_grid(k));
+        G_lon_LTI = G_lon.value('rho1_tas_param',tas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
         [K_lon_hinf_point,~,gamma_lon_hinf_point] = hinfsyn(G_lon_LTI,4,1);
         SynTime_lon_hinfs(i,j,k) = toc;
@@ -360,21 +366,21 @@ cleanupsysic        = 'yes';
 sysic
 
 %% Closed-loop interconnection with Longitudinal Rate-Bounded LPV controller and anti-aliasing filter
-P_lon.Domain = DomainRB;
-systemnames         = 'P_lon K_lon_rblpv Ele UL Ele_Delay AA_lon DL';
-inputvar            = '[An_c{1}]';
-outputvar           = '[DL]';
-input_to_UL         = '[K_lon_rblpv]';
-input_to_Ele        = '[UL]';
-input_to_Ele_Delay  = '[Ele]';
-input_to_P_lon      = '[Ele_Delay]';
-input_to_AA_lon     = '[P_lon]';
-input_to_DL         = '[AA_lon]';
-input_to_K_lon_rblpv= '[An_c;DL]';
-sysoutname          = 'CL_lon_rblpv';
-cleanupsysic        = 'yes'; 
-sysic
-P_lon.Domain = Domain;
+% P_lon.Domain = DomainRB;
+% systemnames         = 'P_lon K_lon_rblpv Ele UL Ele_Delay AA_lon DL';
+% inputvar            = '[An_c{1}]';
+% outputvar           = '[DL]';
+% input_to_UL         = '[K_lon_rblpv]';
+% input_to_Ele        = '[UL]';
+% input_to_Ele_Delay  = '[Ele]';
+% input_to_P_lon      = '[Ele_Delay]';
+% input_to_AA_lon     = '[P_lon]';
+% input_to_DL         = '[AA_lon]';
+% input_to_K_lon_rblpv= '[An_c;DL]';
+% sysoutname          = 'CL_lon_rblpv';
+% cleanupsysic        = 'yes'; 
+% sysic
+% P_lon.Domain = Domain;
 
 %% Closed-loop interconnection with Longitudinal H_infinity controller and anti-aliasing filter
 systemnames         = 'P_lon K_lon_hinf Ele UL Ele_Delay AA_lon DL';
@@ -404,7 +410,7 @@ legend('LPV','H\infty')
 % Ideal model
 omega_beta = 1;
 zeta_beta = 0.7;
-omega_phi = 2.8;
+omega_phi = 2;
 zeta_phi = 0.7;
 Ideal_bet = tf(omega_beta^2,[1 2*zeta_beta*omega_beta omega_beta^2]);
 Ideal_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
@@ -414,7 +420,7 @@ Model_bet = Ideal_bet*Ail*Pade30;
 Model_phi = Ideal_phi*Rud*Pade30;
 Perf_bet = tf([0.1,5.973],[1,0.176]);
 Perf_phi = tf([0.1,5.973],[1,0.176]);
-D_ail = 0.25*tf([1,w_ail*10],[1,w_ail]);
+D_ail = 0.1*tf([1,w_ail*10],[1,w_ail]);
 W_ail = 0.8*tf([1,1.5],[1,4]);
 W_rud = 0.8*tf([100,53.64],[1,119.2]);
 N_bet = 0.033*pi/180*(s+10)/(s+100); % 0.033 deg
@@ -432,18 +438,16 @@ DL_lat = [Pade15 0 0 0 0;
           0 0 0 0 Pade15];
 Ail_Delay = Pade10;
 Rud_Delay = Pade10;
-% AA_lat = [AA 0 0 0 0;
-%           0 AA 0 0 0;
-%           0 0 AA 0 0;
-%           0 0 0 AA 0;
-%           0 0 0 0 AA];
-AA_lat = eye(5);
+AA_lat = [AA 0 0 0 0;
+          0 AA 0 0 0;
+          0 0 AA 0 0;
+          0 0 0 AA 0;
+          0 0 0 0 AA];
 N_lat = [N_bet 0 0 0 0;
          0 N_p 0 0 0;
          0 0 N_r 0 0;
          0 0 0 N_phi 0;
          0 0 0 0 N_Ay];
-
 
 %% Lateral LPV modeling
 % control interconnection
@@ -470,7 +474,6 @@ cleanupsysic       = 'yes';
 sysic
 
 %% Lateral LPV synthesis
-G_lat.Domain = Domain;
 if isfile('./result/K_lat_lpv.mat') == 0
     tic
     [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,7,2);
@@ -485,20 +488,20 @@ disp(['Gamma (Lateral Rate-Unbounded LPV) = ',num2str(gamma_lat_lpv)])
 % disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat/info_lat_lpv.MinGamma-1)*100),' %'])
 
 %% Lateral rate-bounded LPV synthesis
-G_lat.Domain = DomainRB;
-if isfile('./result/K_lat_rblpv.mat') == 0
-    tic
-    [K_lat_rblpv,gamma_lat_rblpv,info_lat_rblpv] = lpvsyn(G_lat,7,2,Xb,Yb); % Elapsed time is 366 seconds with 4 basis functions
-    SynTime_lat_rblpv = toc;
-    save K_lat_rblpv.mat K_lat_rblpv gamma_lat_rblpv info_lat_rblpv SynTime_lat_rblpv
-else
-    disp('Lateral Rate-Bounded LPV Synthesis Skipped & Data Loaded')
-    load K_lat_rblpv.mat
-end
-G_lat.Domain = Domain;
-% disp(['Min Gamma (Lateral Rate-Bounded LPV) = ',num2str(info_lat_rblpv.MinGamma)])
-disp(['Gamma (Lateral Rate-Bounded LPV) = ',num2str(gamma_lat_rblpv)])
-% disp(['Back-Off Factor (Lateral Rate-Bounded LPV) = ',num2str((gamma_lat_rblpv/info_lat_rblpv.MinGamma-1)*100),' %'])
+% G_lat.Domain = DomainRB;
+% if isfile('./result/K_lat_rblpv.mat') == 0
+%     tic
+%     [K_lat_rblpv,gamma_lat_rblpv,info_lat_rblpv] = lpvsyn(G_lat,7,2,Xb,Yb); % Elapsed time is 366 seconds with 4 basis functions
+%     SynTime_lat_rblpv = toc;
+%     save K_lat_rblpv.mat K_lat_rblpv gamma_lat_rblpv info_lat_rblpv SynTime_lat_rblpv
+% else
+%     disp('Lateral Rate-Bounded LPV Synthesis Skipped & Data Loaded')
+%     load K_lat_rblpv.mat
+% end
+% G_lat.Domain = Domain;
+% % disp(['Min Gamma (Lateral Rate-Bounded LPV) = ',num2str(info_lat_rblpv.MinGamma)])
+% disp(['Gamma (Lateral Rate-Bounded LPV) = ',num2str(gamma_lat_rblpv)])
+% % disp(['Back-Off Factor (Lateral Rate-Bounded LPV) = ',num2str((gamma_lat_rblpv/info_lat_rblpv.MinGamma-1)*100),' %'])
 
 %% Lateral H_infinity synthesis
 if isfile('./result/K_lat_hinf.mat') == 0
@@ -506,7 +509,7 @@ if isfile('./result/K_lat_hinf.mat') == 0
     for i = 1:num_tas
     for j = 1:num_alt
     for k = 1:num_mor 
-        G_lat_LTI = G_lat.value('tas_param',tas_grid(i),'alt_param',alt_grid(j),'mor_param',mor_grid(k));
+        G_lat_LTI = G_lat.value('rho1_tas_param',tas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
         [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,7,2);
         SynTime_lat_hinfs(i,j,k) = toc;
@@ -542,24 +545,24 @@ cleanupsysic       = 'yes';
 sysic
 
 %% Closed-loop interconnection with Lateral Rate-Bounded LPV controller and anti-aliasing filter
-P_lat.Domain = DomainRB;
-systemnames        = 'P_lat K_lat_rblpv D_ail UL_lat Ail Rud Ail_Delay Rud_Delay DL_lat AA_lat';
-inputvar           = '[bet_c{1};phi_c{1};Dist_ail{1}]';
-outputvar          = '[P_lat]';
-input_to_UL_lat    = '[K_lat_rblpv]';
-input_to_Ail       = '[UL_lat(1)]';
-input_to_Rud       = '[UL_lat(2)]';
-input_to_Ail_Delay = '[Ail+D_ail]';
-input_to_Rud_Delay = '[Rud]';
-input_to_P_lat     = '[Ail_Delay;Rud_Delay]';
-input_to_D_ail     = '[Dist_ail]';
-input_to_DL_lat    = '[AA_lat]';
-input_to_AA_lat    = '[P_lat]';
-input_to_K_lat_rblpv = '[bet_c;phi_c;P_lat]';
-sysoutname         = 'CL_lat_rblpv';
-cleanupsysic       = 'yes'; 
-sysic
-P_lat.Domain = Domain;
+% P_lat.Domain = DomainRB;
+% systemnames        = 'P_lat K_lat_rblpv D_ail UL_lat Ail Rud Ail_Delay Rud_Delay DL_lat AA_lat';
+% inputvar           = '[bet_c{1};phi_c{1};Dist_ail{1}]';
+% outputvar          = '[P_lat]';
+% input_to_UL_lat    = '[K_lat_rblpv]';
+% input_to_Ail       = '[UL_lat(1)]';
+% input_to_Rud       = '[UL_lat(2)]';
+% input_to_Ail_Delay = '[Ail+D_ail]';
+% input_to_Rud_Delay = '[Rud]';
+% input_to_P_lat     = '[Ail_Delay;Rud_Delay]';
+% input_to_D_ail     = '[Dist_ail]';
+% input_to_DL_lat    = '[AA_lat]';
+% input_to_AA_lat    = '[P_lat]';
+% input_to_K_lat_rblpv = '[bet_c;phi_c;P_lat]';
+% sysoutname         = 'CL_lat_rblpv';
+% cleanupsysic       = 'yes'; 
+% sysic
+% P_lat.Domain = Domain;
 
 %% Closed-loop interconnection with Lateral H_infinity controller and anti-aliasing filter
 systemnames        = 'P_lat K_lat_hinf D_ail UL_lat Ail Rud Ail_Delay Rud_Delay DL_lat AA_lat';
@@ -582,9 +585,7 @@ sysic
 %% Closed-loop comparison
 figure
 step(CL_lat_lpv), hold on
-step(CL_lat_rblpv)
 step(CL_lat_hinf)
 grid on
-legend('LPV','RBLPV','H\infty')
 
 LinearAnalysis

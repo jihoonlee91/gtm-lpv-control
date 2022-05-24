@@ -16,6 +16,7 @@ addpath('./libs');
 addpath(genpath('./LPVToolsV1.0/'));
 addpath(genpath('./figure/'));
 addpath(genpath('./result/'));
+addpath(genpath('./result_archive/'));
 
 rehash path
 

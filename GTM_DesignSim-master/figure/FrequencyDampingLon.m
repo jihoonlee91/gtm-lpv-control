@@ -110,4 +110,4 @@ legend('\eta_s = -25%','\eta_s = -12.5%','\eta_s = 0%','location','best')
 subplot(224),plot(AOA,shortperiod3(:,2),':^'),grid on
 legend('\eta_s = -25%','\eta_s = -12.5%','\eta_s = 0%','location','best')
 
-exportgraphics(gcf,'FrequencyDamping.pdf')
+exportgraphics(gcf,'FrequencyDampingLon.pdf')
