@@ -13,6 +13,10 @@ addpath('./obj');
 % Add libriary directory
 addpath('./libs');
 
+addpath(genpath('./LPVToolsV1.0/'));
+addpath(genpath('./figure/'));
+addpath(genpath('./result/'));
+
 rehash path
 
 

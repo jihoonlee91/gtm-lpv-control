@@ -84,6 +84,7 @@ MWS.bias.rudder     =0;
 MWS.bias.stabilizer =0;
 MWS.bias.throttle   =20;
 MWS.bias.geardown   =0;
+MWS.bias.morphing   =0;
 
 % Basic Table Options
 MWS.LinearizeModeOn=0;
