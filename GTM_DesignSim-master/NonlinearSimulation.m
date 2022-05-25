@@ -5,12 +5,12 @@ clc
 % 
 % setup
 
-load Linearization.mat
-load Trim.mat
-load K_lon_lpv.mat
-load K_lon_hinf.mat
-load K_lat_lpv.mat
-load K_lat_hinf.mat
+% load Linearization.mat
+% load Trim.mat
+% load K_lon_lpv.mat
+% load K_lon_hinf.mat
+% load K_lat_lpv.mat
+% load K_lat_hinf.mat
 
 %% Nonlinear Simulation
 vehicle      = 'GTM_T2';
@@ -31,11 +31,11 @@ loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
 
 % actuator bias 없애주자
-MWS.bias.aileron = 0;
-MWS.bias.elevator = 0;
-MWS.bias.rudder = 0;
-MWS.bias.throttle = 0;  
-MWS.bias.morphing = 0;
+% MWS.bias.aileron = 0;
+% MWS.bias.elevator = 0;
+% MWS.bias.rudder = 0;
+% MWS.bias.throttle = 0;  
+% MWS.bias.morphing = 0;
 
 loadmws(MWS,'gtm_design'); % load MWS
 
