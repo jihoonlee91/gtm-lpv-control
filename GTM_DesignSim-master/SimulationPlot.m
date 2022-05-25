@@ -57,6 +57,14 @@ ylabel('Position [ft/s]')
 legend('North','East','Up')
 grid on, grid minor
 
+%% Acc
+figure
+plot(t,Ax,t,Ay,t,Az)
+xlabel('Time [sec]')
+ylabel('Acceleration [ft/s^2]')
+legend('Ax','Ay','Az')
+grid on, grid minor
+
 %% Longitudinal plot
 % tas alp q the h Ax Az
 % dele delt

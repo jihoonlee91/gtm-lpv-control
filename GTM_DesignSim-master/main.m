@@ -24,7 +24,6 @@ verbose        = 1; % trim output display off
 vabflag        = 1; % wind-axis linear state
 use_all_inputs = 0; % control surface as groups
 Ts             = 0; % continuous-time model
-LPVControlOn   = 1; % 0 (hinf control) or 1 (lpv control)
 
 % Parameter grid
 tas_grid  = convvel([70 85 100],'kts','ft/s'); % [ft/s] (70~85 knot)
@@ -410,8 +409,8 @@ legend('LPV','H\infty')
 % Ideal model
 omega_beta = 1;
 zeta_beta = 0.7;
-omega_phi = 2;
-zeta_phi = 0.7;
+omega_phi = 0.5;
+zeta_phi = 0.8;
 Ideal_bet = tf(omega_beta^2,[1 2*zeta_beta*omega_beta omega_beta^2]);
 Ideal_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 
@@ -419,8 +418,8 @@ Ideal_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 Model_bet = Ideal_bet*Ail*Pade30;
 Model_phi = Ideal_phi*Rud*Pade30;
 Perf_bet = tf([0.1,5.973],[1,0.176]);
-Perf_phi = tf([0.1,5.973],[1,0.176]);
-D_ail = 0.1*tf([1,w_ail*10],[1,w_ail]);
+Perf_phi = tf([0.1,5.973],[1,0.299]);
+D_ail = 0.1*tf([1,w_ail*10],[1,w_ail])*0;
 W_ail = 0.8*tf([1,1.5],[1,4]);
 W_rud = 0.8*tf([100,53.64],[1,119.2]);
 N_bet = 0.033*pi/180*(s+10)/(s+100); % 0.033 deg
