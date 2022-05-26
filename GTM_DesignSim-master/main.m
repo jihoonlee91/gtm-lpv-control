@@ -480,8 +480,8 @@ W_rud = 1*(s+20)/(s+120);
 % W_ail = (0.8*s+43)/(s+120);
 % W_rud = (0.8*s+43)/(s+120);
 
-Int_bet = .1/(s+0.001);
-Int_phi = .1/(s+0.001);
+Int_bet = (.1)/(s+0.001);
+Int_phi = (.1)/(s+0.001);
 
 D_ail = 0.01*tf([1,w_ail*10],[1,w_ail])*0;
 
@@ -520,16 +520,18 @@ Phi_Delay = [1 0 0 0 0;
 AilD = Pade30;
 RudD = Pade30;
 
-figure
-bode(Perf_bet,Perf_phi,W_ail,W_rud,D_ail),title(''), grid on
-h = legend('$P_{\beta}$','$P_{\phi}$','$W_{\eta a}$','$W_{\delta r}$','$D_{\eta a}$','Interpreter','latex');
-set(h,'string',{'$P_{\beta}$','$P_{\phi}$','$W_{\eta a}$','$W_{\delta r}$','$D_{\eta a}$'})
+% figure
+% bode(Perf_bet,Perf_phi,W_ail,W_rud,D_ail),title(''), grid on
+% h = legend('$P_{\beta}$','$P_{\phi}$','$W_{\eta a}$','$W_{\delta r}$','$D_{\eta a}$','Interpreter','latex');
+% set(h,'string',{'$P_{\beta}$','$P_{\phi}$','$W_{\eta a}$','$W_{\delta r}$','$D_{\eta a}$'})
 
 drawnow
 
 %% Lateral LPV modeling
 systemnames        = 'P_lat N_lat Model_bet Model_phi W_ail W_rud Ail Rud AilD RudD Int_bet Int_phi Perf_bet Perf_phi Phi_Delay';
 inputvar           = '[bet_c{1};phi_c{1};Noise{5};u{2}]';
+% outputvar          = '[W_ail;W_rud;Perf_bet;Perf_phi;bet_c;phi_c;Phi_Delay]';
+% outputvar          = '[W_ail;W_rud;Perf_bet;Perf_phi;bet_c;phi_c;Phi_Delay;Int_bet;Int_phi]';
 % outputvar          = '[W_ail;W_rud;Perf_bet;Perf_phi;Int_bet;Int_phi;bet_c;phi_c;Phi_Delay]';
 outputvar          = '[W_ail;W_rud;Int_bet;Int_phi;bet_c;phi_c;Phi_Delay]';
 input_to_Perf_bet  = '[Model_bet-P_lat(1)]';
@@ -671,19 +673,19 @@ sysic
 % P_lat.Domain = Domain;
 
 %% Closed-loop comparison
-% figure
-% step(CL_lat_lpv,10), hold on
-% step(CL_lat_hinf,10)
-% grid on
+figure
+step(CL_lat_lpv,10), hold on
+step(CL_lat_hinf,10)
+grid on
 
 %%
-% MWS               = init_design('GTM');
-% target            = struct('gamma',0,'tas',85); % target trim condition [knot]
-% MWS.StatesInp(9)  = 3000; % set altitude [ft]
-% MWS.bias.morphing = -12.5; % set morphing parameter
-% loadmws(MWS,'gtm_design'); % load MWS
-% [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
-% loadmws(MWS,'gtm_design'); % load MWS
+MWS               = init_design('GTM');
+target            = struct('gamma',0,'tas',85); % target trim condition [knot]
+MWS.StatesInp(9)  = 3000; % set altitude [ft]
+MWS.bias.morphing = -12.5; % set morphing parameter
+loadmws(MWS,'gtm_design'); % load MWS
+[MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
+loadmws(MWS,'gtm_design'); % load MWS
 
 %%
-[tsim,xsim,ysim]=sim('gtm_design',[0 10]);
+[tsim,xsim,ysim]=sim('gtm_design',[0 6]);
