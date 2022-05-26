@@ -38,7 +38,7 @@ loadmws(MWS,'gtm_design'); % load MWS
 % MWS.bias.morphing = 0;
 
 loadmws(MWS,'gtm_design'); % load MWS
-
+%%
 [tsim,xsim,ysim]=sim('gtm_design',[0 10]);
 
 save NonlinearSimulation.mat tsim xsim ysim NED
