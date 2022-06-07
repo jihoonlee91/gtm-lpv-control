@@ -13,7 +13,10 @@ addpath('./obj');
 % Add libriary directory
 addpath('./libs');
 
+% Add libriary directory
 addpath(genpath('./LPVToolsV1.0/'));
+run('./LPVToolsV1.0/addlpv');
+
 addpath(genpath('./figure/'));
 addpath(genpath('./result/'));
 addpath(genpath('./result_archive/'));
@@ -21,9 +24,9 @@ addpath(genpath('./result_archive/'));
 rehash path
 
 
-% Close model if open, prompt if changed.
+% Open model if close, prompt if changed.
 if  not(isempty(find_system('SearchDepth',0,'Name','gtm_design')))
-    if strcmp(get_param('gtm_design','Dirty'),'on');
+    if strcmp(get_param('gtm_design','Dirty'),'on')
 %         savechanges=input('  gtm_design model has been changed, save changes (y/N) ?','s');
 %         if ~isempty(savechanges) && strcmpi(savechanges(1),'y');
 	  fprintf(1,'Saving System...');
@@ -34,10 +37,16 @@ if  not(isempty(find_system('SearchDepth',0,'Name','gtm_design')))
 %         end
     end
     % terminate if left in paused state. matlab will not close paused model.
-    if strcmp(get_param('gtm_design','SimulationStatus'),'paused'),
+    if strcmp(get_param('gtm_design','SimulationStatus'),'paused')
         gtm_design([],[],[],'term');
     end
-    bdclose('gtm_design');
+    if strcmp(get_param('gtm_design','SimulationStatus'),'paused')
+        gtm_design([],[],[],'term');
+    end
+    if strcmp(get_param('gtm_design','SimulationStatus'),'paused')
+        gtm_design([],[],[],'term');
+    end
+%     bdclose('gtm_design');
 end
 
 % Clear simout* variables to ensure clean initialization
@@ -55,7 +64,7 @@ open_system('gtm_design');
 loadmws(init_design('GTM'),'gtm_design');
 
 % Trim model, and load trimmed conditions
-% appendmws(trimgtm(struct('eas',75, 'gamma',0)));
+% appendmws(trimgtm(struct('tas',75, 'gamma',0),'elev',0));
 
 warning('on','Simulink:SL_MdlFileNotOnPath');
 

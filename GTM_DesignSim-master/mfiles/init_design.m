@@ -47,7 +47,7 @@ MWS.Timestep = 1/200; % sec
 ini.Altitude =     800; % ft
 ini.tas      =     75;      % knots
 ini.alpha    =     3;        % deg
-ini.gamma    =     1;        % deg
+ini.gamma    =     0;        % deg
 ini.stab     =     0;
 % ini.lat      =     37.02814654;  %Smithfield, deg
 % ini.lon      =    -76.58696588;  %Smithfield, deg
@@ -84,7 +84,7 @@ MWS.bias.rudder     =0;
 MWS.bias.stabilizer =0;
 MWS.bias.throttle   =20;
 MWS.bias.geardown   =0;
-MWS.bias.morphing   =0;
+MWS.bias.morphing   =-12.5;
 
 % Basic Table Options
 MWS.LinearizeModeOn=0;
@@ -136,7 +136,7 @@ StatesInp(8)  = ini.lon*d2r;	 %  8 - lon (rad), +east,
 StatesInp(9)  = ini.Altitude;	 %  9 - h (ft)
 StatesInp(10) = 0;	             % 10 - phi (rad)
 StatesInp(11) = theta*d2r;       % 11 - theta (rad)
-StatesInp(12) = 0;	             % 12 - psi (rad)
+StatesInp(12) = pi/2;            % 12 - psi (rad)
 
 
 

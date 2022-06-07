@@ -1,121 +1,8 @@
 %% Initialization
 close all
-
-% clear all
-% Load any data for initialization
-addpath(genpath('./LPVToolsV1.0/'));
-% load aTrim.mat
-% load aLinearization.mat
-% load aK_lon_lpv.mat
-% load aK_lon_hinf.mat
-% load aK_lat_lpv.mat
-% load aK_lat_hinf.mat
+clear all
+clc
 setup
-% MWS = grabmws('gtm_design');
-
-PitchSurf      = 'elev'; % pitch surface
-verbose        = 1; % trim output display off
-vabflag        = 1; % wind-axis linear state
-use_all_inputs = 0; % control surface as groups
-Ts             = 0; % continuous-time model
-
-opt  = lpvsynOptions('BackOffFactor',1.02);
-opts = hinfsynOptions('Method','RIC');
-
-%% Basic setup
- 
-% Parameter grid
-tas_grid  = convvel([70 85 100],'kts','ft/s'); % [ft/s] (70~85 knot)
-alt_grid  = [0 3000 6000]; % 700~1100 [ft]
-mor_grid  = [-0.25 -0.125 0]; % between -0.25 and 0 []
-num_tas   = numel(tas_grid); % number tas grid
-num_alt   = numel(alt_grid); % number alt grid
-num_mor   = numel(mor_grid); % number morphing grid
-
-g = 32.17405; % gravitational acceleration [ft/s^2]
-Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
-Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
-T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust at sea level without ram drag
-tas_RateBound = 10; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
-alt_RateBound = 20; % convvel([100],'kts','ft/s')
-mor_RateBound = 0.025; % 10 sec for full deployment
-
-Domain = rgrid({'rho1_tas_param','rho2_alt_param','rho3_mor_param'},{tas_grid,alt_grid,mor_grid});
-DomainRB = rgrid({'rho1_tas_param','rho2_alt_param','rho3_mor_param'},{tas_grid,alt_grid,mor_grid},[[-1,1]*tas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
-
-s = tf('s');
-w=logspace(-3,3,50);
-
-%% Trim calculation
-if isfile('./result/Trim.mat') == 0
-    clearvars MWS_grid tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
-    clearvars sys_alp_trim sys_pitch_trim sys_throttle_trim sys_aileron_trim sys_elevator_trim sys_rudder_trim
-    count = 0;
-    for i = 1:num_tas
-    for j = 1:num_alt
-    for k = 1:num_mor
-        tas = tas_grid(i); % current tas [ft/s]
-        alt = alt_grid(j); % current alt [ft]
-        mor = mor_grid(k); % current mor []
-    
-        target            = struct('gamma',0,'tas',convvel(tas,'ft/s','kts')); % target trim condition - straight and level flight, heading north [deg] X [knot]
-        MWS.StatesInp(9)  = alt; % set altitude [ft]
-        MWS.bias.morphing = mor*100; % set symmetric morphing parameter [%]
-    
-        loadmws(MWS,'gtm_design'); % load MWS
-    
-        [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
-        if (Err > 1e-3)
-            error('TRIM FAIL')
-        end
-        count = count+1;
-        disp(['Trim Done #',num2str(count)])
-        
-        % save trim results
-        MWS_grid(i,j,k)      = MWS;
-    
-        tas_trim(i,j,k)      = convvel(Trimcond.tas,'kts','ft/s'); % [ft/s]
-        alt_trim(i,j,k)      = Trimcond.altitude; % [ft]
-        mor_trim(i,j,k)      = mor*100; % [%]
-        
-        alp_trim(i,j,k)      = Trimcond.alpha; % [deg]
-        pitch_trim(i,j,k)    = Trimcond.pitch; % [deg]
-        throttle_trim(i,j,k) = Trimcond.throttle; % [%]
-        aileron_trim(i,j,k)  = Trimcond.aileron; % [deg]
-        elevator_trim(i,j,k) = Trimcond.elevator; % [deg]
-        rudder_trim(i,j,k)   = Trimcond.rudder; % [deg]
-
-        sys_tas_trim(:,:,i,j,k)      = ss(0,0,0,tas_trim(i,j,k)); % [deg]
-        sys_alt_trim(:,:,i,j,k)      = ss(0,0,0,alt_trim(i,j,k)); % [deg]
-        sys_mor_trim(:,:,i,j,k)      = ss(0,0,0,mor_trim(i,j,k)); % [deg]
-
-        sys_alp_trim(:,:,i,j,k)      = ss(0,0,0,alp_trim(i,j,k)); % [deg]
-        sys_pitch_trim(:,:,i,j,k)    = ss(0,0,0,pitch_trim(i,j,k)); % [deg]
-        sys_throttle_trim(:,:,i,j,k) = ss(0,0,0,throttle_trim(i,j,k)); % [%]
-        sys_aileron_trim(:,:,i,j,k)  = ss(0,0,0,aileron_trim(i,j,k)); % [deg]
-        sys_elevator_trim(:,:,i,j,k) = ss(0,0,0,elevator_trim(i,j,k)); % [deg]
-        sys_rudder_trim(:,:,i,j,k)   = ss(0,0,0,rudder_trim(i,j,k)); % [deg]
-    end
-    end
-    end
-    
-    sch_tas_trim      = pss(sys_tas_trim,Domain); % [deg]
-    sch_alt_trim      = pss(sys_alt_trim,Domain); % [deg]
-    sch_mor_trim      = pss(sys_mor_trim,Domain); % [deg]
-
-    sch_alp_trim      = pss(sys_alp_trim,Domain); % [deg]
-    sch_pitch_trim    = pss(sys_pitch_trim,Domain); % [deg]
-    sch_throttle_trim = pss(sys_throttle_trim,Domain); % [%]
-    sch_aileron_trim  = pss(sys_aileron_trim,Domain); % [deg]
-    sch_elevator_trim = pss(sys_elevator_trim,Domain); % [deg]
-    sch_rudder_trim   = pss(sys_rudder_trim,Domain); % [deg]
-    
-    save Trim.mat MWS_grid sch_tas_trim sch_alt_trim sch_mor_trim sch_alp_trim sch_pitch_trim sch_throttle_trim sch_aileron_trim sch_elevator_trim sch_rudder_trim tas_trim alt_trim mor_trim
-    disp('Trim Data Saved')
-else
-    load Trim.mat
-    disp('Trim Data Loaded')
-end
 
 %% Linearization
 w_ele = 2*pi*5; % elevator frequency [Hz], W_ele = w_ele/(s+w_ele)
@@ -129,7 +16,7 @@ if isfile('./result/Linearization.mat') == 0
     for j = 1:num_alt
     for k = 1:num_mor
         % linearization
-        [~,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
+        [~,londyn,latdyn]=linmodel(MWS_grid(i,j,k),1,0,0);
         count = count+1;
         disp(['Linearization Done #',num2str(count)])
         
@@ -234,6 +121,16 @@ if isfile('./result/Linearization.mat') == 0
     end
     end
     
+    % Set parameter rate bound
+    g = 32.17405; % gravitational acceleration [ft/s^2]
+    Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
+    Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
+    T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust at sea level without ram drag
+    tas_RateBound = 20; % 1G free fall
+    alt_RateBound = 20; % 10 deg climb/descent
+    mor_RateBound = 12.5; % 2 sec for full deployment
+
+    Domain = rgrid({'rho1_tas_param','rho2_alt_param','rho3_mor_param'},{tas_grid,alt_grid,mor_grid},[[-1,1]*tas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
     P_lon = pss(GTM_lon,Domain);
     P_lat = pss(GTM_lat,Domain);
 

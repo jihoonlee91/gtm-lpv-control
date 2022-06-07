@@ -24,7 +24,8 @@ Iyy0 = 4.655;  % slg-ft^2,
 Izz0 = 5.587;  % slg-ft^2,
 Ixz0 = 0.274;  % slg-ft^2,
 Iyz0 = 0.0;    % slg-ft^2,
-Ixy0 = 0.006;  % slg-ft^2,
+% Ixy0 = 0.006;  % slg-ft^2,
+Ixy0 = 0;  % slg-ft^2,
 MWS.Inertia0 = [Ixx0 Iyy0 Izz0 Ixz0 Iyz0 Ixy0];
 
 % Shift in CG and Inertia when gear are down
@@ -44,12 +45,13 @@ MWS.S       = 5.9018;   % ft^2,  reference wing area
 MWS.Cbar    = 0.9153;   % ft,    mean aerodynamic chord
 MWS.b       = 6.8488;   % ft,    wing span
 MWS.le_mac  = 4.5462;   % ft,    leading edge of MAC
-MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) -0.1416/12 -0.9761]; % ft, initial CG (21.99% MAC), gear up
+% MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) -0.1416/12 -0.9761]; % ft, initial CG (21.99% MAC), gear up
+MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) 0 -0.9761]; % ft, initial CG (21.99% MAC), gear up
 MWS.ref_cg  = [-(MWS.le_mac + MWS.Cbar*0.25) 0 -0.9401];  %ft, reference CG: 25% MAC in ARS coordinates 
 
 % Fuel Location and weight
-MWS.fwdfuel    = 5.74;     % lbs,  initial fuel weight in foward tank
-MWS.aftfuel    = 5.74;     % lbs,  initial fuel weight in aft tank
+MWS.fwdfuel    = 5.74;     % lbs,  initial fuel weight in foward tank (used after aftfuel run out)
+MWS.aftfuel    = 5.74;     % lbs,  initial fuel weight in aft tank (used first -> CG move forward -> more stable)
 MWS.fwdfuel_pos    = [-53.43    0.00 -13.86]/12;    % ft,   foward fuel tank position 
 MWS.aftfuel_pos    = [-62.30    0.00 -13.86]/12;    % ft,   aft fuel tank position
 
@@ -57,13 +59,15 @@ MWS.aftfuel_pos    = [-62.30    0.00 -13.86]/12;    % ft,   aft fuel tank positi
 MWS.engl_pos       = [-51.903 -14.20  -7.71]/12;    % ft,   location of right engine, not part of 9/8/09 measurements
 MWS.engr_pos       = [-51.903  14.20  -7.71]/12;    % ft,   location of left engine, not part of 9/8/09 measurements
 MWS.engl_ang       = [  0       1.98   2.22];       % deg,  angluar offsets of left engine
-MWS.engr_ang       = [  0       1.95  -1.18];       % deg,  angluar offsets of right engine
+% MWS.engr_ang       = [  0       1.95  -1.18];       % deg,  angluar offsets of right engine
+MWS.engr_ang       = [  0       1.98  -2.22];       % deg,  angluar offsets of right engine
 
 % Landing Gear Parameters
 %   Units ft, ft/sec and lbs
 MWS.LandingGear.NoseWheelPos = [-22.24, 0, -1.7]/12;
 MWS.LandingGear.LeftMainPos  = [-61.31, -8.0, -2.64]/12;
-MWS.LandingGear.RightMainPos = [-61.31, 7.8, -2.64]/12;
+% MWS.LandingGear.RightMainPos = [-61.31, 7.8, -2.64]/12;
+MWS.LandingGear.RightMainPos = [-61.31, 8.0, -2.64]/12;
 %MWS.LandingGear.SpringConst  = [14 17.2 17.6]*12;
 MWS.LandingGear.SpringConst  = [25 41.6 42.4]*12;
 MWS.LandingGear.DampingConst = [7 7 7];
