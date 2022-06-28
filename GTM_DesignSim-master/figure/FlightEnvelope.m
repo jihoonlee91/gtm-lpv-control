@@ -27,7 +27,7 @@ min = 0;
 max = 0;
 figure
 tic
-for i = 1:length(configs)
+for i = 1:width(configs)
     loadmws(init_design('GTM'),'gtm_design');
     MWS = grabmws('gtm_design');
     MWS.StatesInp(9)  = configs(2,i); % set altitude [ft]
@@ -108,11 +108,12 @@ save FlightEnvelope.mat MWS_configs Xtrim_configs Trimcond_configs Err_configs t
 %%
 eas = [Trimcond_configs.eas].';
 tas = [Trimcond_configs.tas].';
-alp = [Trimcond_configs.alpha].';
 alt = [Trimcond_configs.altitude].';
+mor = [Trimcond_configs.morphing].';
+
+alp = [Trimcond_configs.alpha].';
 thr = [Trimcond_configs.throttle].';
 ele = [Trimcond_configs.elevator].';
-mor = [Trimcond_configs.morphing].';
 
 Trimdata = [eas,tas,alp,alt/1000,thr,ele,mor];
 Trimdata_valid = Trimdata(:,~isnan(Trimdata(1,:)));
@@ -176,3 +177,33 @@ caxis([0 100])
 % c.Ticks = -100:2:100;
 % c.Label.String = 'Throttle Difference (Maxspan-Minspan) [%p]';
 % caxis([-10 10])
+
+%%
+if 0
+    figure, plot([Trimcond_configs.eas].')
+    figure, plot([Trimcond_configs.tas].')
+    figure, plot([Trimcond_configs.alpha].')
+    figure, plot([Trimcond_configs.beta].')
+    figure, plot([Trimcond_configs.gamma].')
+    figure, plot([Trimcond_configs.pdeg].')
+    figure, plot([Trimcond_configs.qdeg].')
+    figure, plot([Trimcond_configs.rdeg].')
+    figure, plot([Trimcond_configs.altitude].')
+    figure, plot([Trimcond_configs.roll].')
+    figure, plot([Trimcond_configs.pitch].')
+    figure, plot([Trimcond_configs.yaw].')
+    figure, plot([Trimcond_configs.gndtrack].')
+    figure, plot([Trimcond_configs.pitchrate].')
+    figure, plot([Trimcond_configs.rollrate].')
+    figure, plot([Trimcond_configs.yawrate].')
+    figure, plot([Trimcond_configs.throttle].')
+%     figure, plot([Trimcond_configs.stab].')
+    figure, plot([Trimcond_configs.aileron].')
+    figure, plot([Trimcond_configs.rudder].')
+    figure, plot([Trimcond_configs.elevator].')
+%     figure, plot([Trimcond_configs.spdbrake].')
+%     figure, plot([Trimcond_configs.flaps].')
+%     figure, plot([Trimcond_configs.geardown].')
+%     figure, plot([Trimcond_configs.Xo].')
+%     figure, plot([Trimcond_configs.morphing].')
+end
