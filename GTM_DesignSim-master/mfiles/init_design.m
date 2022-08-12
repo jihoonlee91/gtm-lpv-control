@@ -45,7 +45,7 @@ MWS.Timestep = 1/200; % sec
 
 % Initial Conditions
 ini.Altitude =     800; % ft
-ini.tas      =     75;      % knots
+ini.tas      =     85;      % knots
 ini.alpha    =     3;        % deg
 ini.gamma    =     0;        % deg
 ini.stab     =     0;
