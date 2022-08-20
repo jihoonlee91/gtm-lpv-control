@@ -10,26 +10,26 @@ MWS = grabmws('gtm_design');
 %% Basic setup
 % Parameter grid
 % sas_grid  = convvel([50 85 120],'kts','ft/s'); % [ft/s] (tas 70~85 knot)
-sas_grid  = [60 85 110];
+sas_grid  = [60 85 110]; % [kts]
 alt_grid  = [0 10000 20000]; % 700~1100 [ft]
-mor_grid  = [-0.25 0]; % between -0.25 and 0 []
+mor_grid  = [-25 0]; % between -0.25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
 
-g = 32.17405; % gravitational acceleration [ft/s^2]
-Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
-Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
-T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust at sea level without ram drag
-sas_RateBound = 10; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
-alt_RateBound = 20; % convvel([100],'kts','ft/s')
-mor_RateBound = 0.025; % 10 sec for full deployment
+% g = 32.17405; % gravitational acceleration [ft/s^2]
+% Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
+% Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
+% T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust at sea level without ram drag
+% sas_RateBound = 10; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
+% alt_RateBound = 20; % convvel([100],'kts','ft/s')
+% mor_RateBound = 0.025; % 10 sec for full deployment
 
 Domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid});
-DomainRB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid},[[-1,1]*sas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
+% DomainRB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid},[[-1,1]*sas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
 
 s = tf('s');
-w=logspace(-3,3,50);
+w = logspace(-3,3,50);
 
 %% Trim calculation
 PitchSurf = 'elev'; % pitch surface
@@ -49,7 +49,7 @@ if isfile('./result/Trim.mat') == 0
 
         target            = struct('tas',tas,'gamma',0); % target trim condition - straight and level flight, heading north [deg] X [knot]
         MWS.StatesInp(9)  = alt; % set altitude [ft]
-        MWS.bias.morphing = mor*100; % set symmetric morphing parameter [%]
+        MWS.bias.morphing = mor; % set symmetric morphing parameter [%]
 
         loadmws(MWS,'gtm_design'); % load MWS
 
