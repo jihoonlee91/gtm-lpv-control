@@ -438,83 +438,6 @@ Model {
 	  IsActive		  [1]
 	  IsTabbed		  [1]
 	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "822"
-	  Extents		  [2515.0, 1114.0]
-	  ZoomFactor		  [2.0303249097472924]
-	  Offset		  [789.52924985334153, 414.02773826458036]
-	  SceneRectInView	  [789.52924985334153, 414.02773826458036, 990.97439544807958, 438.94452347083927]
-	}
-	Object {
-	  $ObjectID		  6
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "867"
-	  Extents		  [2515.0, 738.0]
-	  ZoomFactor		  [1.0]
-	  Offset		  [-758.57265625, -197.7]
-	  SceneRectInView	  [-758.57265625, -197.7, 2012.0, 590.4]
-	}
-	Object {
-	  $ObjectID		  7
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "874"
-	  Extents		  [2515.0, 738.0]
-	  ZoomFactor		  [2.4937105374274573]
-	  Offset		  [9.38587607106848, -10.877813130040337]
-	  SceneRectInView	  [9.38587607106848, -10.877813130040337, 806.829810357863, 236.75562626008067]
-	}
-	Object {
-	  $ObjectID		  8
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "StudioAdapterBlock"
-	  LoadSaveID		  "870"
-	  Extents		  [2515.0, 738.0]
-	  ZoomFactor		  [1.0]
-	  Offset		  [0.0, 0.0]
-	  SceneRectInView	  [0.0, 0.0, 0.0, 0.0]
-	}
-	Object {
-	  $ObjectID		  9
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "566"
-	  Extents		  [2515.0, 738.0]
-	  ZoomFactor		  [1.25]
-	  Offset		  [72.15919563477982, 600.55834992887628]
-	  SceneRectInView	  [72.15919563477982, 600.55834992887628, 1609.6, 472.32]
-	}
-	Object {
-	  $ObjectID		  10
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "214"
-	  Extents		  [2515.0, 738.0]
-	  ZoomFactor		  [0.66247755834829436]
-	  Offset		  [-1176.9617806749202, 603.93154155081822]
-	  SceneRectInView	  [-1176.9617806749202, 603.93154155081822, 3037.0840108401089, 891.20000000000016]
-	}
-	Object {
-	  $ObjectID		  11
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkTopLevel"
-	  LoadSaveID		  "0"
-	  Extents		  [2515.0, 738.0]
-	  ZoomFactor		  [1.1815095627401817]
-	  Offset		  [-477.58592953348716, 94.150139017608922]
-	  SceneRectInView	  [-477.58592953348716, 94.150139017608922, 1702.9062340669741, 499.69972196478204]
-	}
-	Object {
-	  $ObjectID		  12
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkSubsys"
 	  LoadSaveID		  "79"
 	  Extents		  [2515.0, 1114.0]
 	  ZoomFactor		  [2.4362007271610979]
@@ -522,7 +445,18 @@ Model {
 	  SceneRectInView	  [99.253347089213719, -49.907752646169371, 825.87611832157256, 365.81550529233874]
 	}
 	Object {
-	  $ObjectID		  13
+	  $ObjectID		  6
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkTopLevel"
+	  LoadSaveID		  "0"
+	  Extents		  [2515.0, 1114.0]
+	  ZoomFactor		  [1.1815095627401817]
+	  Offset		  [-477.58592953348716, -33.144641103500874]
+	  SceneRectInView	  [-477.58592953348716, -33.144641103500874, 1702.9062340669741, 754.28928220700163]
+	}
+	Object {
+	  $ObjectID		  7
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -533,18 +467,95 @@ Model {
 	  SceneRectInView	  [-1130.5984346037997, -434.72937905468035, 2515.0, 1114.0]
 	}
 	Object {
-	  $ObjectID		  14
+	  $ObjectID		  8
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
 	  LoadSaveID		  "75"
 	  Extents		  [2515.0, 1114.0]
 	  ZoomFactor		  [1.4104575163398694]
-	  Offset		  [-297.95802992188527, 15.074142724745059]
-	  SceneRectInView	  [-297.95802992188527, 15.074142724745059, 1426.4874884151991, 631.85171455050966]
+	  Offset		  [-297.95802992188527, 15.074142724745002]
+	  SceneRectInView	  [-297.95802992188527, 15.074142724745002, 1426.4874884151991, 631.85171455050966]
+	}
+	Object {
+	  $ObjectID		  9
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "214"
+	  Extents		  [2515.0, 1114.0]
+	  ZoomFactor		  [1.25]
+	  Offset		  [-460.11517295887847, 1173.8403336422612]
+	  SceneRectInView	  [-460.11517295887847, 1173.8403336422612, 1609.6, 712.96]
+	}
+	Object {
+	  $ObjectID		  10
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "270"
+	  Extents		  [2515.0, 1114.0]
+	  ZoomFactor		  [2.5]
+	  Offset		  [619.49414400734793, 343.98942142195153]
+	  SceneRectInView	  [619.49414400734793, 343.98942142195153, 804.8, 356.48]
+	}
+	Object {
+	  $ObjectID		  11
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "822"
+	  Extents		  [2515.0, 1114.0]
+	  ZoomFactor		  [2.0303249097472924]
+	  Offset		  [789.52924985334153, 414.02773826458036]
+	  SceneRectInView	  [789.52924985334153, 414.02773826458036, 990.97439544807958, 438.94452347083927]
+	}
+	Object {
+	  $ObjectID		  12
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "867"
+	  Extents		  [2515.0, 738.0]
+	  ZoomFactor		  [1.0]
+	  Offset		  [-758.57265625, -197.7]
+	  SceneRectInView	  [-758.57265625, -197.7, 2012.0, 590.4]
+	}
+	Object {
+	  $ObjectID		  13
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "874"
+	  Extents		  [2515.0, 738.0]
+	  ZoomFactor		  [2.4937105374274573]
+	  Offset		  [9.38587607106848, -10.877813130040337]
+	  SceneRectInView	  [9.38587607106848, -10.877813130040337, 806.829810357863, 236.75562626008067]
+	}
+	Object {
+	  $ObjectID		  14
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "StudioAdapterBlock"
+	  LoadSaveID		  "870"
+	  Extents		  [2515.0, 738.0]
+	  ZoomFactor		  [1.0]
+	  Offset		  [0.0, 0.0]
+	  SceneRectInView	  [0.0, 0.0, 0.0, 0.0]
 	}
 	Object {
 	  $ObjectID		  15
+	  IsActive		  [0]
+	  IsTabbed		  [0]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "566"
+	  Extents		  [2515.0, 738.0]
+	  ZoomFactor		  [1.25]
+	  Offset		  [72.15919563477982, 600.55834992887628]
+	  SceneRectInView	  [72.15919563477982, 600.55834992887628, 1609.6, 472.32]
+	}
+	Object {
+	  $ObjectID		  16
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -555,7 +566,7 @@ Model {
 	  SceneRectInView	  [-1675.8964707767884, -233.87490200978203, 1728.7798537784593, 765.74980401956407]
 	}
 	Object {
-	  $ObjectID		  16
+	  $ObjectID		  17
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -566,7 +577,7 @@ Model {
 	  SceneRectInView	  [-680.68833739246315, 43.974994739204874, 2391.7047997849259, 701.820334887187]
 	}
 	Object {
-	  $ObjectID		  17
+	  $ObjectID		  18
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -577,7 +588,7 @@ Model {
 	  SceneRectInView	  [610.2591483723354, 255.59916589434658, 776.17701575532908, 343.80166821130683]
 	}
 	Object {
-	  $ObjectID		  18
+	  $ObjectID		  19
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -588,7 +599,7 @@ Model {
 	  SceneRectInView	  [-410.29233870967744, -116.94758064516131, 760.58467741935488, 336.89516129032256]
 	}
 	Object {
-	  $ObjectID		  19
+	  $ObjectID		  20
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -599,7 +610,7 @@ Model {
 	  SceneRectInView	  [-10.157218686996032, 42.703096648185465, 615.415999873992, 272.59380670362907]
 	}
 	Object {
-	  $ObjectID		  20
+	  $ObjectID		  21
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -610,7 +621,7 @@ Model {
 	  SceneRectInView	  [-423.79700532900853, 207.85797034291014, 2029.0152919369787, 898.73679332715471]
 	}
 	Object {
-	  $ObjectID		  21
+	  $ObjectID		  22
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -621,7 +632,7 @@ Model {
 	  SceneRectInView	  [-788.997786983367, -133.87866998487902, 1299.8471364667339, 575.757339969758]
 	}
 	Object {
-	  $ObjectID		  22
+	  $ObjectID		  23
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -632,7 +643,7 @@ Model {
 	  SceneRectInView	  [73.0241935483871, 14.112903225806456, 283.95161290322579, 125.77419354838709]
 	}
 	Object {
-	  $ObjectID		  23
+	  $ObjectID		  24
 	  IsActive		  [0]
 	  IsTabbed		  [0]
 	  ViewObjType		  "SimulinkSubsys"
@@ -641,17 +652,6 @@ Model {
 	  ZoomFactor		  [5.0]
 	  Offset		  [573.87999999999988, 347.38]
 	  SceneRectInView	  [573.87999999999988, 347.38, 402.4, 178.24]
-	}
-	Object {
-	  $ObjectID		  24
-	  IsActive		  [0]
-	  IsTabbed		  [0]
-	  ViewObjType		  "SimulinkSubsys"
-	  LoadSaveID		  "270"
-	  Extents		  [2515.0, 1114.0]
-	  ZoomFactor		  [2.5]
-	  Offset		  [619.49414400734793, 343.98942142195153]
-	  SceneRectInView	  [619.49414400734793, 343.98942142195153, 804.8, 356.48]
 	}
 	Object {
 	  $ObjectID		  25
@@ -2827,7 +2827,7 @@ Model {
   LastModifiedBy	  "jihoo"
   ModifiedDateFormat	  "%<Auto>"
   LastModifiedDate	  "Sat Aug 20 00:09:25 2022"
-  RTWModifiedTimeStamp	  582856160
+  RTWModifiedTimeStamp	  582907308
   ModelVersionFormat	  "$LastChangedRevision: 4850 $"
   SampleTimeColors	  off
   SampleTimeAnnotations	  on
@@ -14923,7 +14923,7 @@ Model {
 	  BackgroundColor	  "[0.901961, 0.901961, 1.000000]"
 	  DropShadow		  on
 	  AnnotationType	  "area_annotation"
-	  ZOrder		  169
+	  ZOrder		  171
 	  FontSize		  12
 	}
 	Annotation {
@@ -14938,7 +14938,7 @@ Model {
 	  BackgroundColor	  "[0.901961, 0.901961, 1.000000]"
 	  DropShadow		  on
 	  AnnotationType	  "area_annotation"
-	  ZOrder		  170
+	  ZOrder		  172
 	  FontSize		  12
 	}
       }
@@ -18072,7 +18072,7 @@ Model {
 	    Name		    "Actuators"
 	    Location		    [2041, -7, 4103, 1119]
 	    SystemRect		    [0.000000, 0.000000, 0.000000, 0.000000]
-	    Open		    off
+	    Open		    on
 	    PortBlocksUseCompactNotation off
 	    SetExecutionDomain	    off
 	    ExecutionDomainType	    "Deduce"
@@ -18128,7 +18128,7 @@ Model {
 		TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 		TiledPageScale		1
 		ShowPageBoundaries	off
-		ZoomFactor		"66"
+		ZoomFactor		"125"
 		SimulinkSubDomain	"Simulink"
 		Block {
 		  BlockType		  Inport
@@ -24783,7 +24783,7 @@ Model {
 		  BackgroundColor	  "[0.901961, 0.901961, 1.000000]"
 		  DropShadow		  on
 		  AnnotationType	  "area_annotation"
-		  ZOrder		  32
+		  ZOrder		  33
 		  FontSize		  12
 		}
 	      }
@@ -25441,7 +25441,7 @@ Model {
 	      }
 	      System {
 		Name			"InputModification\nfor Trimming"
-		Location		[-7, -7, 2055, 1119]
+		Location		[2041, -7, 4103, 1119]
 		SystemRect		[0.000000, 0.000000, 0.000000, 0.000000]
 		Open			off
 		PortBlocksUseCompactNotation off
@@ -35512,7 +35512,7 @@ Model {
 		    Name		    "Flaps"
 		    Location		    [2041, -7, 4103, 1119]
 		    SystemRect		    [0.000000, 0.000000, 0.000000, 0.000000]
-		    Open		    on
+		    Open		    off
 		    PortBlocksUseCompactNotation off
 		    SetExecutionDomain	    off
 		    ExecutionDomainType	    "Deduce"

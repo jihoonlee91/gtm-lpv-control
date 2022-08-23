@@ -7,12 +7,19 @@ setup
 
 MWS = grabmws('gtm_design');
 
+fps2knots = 0.592487;
+knots2fps = 1/fps2knots;
+d2r=pi/180;
+r2d=180/pi;
+per2deci = 0.01;
+deci2per = 100;
+
 %% Basic setup
 % Parameter grid
 % sas_grid  = convvel([50 85 120],'kts','ft/s'); % [ft/s] (tas 70~85 knot)
 sas_grid  = [60 85 110]; % [kts]
 alt_grid  = [0 10000 20000]; % 700~1100 [ft]
-mor_grid  = [-25 0]; % between -0.25 and 0 [%]
+mor_grid  = [-25 0]; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -29,7 +36,7 @@ Domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,al
 % DomainRB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid},[[-1,1]*sas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
 
 s = tf('s');
-w = logspace(-3,3,50);
+% w = logspace(-3,3,50);
 
 %% Trim calculation
 PitchSurf = 'elev'; % pitch surface
@@ -146,12 +153,12 @@ if isfile('./result/Linearization.mat') == 0
         % Lat input: Aileron [deg], Rudder [deg], L Morphing [deg], R Morphing [deg]
     
         % unit change
-        londyn.B(:,1)   = londyn.B(:,1)*180/pi; % Elevator [deg] -> [rad]
-        londyn.B(:,2:3) = londyn.B(:,2:3)*100; % L/R Morphing [%] -> []
-        londyn.B(:,4:5) = londyn.B(:,4:5)*100; % L/R Throttles [%] -> []
-        latdyn.B(:,1)   = latdyn.B(:,1)*180/pi; % Aileron [deg] -> [rad]
-        latdyn.B(:,2)   = latdyn.B(:,2)*180/pi; % Rudder [deg] -> [rad]
-        latdyn.B(:,3:4) = latdyn.B(:,3:4)*100; % L/R Morphing [%] -> []
+%         londyn.B(:,1)   = londyn.B(:,1)/d2r; % Elevator [deg] -> [rad]
+%         londyn.B(:,2:3) = londyn.B(:,2:3)/per2deci; % L/R Morphing [%] -> []
+%         londyn.B(:,4:5) = londyn.B(:,4:5)/per2deci; % L/R Throttles [%] -> []
+%         latdyn.B(:,1)   = latdyn.B(:,1)/d2r; % Aileron [deg] -> [rad]
+%         latdyn.B(:,2)   = latdyn.B(:,2)/d2r; % Rudder [deg] -> [rad]
+%         latdyn.B(:,3:4) = latdyn.B(:,3:4)/per2deci; % L/R Morphing [%] -> []
         
         % New units:
         % Lon state: tas [ft/s], alpha [rad], q [rad/s], theta [rad]
@@ -241,31 +248,37 @@ H_s_q   = 1;
 H_s_gam = 1;
 H_s_lon = blkdiag(H_s_tas,H_s_alp,H_s_q,H_s_gam);
 
-omega_tas = 3; % [rad/s]
-zeta_tas = .7; % []
+omega_tas = 2; % [rad/s]
+zeta_tas = 1; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 7; % [rad/s]
-zeta_gam = .7; % []
+omega_gam = 6; % [rad/s]
+zeta_gam = 1; % []
 W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_gam);
 
-W_n_tas     = 0.05*(s/0.5+1)/(s/100+1); % [ft/s]
-W_n_alp     = 0.05*pi/180*(s/0.5+1)/(s/100+1); % 0.031 deg
-W_n_q       = 0.05*pi/180*(s/0.5+1)/(s/100+1); % 0.3857 deg/s
-W_n_gam     = 0.05*pi/180*(s/0.5+1)/(s/100+1); % 0.031 deg
+W_n_tas     = 0.06*knots2fps; % 0.06 kts
+W_n_alp     = 0.031*d2r; % 0.031 deg
+W_n_q       = 0.3857*d2r; % 0.3857 deg/s (MAG3)
+W_n_gam     = 0.031*d2r; % 0.031 deg (same with alpha)
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_gam);
 
-W_c_eng = 0.1*(s/0.5+1)/(s/100+1);
-W_c_ele = tf([0.8 42.91],[1 119.2]);
+W_c_eng = 0.00001*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
+W_c_ele = 0.00001*tf([0.8 42.91],[1 119.2]); % bandwidth 내에서는 패널티 X
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 
-W_p_tas = 0.01/(s+0.001);
-W_p_gam = 0.1/(s+0.001);
+% W_p_tas = 0.01/(s+0.001);
+% W_p_gam = 0.1/(s+0.001);
+W_p_tas = (s/100+1)/(s/0.005+1)/(0.1*knots2fps);
+W_p_gam = (s/100+1)/(s/0.005+1)/(0.1*d2r);
 W_p_lon = blkdiag(W_p_tas,W_p_gam);
 
 W_d_eng = tf(2.0*[1 4],[1 160]);
 W_d_ele = tf(1.5*[1 20],[1 200]);
 W_d_lon = blkdiag(W_d_eng,W_d_ele);
+
+% W_r_tas = 10*knots2fps;
+% W_r_gam = 3*d2r;
+% W_r_lon = blkdiag(W_d_eng,W_d_ele);
 
 figure
 bode(W_c_eng)
@@ -348,7 +361,9 @@ cleanupsysic        = 'yes';
 sysic
 
 figure
-step(CL_lon_hinf)
+opt = stepDataOptions;
+opt.StepAmplitude = [1*knots2fps pi/180];
+step(CL_lon_hinf,opt)
 grid on
 drawnow
 
@@ -385,7 +400,9 @@ cleanupsysic        = 'yes';
 sysic
 
 figure
-step(CL_lon_lpv)
+opt = stepDataOptions;
+opt.StepAmplitude = [1*knots2fps pi/180];
+step(CL_lon_lpv,opt)
 grid on
 drawnow
 
@@ -462,10 +479,10 @@ zeta_phi = .7; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
 
-W_n_bet     = 0.05*pi/180*(s/0.5+1)/(s/100+1); % [ft/s]
-W_n_p       = 0.05*pi/180*(s/0.5+1)/(s/100+1); % 0.031 deg
-W_n_r       = 0.05*pi/180*(s/0.5+1)/(s/100+1); % 0.3857 deg/s
-W_n_phi     = 0.05*pi/180*(s/0.5+1)/(s/100+1); % 0.031 deg
+W_n_bet     = 0.033; % 0.033 deg
+W_n_p       = 0.5220; % 0.5220 deg/sec
+W_n_r       = 0.3330; % 0.3330 deg/sec
+W_n_phi     = 0.02; % 0.02 deg
 W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 W_c_ail = tf([0.8 42.91],[1 119.2]);
