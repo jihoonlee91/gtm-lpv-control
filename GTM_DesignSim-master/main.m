@@ -17,9 +17,12 @@ deci2per = 100;
 %% Basic setup
 % Parameter grid
 % sas_grid  = convvel([50 85 120],'kts','ft/s'); % [ft/s] (tas 70~85 knot)
-sas_grid  = [60 85 110]; % [kts]
-alt_grid  = [0 10000 20000]; % 700~1100 [ft]
-mor_grid  = [-25 0]; % between -25 and 0 [%]
+% sas_grid  = [60 85 110]; % [kts]
+% alt_grid  = [0 10000 20000]; % 700~1100 [ft]
+% mor_grid  = [-25 0]; % between -25 and 0 [%]
+sas_grid  = 85; % [kts]
+alt_grid  = 0; % 700~1100 [ft]
+mor_grid  = -12.5; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -195,7 +198,12 @@ if isfile('./result/Linearization.mat') == 0
         set(londyn_aug,'Statename',{'tas','alpha','q','gamma'},...
                        'Inputname',{'delt','dele'},...
                        'Outputname',{'tas','alpha','q','gamma'})
-        
+
+        if isstable(londyn_aug) && (rank(ctrb(londyn_aug))==height(londyn_aug)) % stable and controllable
+        else % unstable or uncontrollable
+            error('Unstable or uncontrollable longitudinal dynamics')
+        end
+
         % lateral dimensional derivatives
 %         Y_bet = latdyn.A(1,1)*V0;
 %         Y_p = latdyn.A(1,2)*V0;
@@ -212,7 +220,12 @@ if isfile('./result/Linearization.mat') == 0
         set(latdyn_aug,'Statename',{'beta','p','r','phi'},...
                        'Inputname',{'dela','delr','delm'},...
                        'Outputname',{'beta','p','r','phi'})
-        
+
+        if isstable(latdyn_aug) && (rank(ctrb(latdyn_aug))==height(latdyn_aug)) % stable and controllable
+        else % unstable or uncontrollable
+            error('Unstable or uncontrollable lateral dynamics')
+        end
+
         % stacking
         GTM_lon(:,:,i,j,k) = londyn_aug;
         GTM_lat(:,:,i,j,k) = latdyn_aug;
@@ -234,10 +247,12 @@ end
 % Anti-Aliasing Filter
 AA = 1/(1/2/pi/16*s+1);
 
+% actuator dynamics
 P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
 P_a_ele = 2*pi*5/(s+2*pi*5)*pade(exp(-15e-3*s),1); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lon = blkdiag(P_a_eng,P_a_ele);
 
+% sensor dynamics
 % H_s_tas = AA*pade(exp(-15e-3*s),1);
 % H_s_alp = AA*pade(exp(-15e-3*s),1);
 % H_s_q   = AA*pade(exp(-15e-3*s),1);
@@ -248,46 +263,59 @@ H_s_q   = 1;
 H_s_gam = 1;
 H_s_lon = blkdiag(H_s_tas,H_s_alp,H_s_q,H_s_gam);
 
-omega_tas = 2; % [rad/s]
+% reference model
+omega_tas = 1; % [rad/s]
 zeta_tas = 1; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 6; % [rad/s]
+omega_gam = 2; % [rad/s]
 zeta_gam = 1; % []
 W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_gam);
 
+% sensor noise (white)
 W_n_tas     = 0.06*knots2fps; % 0.06 kts
 W_n_alp     = 0.031*d2r; % 0.031 deg
 W_n_q       = 0.3857*d2r; % 0.3857 deg/s (MAG3)
 W_n_gam     = 0.031*d2r; % 0.031 deg (same with alpha)
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_gam);
 
-W_c_eng = 0.00001*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
-W_c_ele = 0.00001*tf([0.8 42.91],[1 119.2]); % bandwidth 내에서는 패널티 X
+% control weight
+% W_c_ele = 10*tf([0.8 42.91],[1 119.2]); % bandwidth 내에서는 패널티 X
+W_c_eng = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
+W_c_ele = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
+% W_c_eng = 0.000001;
+% W_c_ele = 0.000001;
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 
+% performance weight
 % W_p_tas = 0.01/(s+0.001);
 % W_p_gam = 0.1/(s+0.001);
-W_p_tas = (s/100+1)/(s/0.005+1)/(0.1*knots2fps);
-W_p_gam = (s/100+1)/(s/0.005+1)/(0.1*d2r);
+% W_p_tas = (s/100+1)/(s/0.005+1)/(0.1*knots2fps);
+% W_p_gam = (s/100+1)/(s/0.005+1)/(0.1*d2r);
+W_p_tas = 50*(s/100+1)/(s/0.005+1);
+W_p_gam = 200*(s/100+1)/(s/0.005+1);
 W_p_lon = blkdiag(W_p_tas,W_p_gam);
 
-W_d_eng = tf(2.0*[1 4],[1 160]);
-W_d_ele = tf(1.5*[1 20],[1 200]);
+% actuator disturbance
+% W_d_eng = tf(2.0*[1 4],[1 160]);
+% W_d_ele = tf(1.5*[1 20],[1 200]);
+W_d_eng = 0;
+W_d_ele = 0;
 W_d_lon = blkdiag(W_d_eng,W_d_ele);
 
-% W_r_tas = 10*knots2fps;
-% W_r_gam = 3*d2r;
-% W_r_lon = blkdiag(W_d_eng,W_d_ele);
+% reference scaling
+W_r_tas = 10*knots2fps;
+W_r_gam = 3*d2r;
+W_r_lon = blkdiag(W_r_tas,W_r_gam);
 
-figure
-bode(W_c_eng)
-hold on
-grid on
-bode(W_c_ele)
-bode(W_p_tas)
-bode(W_p_gam)
-legend
+% figure
+% bode(W_c_eng)
+% hold on
+% grid on
+% bode(W_c_ele)
+% bode(W_p_tas)
+% bode(W_p_gam)
+% legend
 
 % figure
 % opt_bode = bodeoptions('cstprefs');
@@ -306,25 +334,26 @@ legend
 % h = legend('$P_{Az}$','$W_{\delta e}$','Interpreter','latex');
 % set(h,'string',{'$P_{Az}$','$W_{\delta e}$'})
 
-%% Longitudinal LPV modeling
+% Longitudinal LPV modeling
 % control interconnection
-systemnames         = 'P_lon P_a_lon H_s_lon W_m_lon W_n_lon W_c_lon W_p_lon W_d_lon';
+systemnames         = 'P_lon P_a_lon H_s_lon W_m_lon W_n_lon W_c_lon W_p_lon W_d_lon W_r_lon';
 inputvar            = '[r{2};n{4};d{2};u{2}]';
-outputvar           = '[W_c_lon;W_p_lon;r;H_s_lon+W_n_lon]';
+outputvar           = '[W_c_lon;W_p_lon;W_r_lon;H_s_lon+W_n_lon]';
 input_to_P_lon      = '[P_a_lon]';
 input_to_P_a_lon    = '[u+W_d_lon]';
 input_to_H_s_lon    = '[P_lon]';
-input_to_W_m_lon    = '[r]';
+input_to_W_m_lon    = '[W_r_lon]';
 input_to_W_n_lon    = '[n]';
 input_to_W_c_lon    = '[u]';
 input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1);W_m_lon(2)-P_lon(4)]';
 input_to_W_d_lon    = '[d]';
+input_to_W_r_lon    = '[r]';
 sysoutname          = 'G_lon';
 cleanupsysic        = 'yes';
 sysic
 size(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)))
 
-%% Longitudinal H_infinity synthesis
+% Longitudinal H_infinity synthesis
 if isfile('./result/K_lon_hinf.mat') == 0
     clearvars K_lon_hinfs gamma_lon_hinfs
     opt_hinf = hinfsynOptions('Method','RIC');
@@ -348,26 +377,27 @@ else
     load('./result/K_lon_hinf.mat')
 end
 
-%% Closed-loop interconnection with Longitudinal H_infinity controller
-systemnames         = 'P_lon P_a_lon H_s_lon K_lon_hinf';
+% Closed-loop interconnection with Longitudinal H_infinity controller
+systemnames         = 'P_lon P_a_lon H_s_lon K_lon_hinf W_r_lon';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lon]';
+outputvar           = '[P_lon;K_lon_hinf]';
 input_to_P_lon      = '[P_a_lon]';
 input_to_P_a_lon    = '[K_lon_hinf]';
 input_to_H_s_lon    = '[P_lon]';
-input_to_K_lon_hinf = '[r;H_s_lon]';
+input_to_K_lon_hinf = '[W_r_lon;H_s_lon]';
+input_to_W_r_lon    = '[r]';
 sysoutname          = 'CL_lon_hinf';
 cleanupsysic        = 'yes'; 
 sysic
 
-figure
-opt = stepDataOptions;
-opt.StepAmplitude = [1*knots2fps pi/180];
-step(CL_lon_hinf,opt)
-grid on
-drawnow
+% figure
+% opt = stepDataOptions;
+% opt.StepAmplitude = [1*knots2fps pi/180];
+% step(CL_lon_hinf,opt)
+% grid on
+% drawnow
 
-%% Longitudinal LPV synthesis
+% Longitudinal LPV synthesis
 if isfile('./result/K_lon_lpv.mat') == 0
     disp('Longitudinal LPV Synthess Started')
     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
@@ -387,22 +417,25 @@ disp(['Min Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(info_lon_lpv.MinG
 disp(['Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(gamma_lon_lpv)])
 disp(['Back-Off Factor (Longitudinal Rate-Unbounded LPV) = ',num2str((gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100),' %'])
 
-%% Closed-loop interconnection with Longitudinal LPV controller
-systemnames         = 'P_lon P_a_lon H_s_lon K_lon_lpv';
+% Closed-loop interconnection with Longitudinal LPV controller
+systemnames         = 'P_lon P_a_lon H_s_lon K_lon_lpv W_r_lon';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lon]';
+outputvar           = '[P_lon;K_lon_lpv]';
 input_to_P_lon      = '[P_a_lon]';
 input_to_P_a_lon    = '[K_lon_lpv]';
 input_to_H_s_lon    = '[P_lon]';
-input_to_K_lon_lpv  = '[r;H_s_lon]';
+input_to_K_lon_lpv  = '[W_r_lon;H_s_lon]';
+input_to_W_r_lon    = '[r]';
 sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
+% set(CL_lon_hinf,'Outputname',{'tas','alpha','q','gamma','delt','dele'});
+
 figure
 opt = stepDataOptions;
-opt.StepAmplitude = [1*knots2fps pi/180];
-step(CL_lon_lpv,opt)
+% opt.StepAmplitude = [1*knots2fps pi/180];
+step(CL_lon_hinf,CL_lon_lpv,opt);
 grid on
 drawnow
 
@@ -499,7 +532,7 @@ W_d_rud = tf(1.5*[1 20],[1 200]);
 W_d_mor = tf(2.0*[1 4],[1 160]);
 W_d_lat = blkdiag(W_d_ail,W_d_rud,W_d_mor);
 
-%% Lateral LPV modeling
+% Lateral LPV modeling
 systemnames         = 'P_lat P_a_lat H_s_lat W_m_lat W_n_lat W_c_lat W_p_lat W_d_lat';
 inputvar            = '[r{2};n{4};d{3};u{3}]';
 outputvar           = '[W_c_lat;W_p_lat;r;H_s_lat+W_n_lat]';
@@ -516,7 +549,7 @@ cleanupsysic        = 'yes';
 sysic
 size(G_lat.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)))
 
-%% Lateral H_infinity synthesis
+% Lateral H_infinity synthesis
 if isfile('./result/K_lat_hinf.mat') == 0
     clearvars K_lat_hinfs gamma_lat_hinfs
     for i = 1:num_sas
@@ -539,7 +572,7 @@ else
     load('./result/K_lat_hinf.mat')
 end
 
-%% Closed-loop interconnection with Lateral H_infinity controller and anti-aliasing filter
+% Closed-loop interconnection with Lateral H_infinity controller and anti-aliasing filter
 % Delta = ultidyn('Delta',[1 1],'Bound',1);
 % w_Delta = tf(2.0*[1 4],[1 160]);
 % P_a_mor = 2*pi*5/(s+2*pi*1)*pade(exp(-15e-3*s),1)*(1+w_Delta*Delta); % Bandwidth 5 Hz
@@ -556,12 +589,12 @@ sysoutname          = 'CL_lat_hinf';
 cleanupsysic        = 'yes'; 
 sysic
 
-figure
-step(CL_lat_hinf)
-grid on
-drawnow
+% figure
+% step(CL_lat_hinf)
+% grid on
+% drawnow
 
-%% Lateral LPV synthesis
+% Lateral LPV synthesis
 if isfile('./result/K_lat_lpv.mat') == 0
     disp('Lateral LPV Synthess Started')
     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
@@ -580,7 +613,7 @@ disp(['Min Gamma (Lateral Rate-Unbounded LPV) = ',num2str(info_lat_lpv.MinGamma)
 disp(['Gamma (Lateral Rate-Unbounded LPV) = ',num2str(gamma_lat_lpv)])
 disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100),' %'])
 
-%% Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
+% Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
 systemnames         = 'P_lat P_a_lat H_s_lat K_lat_lpv';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lat]';
@@ -596,6 +629,9 @@ figure
 step(CL_lat_lpv)
 grid on
 drawnow
+
+%%
+save WorkSpace.mat
 
 %% Lateral rate-bounded LPV synthesis
 % G_lat.Domain = DomainRB;
@@ -641,13 +677,13 @@ drawnow
 %% Nonlinear simulation
 % LPVControlOn   = 0; % 0 (hinf control) or 1 (lpv control)
 % RateBoundOn    = 0; % 0 (rate-unbounded) or 1 (rate-bounded)
-% 
-% MWS               = init_design('GTM');
-% target            = struct('gamma',0,'tas',85); % target trim condition [knot]
-% MWS.StatesInp(9)  = 3000; % set altitude [ft]
-% MWS.bias.morphing = 0; % set morphing parameter
-% loadmws(MWS,'gtm_design'); % load MWS
-% [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
-% loadmws(MWS,'gtm_design'); % load MWS
-% 
-% [tsim,xsim,ysim]=sim('gtm_design',[0 6]);
+
+MWS               = init_design('GTM');
+target            = struct('gamma',0,'tas',85); % target trim condition [knot]
+MWS.StatesInp(9)  = 0; % set altitude [ft]
+MWS.bias.morphing = -12.5; % set morphing parameter
+loadmws(MWS,'gtm_design'); % load MWS
+[MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
+loadmws(MWS,'gtm_design'); % load MWS
+
+[tsim,xsim,ysim]=sim('gtm_design',[0 15]);

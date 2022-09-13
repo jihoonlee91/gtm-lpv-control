@@ -23,10 +23,8 @@ addpath(genpath('./LPVToolsV1.0/'));
 run('./LPVToolsV1.0/addlpv');
 
 addpath(genpath('./temporary/'));
-load aK_lon_lpv.mat
-load aK_lon_hinf.mat
-load aK_lat_lpv.mat
-load aK_lat_hinf.mat
+load TempSch.mat
+load TempK.mat
 
 rehash path
 
