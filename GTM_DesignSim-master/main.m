@@ -439,6 +439,13 @@ step(CL_lon_hinf,CL_lon_lpv,opt);
 grid on
 drawnow
 
+% tas [
+% alpha
+% q
+% gamma
+% delt
+% dele
+
 %% Longitudinal rate-bounded LPV synthesis
 % Basis function
 % b0 = basis(1,0);
@@ -580,7 +587,7 @@ end
 
 systemnames         = 'P_lat P_a_lat H_s_lat K_lat_hinf';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lat]';
+outputvar           = '[P_lat;K_lat_hinf]';
 input_to_P_lat      = '[P_a_lat]';
 input_to_P_a_lat    = '[K_lat_hinf]';
 input_to_H_s_lat    = '[P_lat]';
@@ -616,7 +623,7 @@ disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/i
 % Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
 systemnames         = 'P_lat P_a_lat H_s_lat K_lat_lpv';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lat]';
+outputvar           = '[P_lat;K_lat_lpv]';
 input_to_P_lat      = '[P_a_lat]';
 input_to_P_a_lat    = '[K_lat_lpv]';
 input_to_H_s_lat    = '[P_lat]';
@@ -629,6 +636,14 @@ figure
 step(CL_lat_lpv)
 grid on
 drawnow
+
+% beta [rad]
+% p [rad/s] 
+% r [rad/s] 
+% phi [rad]
+% dela [deg]
+% delr [deg]
+% delm [%]
 
 %%
 save WorkSpace.mat
@@ -686,4 +701,4 @@ loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
 loadmws(MWS,'gtm_design'); % load MWS
 
-[tsim,xsim,ysim]=sim('gtm_design',[0 15]);
+[tsim,xsim,ysim]=sim('gtm_design',[0 3]);
