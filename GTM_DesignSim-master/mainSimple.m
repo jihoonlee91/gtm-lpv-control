@@ -635,6 +635,7 @@ save WorkSpace.mat
 % RateBoundOn    = 0; % 0 (rate-unbounded) or 1 (rate-bounded)
 
 controlOn = 1;
+set_param(model,'MinStep','0.004')
 
 MWS               = init_design('GTM');
 target            = struct('gamma',0,'tas',85); % target trim condition [knot]
