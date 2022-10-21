@@ -3,16 +3,19 @@ close all
 clear all
 clc
 
-setup
-
-MWS = grabmws('gtm_design');
-
 fps2knots = 0.592487;
 knots2fps = 1/fps2knots;
 d2r=pi/180;
 r2d=180/pi;
 per2deci = 0.01;
 deci2per = 100;
+
+W_r_bet = 1;
+W_r_phi = 1;
+
+setup
+
+MWS = grabmws('gtm_design');
 
 %% Basic setup
 % Parameter grid
@@ -244,7 +247,12 @@ else
 end
 
 %% Component modeling (longitudinal performance)
-% reference model
+% W_cmd
+W_r_tas = 10*knots2fps;
+W_r_gam = 3*d2r;
+W_r_lon = blkdiag(W_r_tas,W_r_gam);
+
+% W_model
 omega_tas = 1; % [rad/s]
 zeta_tas = 1; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
@@ -276,11 +284,6 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 W_p_tas = 50*(s/100+1)/(s/0.005+1);
 W_p_gam = 200*(s/100+1)/(s/0.005+1);
 W_p_lon = blkdiag(W_p_tas,W_p_gam);
-
-% reference scaling
-W_r_tas = 10*knots2fps;
-W_r_gam = 3*d2r;
-W_r_lon = blkdiag(W_r_tas,W_r_gam);
 
 % figure
 % bode(W_c_eng)
@@ -634,8 +637,8 @@ save WorkSpace.mat
 % LPVControlOn   = 0; % 0 (hinf control) or 1 (lpv control)
 % RateBoundOn    = 0; % 0 (rate-unbounded) or 1 (rate-bounded)
 
-controlOn = 1;
-set_param(model,'MinStep','0.004')
+controlOn = 0;
+set_param(model,'MinStep','0.001')
 
 MWS               = init_design('GTM');
 target            = struct('gamma',0,'tas',85); % target trim condition [knot]
@@ -645,4 +648,4 @@ loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
 loadmws(MWS,'gtm_design'); % load MWS
 
-[tsim,xsim,ysim]=sim('gtm_design',[0 1]);
+[tsim,xsim,ysim]=sim('gtm_design',[0 10]);
