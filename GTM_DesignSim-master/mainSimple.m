@@ -253,13 +253,18 @@ W_r_gam = 3*d2r;
 W_r_lon = blkdiag(W_r_tas,W_r_gam);
 
 % W_model
-omega_tas = 1; % [rad/s]
+omega_tas = 0.35; % [rad/s]
 zeta_tas = 1; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 2; % [rad/s]
+omega_gam = 0.15; % [rad/s]
 zeta_gam = 1; % []
 W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_gam);
+figure
+step(W_m_tas)
+hold on, grid on
+step(W_m_gam)
+legend('Wm_{tas}','Wm_{gam}')
 
 % sensor noise (white)
 W_n_tas     = 0.06*knots2fps; % 0.06 kts
@@ -275,6 +280,11 @@ W_c_ele = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
 % W_c_eng = 0.000001;
 % W_c_ele = 0.000001;
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
+figure
+bode(W_c_eng)
+hold on, grid on
+bode(W_c_ele)
+legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
 % W_p_tas = 0.01/(s+0.001);
@@ -284,32 +294,11 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 W_p_tas = 50*(s/100+1)/(s/0.005+1);
 W_p_gam = 200*(s/100+1)/(s/0.005+1);
 W_p_lon = blkdiag(W_p_tas,W_p_gam);
-
-% figure
-% bode(W_c_eng)
-% hold on
-% grid on
-% bode(W_c_ele)
-% bode(W_p_tas)
-% bode(W_p_gam)
-% legend
-
-% figure
-% opt_bode = bodeoptions('cstprefs');
-% opt_bode.PhaseWrapping = 'on';
-% opt_bode.PhaseWrappingBranch = -350;
-% bodeplot(P_a_eng,'k-',P_a_ele,'b-.',P_a_ele,'r--',w,opt_bode),title(''), grid on
-% legend('Throttle','A/E/R','Span','location','best')
-
-% figure
-% bode(Ideal_Az,Model_Az),title(''), grid on
-% h = legend('$Id_{Az}$','$M_{Az}$','Interpreter','latex');
-% set(h,'string',{'$Id_{Az}$','$M_{Az}$'})
-
-% figure
-% bode(Perf_Az,W_elev),title(''), grid on
-% h = legend('$P_{Az}$','$W_{\delta e}$','Interpreter','latex');
-% set(h,'string',{'$P_{Az}$','$W_{\delta e}$'})
+figure
+bode(W_p_tas)
+hold on, grid on
+bode(W_p_gam)
+legend('Wp_{tas}','Wp_{gam}')
 
 % Longitudinal LPV modeling
 % control interconnection
@@ -405,17 +394,11 @@ sysic
 figure
 opt = stepDataOptions;
 % opt.StepAmplitude = [1*knots2fps pi/180];
-step(CL_lon_hinf,CL_lon_lpv,opt);
-grid on
+step(CL_lon_hinf,opt);
+hold on, grid on
+step(CL_lon_lpv,opt);
 legend('H\infty','LPV')
 drawnow
-
-% tas [
-% alpha
-% q
-% gamma
-% delt
-% dele
 
 %% Longitudinal rate-bounded LPV synthesis
 % Basis function
