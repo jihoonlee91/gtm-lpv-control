@@ -248,15 +248,15 @@ end
 
 %% Component modeling (longitudinal performance)
 % W_cmd
-W_r_tas = 10*knots2fps;
+W_r_tas = 20*knots2fps;
 W_r_gam = 3*d2r;
 W_r_lon = blkdiag(W_r_tas,W_r_gam);
 
 % W_model
-omega_tas = 0.35; % [rad/s]
+omega_tas = 0.15; % [rad/s]
 zeta_tas = 1; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 0.15; % [rad/s]
+omega_gam = 0.35; % [rad/s]
 zeta_gam = 1; % []
 W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_gam);
@@ -274,6 +274,8 @@ W_n_gam     = 0.031*d2r; % 0.031 deg (same with alpha)
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_gam);
 
 % control weight
+% P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
+% P_a_ele = 2*pi*5/(s+2*pi*5)*pade(exp(-15e-3*s),1); % Bandwidth 5 Hz and 5+10 ms time delay
 % W_c_ele = 10*tf([0.8 42.91],[1 119.2]); % bandwidth 내에서는 패널티 X
 W_c_eng = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
 W_c_ele = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
@@ -304,7 +306,7 @@ legend('Wp_{tas}','Wp_{gam}')
 % control interconnection
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon';
 inputvar            = '[r{2};n{4};u{2}]';
-outputvar           = '[W_c_lon;W_p_lon;W_r_lon;P_lon+W_n_lon]';
+outputvar           = '[W_c_lon;W_p_lon;W_r_lon(1);W_r_lon(2)-P_lon(4)+W_n_lon(4);P_lon(1)+W_n_lon(1);P_lon(2)+W_n_lon(2);P_lon(3)+W_n_lon(3)]';
 input_to_P_lon      = '[u]';
 input_to_W_m_lon    = '[W_r_lon]';
 input_to_W_n_lon    = '[n]';
@@ -325,7 +327,7 @@ if isfile('./result/K_lon_hinf.mat') == 0
     for k = 1:num_mor 
         G_lon_LTI = G_lon.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
-        [K_lon_hinf_point,CL,gamma_lon_hinf_point] = hinfsyn(G_lon_LTI,6,2,opt_hinf);
+        [K_lon_hinf_point,CL,gamma_lon_hinf_point] = hinfsyn(G_lon_LTI,5,2,opt_hinf);
         SynTime_lon_hinfs(i,j,k) = toc;
         disp(['Gamma (Longitudinal H_infinity) = ',num2str(gamma_lon_hinf_point)])
         gamma_lon_hinfs(i,j,k) = gamma_lon_hinf_point;
@@ -345,7 +347,7 @@ systemnames         = 'P_lon K_lon_hinf W_r_lon';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lon;K_lon_hinf]';
 input_to_P_lon      = '[K_lon_hinf]';
-input_to_K_lon_hinf = '[W_r_lon;P_lon]';
+input_to_K_lon_hinf = '[W_r_lon(1);W_r_lon(2)-P_lon(4);P_lon(1);P_lon(2);P_lon(3)]';
 input_to_W_r_lon    = '[r]';
 sysoutname          = 'CL_lon_hinf';
 cleanupsysic        = 'yes'; 
@@ -364,7 +366,7 @@ if isfile('./result/K_lon_lpv.mat') == 0
     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
     opt_lpv  = lpvsynOptions('BackOffFactor',1.02);
     tic
-    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,6,2,opt_lpv);
+    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,5,2,opt_lpv);
     SynTime_lon_lpv = toc;
     disp('Longitudinal LPV Synthess Finished')
     disp(['Synthesis Time: ',num2str(SynTime_lon_lpv),' sec'])
@@ -383,7 +385,7 @@ systemnames         = 'P_lon K_lon_lpv W_r_lon';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lon;K_lon_lpv]';
 input_to_P_lon      = '[K_lon_lpv]';
-input_to_K_lon_lpv  = '[W_r_lon;P_lon]';
+input_to_K_lon_lpv  = '[W_r_lon(1);W_r_lon(2)-P_lon(4);P_lon(1);P_lon(2);P_lon(3)]';
 input_to_W_r_lon    = '[r]';
 sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
