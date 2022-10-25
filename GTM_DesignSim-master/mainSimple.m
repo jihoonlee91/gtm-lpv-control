@@ -452,6 +452,12 @@ drawnow
 % grid on
 
 %% Component modeling (lateral performance)
+% W_cmd
+W_r_bet = 3*d2r;
+W_r_phi = 45*d2r;
+W_r_lat = blkdiag(W_r_tas,W_r_gam);
+
+% W_model
 omega_bet = 1.5; % [rad/s]
 zeta_bet = .7; % []
 W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
@@ -459,6 +465,11 @@ omega_phi = 3.5; % [rad/s]
 zeta_phi = .7; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
+figure
+step(W_m_bet)
+hold on, grid on
+step(W_m_phi)
+legend('Wm_{bet}','Wm_{phi}')
 
 W_n_bet     = 0.033; % 0.033 deg
 W_n_p       = 0.5220; % 0.5220 deg/sec
@@ -470,10 +481,21 @@ W_c_ail = tf([0.8 42.91],[1 119.2]);
 W_c_rud = tf([0.8 42.91],[1 119.2]);
 W_c_mor = 0.1*(s/0.5+1)/(s/100+1);
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
+figure
+bode(W_c_ail)
+hold on, grid on
+bode(W_c_rud)
+bode(W_c_mor)
+legend('Wc_{ail}','Wc_{rud}','Wc_{mor}')
 
 W_p_bet = 1/(s+0.001);
 W_p_phi = 1/(s+0.001);
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
+figure
+bode(W_p_bet)
+hold on, grid on
+bode(W_p_phi)
+legend('Wp_{bet}','Wp_{phi}')
 
 % Lateral LPV modeling
 systemnames         = 'P_lat W_m_lat W_n_lat W_c_lat W_p_lat';
@@ -622,7 +644,8 @@ save WorkSpace.mat
 % LPVControlOn   = 0; % 0 (hinf control) or 1 (lpv control)
 % RateBoundOn    = 0; % 0 (rate-unbounded) or 1 (rate-bounded)
 
-controlOn = 0;
+set_param('gtm_design/Control/Controller','commented','off') % control on
+% set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param(model,'MinStep','0.001')
 
 MWS               = init_design('GTM');
@@ -633,4 +656,4 @@ loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
 loadmws(MWS,'gtm_design'); % load MWS
 
-[tsim,xsim,ysim]=sim('gtm_design',[0 10]);
+[tsim,xsim,ysim]=sim('gtm_design',[0 200]);

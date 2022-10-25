@@ -23,8 +23,8 @@ addpath(genpath('./LPVToolsV1.0/'));
 run('./LPVToolsV1.0/addlpv');
 
 addpath(genpath('./temporary/'));
-load TempSch.mat
-load TempK.mat
+% load TempSch.mat
+% load TempK.mat
 
 rehash path
 
@@ -70,6 +70,7 @@ model = 'gtm_design';
 % set_param(model,'MaxStep','auto')
 set_param(model,'MinStep','auto')
 set_param(model,'ReturnWorkspaceOutputs','off')
+set_param('gtm_design/Control/Controller','commented','on')
 
 % load nominal starting point
 loadmws(init_design('GTM'),'gtm_design');
