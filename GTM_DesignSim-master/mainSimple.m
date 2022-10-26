@@ -253,11 +253,11 @@ W_r_gam = 3*d2r;
 W_r_lon = blkdiag(W_r_tas,W_r_gam);
 
 % W_model
-omega_tas = 0.15; % [rad/s]
-zeta_tas = 1; % []
+omega_tas = 1.5; % [rad/s]
+zeta_tas = 0.7; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 0.35; % [rad/s]
-zeta_gam = 1; % []
+omega_gam = 3.5; % [rad/s]
+zeta_gam = 0.7; % []
 W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_gam);
 figure
@@ -453,9 +453,9 @@ drawnow
 
 %% Component modeling (lateral performance)
 % W_cmd
-W_r_bet = 3*d2r;
-W_r_phi = 45*d2r;
-W_r_lat = blkdiag(W_r_tas,W_r_gam);
+W_r_bet = 2*d2r;
+W_r_phi = 60*d2r;
+W_r_lat = blkdiag(W_r_bet,W_r_phi);
 
 % W_model
 omega_bet = 1.5; % [rad/s]
@@ -471,15 +471,17 @@ hold on, grid on
 step(W_m_phi)
 legend('Wm_{bet}','Wm_{phi}')
 
-W_n_bet     = 0.033; % 0.033 deg
-W_n_p       = 0.5220; % 0.5220 deg/sec
-W_n_r       = 0.3330; % 0.3330 deg/sec
-W_n_phi     = 0.02; % 0.02 deg
+W_n_bet     = 0.033*d2r; % 0.033 deg
+W_n_p       = 0.5220*d2r; % 0.5220 deg/sec
+W_n_r       = 0.3330*d2r; % 0.3330 deg/sec
+W_n_phi     = 0.02*d2r; % 0.02 deg
 W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
-W_c_ail = tf([0.8 42.91],[1 119.2]);
-W_c_rud = tf([0.8 42.91],[1 119.2]);
-W_c_mor = 0.1*(s/0.5+1)/(s/100+1);
+% W_c_ail = 0.01*tf([0.8 42.91],[1 119.2]);
+% W_c_rud = 0.01*tf([0.8 42.91],[1 119.2]);
+W_c_ail = 0.0001*(s/0.5+1)/(s/100+1);
+W_c_rud = 0.0001*(s/0.5+1)/(s/100+1);
+W_c_mor = 0.0001*(s/0.5+1)/(s/100+1);
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 figure
 bode(W_c_ail)
@@ -488,8 +490,10 @@ bode(W_c_rud)
 bode(W_c_mor)
 legend('Wc_{ail}','Wc_{rud}','Wc_{mor}')
 
-W_p_bet = 1/(s+0.001);
-W_p_phi = 1/(s+0.001);
+% W_p_bet = 1/(s+0.001);
+% W_p_phi = 1/(s+0.001);
+W_p_bet = 200*(s/100+1)/(s/0.005+1);
+W_p_phi = 200*(s/100+1)/(s/0.005+1);
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
 figure
 bode(W_p_bet)
@@ -498,14 +502,15 @@ bode(W_p_phi)
 legend('Wp_{bet}','Wp_{phi}')
 
 % Lateral LPV modeling
-systemnames         = 'P_lat W_m_lat W_n_lat W_c_lat W_p_lat';
+systemnames         = 'P_lat W_m_lat W_n_lat W_c_lat W_p_lat W_r_lat';
 inputvar            = '[r{2};n{4};u{3}]';
-outputvar           = '[W_c_lat;W_p_lat;r;P_lat+W_n_lat]';
+outputvar           = '[W_c_lat;W_p_lat;W_r_lat(1)-P_lat(1)+W_n_lat(1);W_r_lat(2);P_lat(2)+W_n_lat(2);P_lat(3)+W_n_lat(3);P_lat(4)+W_n_lat(4)]';
 input_to_P_lat      = '[u]';
-input_to_W_m_lat    = '[r]';
+input_to_W_m_lat    = '[W_r_lat]';
 input_to_W_n_lat    = '[n]';
 input_to_W_c_lat    = '[u]';
 input_to_W_p_lat    = '[W_m_lat(1)-P_lat(1);W_m_lat(2)-P_lat(4)]';
+input_to_W_r_lat    = '[r]';
 sysoutname          = 'G_lat';
 cleanupsysic        = 'yes'; 
 sysic
@@ -519,7 +524,7 @@ if isfile('./result/K_lat_hinf.mat') == 0
     for k = 1:num_mor 
         G_lat_LTI = G_lat.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
-        [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,6,3,opt_hinf);
+        [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,5,3,opt_hinf);
         SynTime_lat_hinfs(i,j,k) = toc;
         disp(['Gamma (Lateral H_infinity) = ',num2str(gamma_lat_hinf_point)])
         gamma_lat_hinfs(i,j,k) = gamma_lat_hinf_point;
@@ -540,11 +545,12 @@ end
 % P_a_mor = 2*pi*5/(s+2*pi*1)*pade(exp(-15e-3*s),1)*(1+w_Delta*Delta); % Bandwidth 5 Hz
 % P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
-systemnames         = 'P_lat K_lat_hinf';
+systemnames         = 'P_lat K_lat_hinf W_r_lat';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lat;K_lat_hinf]';
 input_to_P_lat      = '[K_lat_hinf]';
-input_to_K_lat_hinf = '[r;P_lat]';
+input_to_K_lat_hinf = '[W_r_lat(1)-P_lat(1);W_r_lat(2);P_lat(2);P_lat(3);P_lat(4)]';
+input_to_W_r_lat    = '[r]';
 sysoutname          = 'CL_lat_hinf';
 cleanupsysic        = 'yes'; 
 sysic
@@ -559,7 +565,7 @@ if isfile('./result/K_lat_lpv.mat') == 0
     disp('Lateral LPV Synthess Started')
     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
     tic
-    [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,6,3,opt_lpv);
+    [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,5,3,opt_lpv);
     SynTime_lat_lpv = toc;
     disp('Lateral LPV Synthess Finished')
     disp(['Synthesis Time: ',num2str(SynTime_lat_lpv),' sec'])
@@ -574,18 +580,23 @@ disp(['Gamma (Lateral Rate-Unbounded LPV) = ',num2str(gamma_lat_lpv)])
 disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100),' %'])
 
 % Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
-systemnames         = 'P_lat K_lat_lpv';
+systemnames         = 'P_lat K_lat_lpv W_r_lat';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lat;K_lat_lpv]';
 input_to_P_lat      = '[K_lat_lpv]';
-input_to_K_lat_lpv  = '[r;P_lat]';
+input_to_K_lat_lpv  = '[W_r_lat(1)-P_lat(1);W_r_lat(2);P_lat(2);P_lat(3);P_lat(4)]';
+input_to_W_r_lat    = '[r]';
 sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
 figure
-step(CL_lat_lpv)
-grid on
+% opt = stepDataOptions;
+% opt.StepAmplitude = [1*knots2fps pi/180];
+step(CL_lat_hinf);
+hold on, grid on
+step(CL_lat_lpv,opt);
+legend('H\infty','LPV')
 drawnow
 
 % beta [rad]
@@ -646,14 +657,36 @@ save WorkSpace.mat
 
 set_param('gtm_design/Control/Controller','commented','off') % control on
 % set_param('gtm_design/Control/Controller','commented','on') % control off
-set_param(model,'MinStep','0.001')
+set_param(model,'MinStep','0.0049')
+% set_param(model,'MaxStep','')
 
 MWS               = init_design('GTM');
-target            = struct('gamma',0,'tas',85); % target trim condition [knot]
+target            = struct('gamma',0,'tas',85); % start trim condition target [knot]
 MWS.StatesInp(9)  = 0; % set altitude [ft]
 MWS.bias.morphing = -12.5; % set morphing parameter
+MWS.bias.aileron = 0; %
+MWS.bias.rudder = 0; %
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
+% MWS.StatesInp(4) = 1*d2r; % p [rad/s]
+% MWS.StatesInp(5) = 1*d2r; % q [rad/s] 
+MWS.StatesInp(6) = 1*d2r; % r [rad/s]
+% MWS.StatesInp(10) = 1*d2r; % phi [rad/s]
+% MWS.StatesInp(11) = 1*d2r; % theta [rad/s]
+% MWS.StatesInp(12) = 1*d2r; % psi [rad/s]
 loadmws(MWS,'gtm_design'); % load MWS
 
-[tsim,xsim,ysim]=sim('gtm_design',[0 200]);
+% StatesInp(1)  = ub;        %  1 - ub (ft/s)
+% StatesInp(2)  = 0;		 %  2 - vb (ft/s)
+% StatesInp(3)  = wb;		 %  3 - wb (ft/s)
+% StatesInp(4)  = 0;		 %  4 - pb (rad/s)
+% StatesInp(5)  = 0;   		 %  5 - qb (rad/s)
+% StatesInp(6)  = 0;		    %  6 - rb (rad/s)
+% StatesInp(7)  = ini.lat*d2r;	%  7 - lat (rad), +north,
+% StatesInp(8)  = ini.lon*d2r;	%  8 - lon (rad), +east,
+% StatesInp(9)  = ini.Altitude;	%  9 - h (ft)
+% StatesInp(10) = 0;	        % 10 - phi (rad)
+% StatesInp(11) = theta*d2r;    % 11 - theta (rad)
+% StatesInp(12) = pi/2;         % 12 - psi (rad)
+
+[tsim,xsim,ysim]=sim('gtm_design',[0 100]);

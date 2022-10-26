@@ -64,7 +64,6 @@ clear functions
 warning('off','Simulink:SL_MdlFileNotOnPath'); % Suppress spurious warnings
 open_system('gtm_design');  
 
-controlOn = 0;
 model = 'gtm_design';
 % get_param(model,'ObjectParameters')
 % set_param(model,'MaxStep','auto')
