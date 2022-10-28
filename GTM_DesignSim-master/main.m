@@ -245,7 +245,7 @@ end
 
 %% Component modeling (longitudinal performance)
 % Anti-Aliasing Filter
-AA = 1/(1/2/pi/16*s+1);
+% AA = 1/(1/2/pi/16*s+1);
 
 % actuator dynamics
 P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model

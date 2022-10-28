@@ -30,10 +30,10 @@ num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
 
-% g = 32.17405; % gravitational acceleration [ft/s^2]
-% Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
-% Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
-% T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust at sea level without ram drag
+g = 32.17405; % gravitational acceleration [ft/s^2]
+Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
+Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
+T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
 % sas_RateBound = 10; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
 % alt_RateBound = 20; % convvel([100],'kts','ft/s')
 % mor_RateBound = 0.025; % 10 sec for full deployment
@@ -60,7 +60,7 @@ if isfile('./result/Trim.mat') == 0
         mor = mor_grid(k); % current mor []
         tas = sas2tas(sas,alt); % [kts]
 
-        target            = struct('tas',tas,'gamma',0); % target trim condition - straight and level flight, heading north [deg] X [knot]
+        target            = struct('tas',tas,'gamma',0); % target trim condition - straight and level flight, heading north [knot] X [deg]
         MWS.StatesInp(9)  = alt; % set altitude [ft]
         MWS.bias.morphing = mor; % set symmetric morphing parameter [%]
 
@@ -247,6 +247,12 @@ else
 end
 
 %% Component modeling (longitudinal performance)
+% W_a
+Throttle_Lag = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0));
+P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
+P_a_ele = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
+P_a_lon = blkdiag(P_a_eng,P_a_ele);
+
 % W_cmd
 W_r_tas = 20*knots2fps;
 W_r_gam = 3*d2r;
@@ -277,8 +283,8 @@ W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_gam);
 % P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
 % P_a_ele = 2*pi*5/(s+2*pi*5)*pade(exp(-15e-3*s),1); % Bandwidth 5 Hz and 5+10 ms time delay
 % W_c_ele = 10*tf([0.8 42.91],[1 119.2]); % bandwidth 내에서는 패널티 X
-W_c_eng = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
-W_c_ele = 0.01*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
+W_c_eng = 0.1*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
+W_c_ele = 0.1*(s/0.5+1)/(s/100+1); % bandwidth 내에서는 패널티 X
 % W_c_eng = 0.000001;
 % W_c_ele = 0.000001;
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
@@ -293,8 +299,8 @@ legend('Wc_{eng}','Wc_{ele}')
 % W_p_gam = 0.1/(s+0.001);
 % W_p_tas = (s/100+1)/(s/0.005+1)/(0.1*knots2fps);
 % W_p_gam = (s/100+1)/(s/0.005+1)/(0.1*d2r);
-W_p_tas = 50*(s/100+1)/(s/0.005+1);
-W_p_gam = 200*(s/100+1)/(s/0.005+1);
+W_p_tas = 100*(s/100+1)/(s/0.005+1);
+W_p_gam = 100*(s/100+1)/(s/0.005+1);
 W_p_lon = blkdiag(W_p_tas,W_p_gam);
 figure
 bode(W_p_tas)
@@ -304,15 +310,16 @@ legend('Wp_{tas}','Wp_{gam}')
 
 % Longitudinal LPV modeling
 % control interconnection
-systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon';
+systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon';
 inputvar            = '[r{2};n{4};u{2}]';
 outputvar           = '[W_c_lon;W_p_lon;W_r_lon(1);W_r_lon(2)-P_lon(4)+W_n_lon(4);P_lon(1)+W_n_lon(1);P_lon(2)+W_n_lon(2);P_lon(3)+W_n_lon(3)]';
-input_to_P_lon      = '[u]';
+input_to_P_lon      = '[P_a_lon]';
 input_to_W_m_lon    = '[W_r_lon]';
 input_to_W_n_lon    = '[n]';
 input_to_W_c_lon    = '[u]';
 input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1);W_m_lon(2)-P_lon(4)]';
 input_to_W_r_lon    = '[r]';
+input_to_P_a_lon    = '[u]';
 sysoutname          = 'G_lon';
 cleanupsysic        = 'yes';
 sysic
@@ -343,12 +350,13 @@ else
 end
 
 % Closed-loop interconnection with Longitudinal H_infinity controller
-systemnames         = 'P_lon K_lon_hinf W_r_lon';
+systemnames         = 'P_lon K_lon_hinf W_r_lon P_a_lon';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lon;K_lon_hinf]';
-input_to_P_lon      = '[K_lon_hinf]';
+input_to_P_lon      = '[P_a_lon]';
 input_to_K_lon_hinf = '[W_r_lon(1);W_r_lon(2)-P_lon(4);P_lon(1);P_lon(2);P_lon(3)]';
 input_to_W_r_lon    = '[r]';
+input_to_P_a_lon    = '[K_lon_hinf]';
 sysoutname          = 'CL_lon_hinf';
 cleanupsysic        = 'yes'; 
 sysic
@@ -381,12 +389,13 @@ disp(['Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(gamma_lon_lpv)])
 disp(['Back-Off Factor (Longitudinal Rate-Unbounded LPV) = ',num2str((gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100),' %'])
 
 % Closed-loop interconnection with Longitudinal LPV controller
-systemnames         = 'P_lon K_lon_lpv W_r_lon';
+systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lon;K_lon_lpv]';
-input_to_P_lon      = '[K_lon_lpv]';
+input_to_P_lon      = '[P_a_lon]';
 input_to_K_lon_lpv  = '[W_r_lon(1);W_r_lon(2)-P_lon(4);P_lon(1);P_lon(2);P_lon(3)]';
 input_to_W_r_lon    = '[r]';
+input_to_P_a_lon    = '[K_lon_lpv]';
 sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
