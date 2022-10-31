@@ -64,11 +64,10 @@ clear functions
 warning('off','Simulink:SL_MdlFileNotOnPath'); % Suppress spurious warnings
 open_system('gtm_design');  
 
-model = 'gtm_design';
 % get_param(model,'ObjectParameters')
 % set_param(model,'MaxStep','auto')
-set_param(model,'MinStep','auto')
-set_param(model,'ReturnWorkspaceOutputs','off')
+set_param('gtm_design','MinStep','auto')
+set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on')
 
 % load nominal starting point

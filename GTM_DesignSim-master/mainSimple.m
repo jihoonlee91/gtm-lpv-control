@@ -20,12 +20,12 @@ MWS = grabmws('gtm_design');
 %% Basic setup
 % Parameter grid
 % sas_grid  = convvel([50 85 120],'kts','ft/s'); % [ft/s] (tas 70~85 knot)
-% sas_grid  = [60 85 110]; % [kts]
-% alt_grid  = [0 10000 20000]; % 700~1100 [ft]
-% mor_grid  = [-25 0]; % between -25 and 0 [%]
-sas_grid  = 85; % [kts]
-alt_grid  = 0; % 700~1100 [ft]
-mor_grid  = -12.5; % between -25 and 0 [%]
+sas_grid  = [70 85 100]; % [kts]
+alt_grid  = [0 5000 10000]; % 700~1100 [ft]
+mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
+% sas_grid  = 85; % [kts]
+% alt_grid  = 0; % 700~1100 [ft]
+% mor_grid  = -12.5; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -45,6 +45,10 @@ s = tf('s');
 % w = logspace(-3,3,50);
 
 %% Trim calculation
+set_param('gtm_design','MinStep','auto')
+set_param('gtm_design','ReturnWorkspaceOutputs','off')
+set_param('gtm_design/Control/Controller','commented','on')
+
 PitchSurf = 'elev'; % pitch surface
 verbose   = 1; % soln disp
 
@@ -133,6 +137,10 @@ else
 end
 
 %% Linearization
+set_param('gtm_design','MinStep','auto')
+set_param('gtm_design','ReturnWorkspaceOutputs','off')
+set_param('gtm_design/Control/Controller','commented','on')
+
 vabflag        = 1; % wind-axis linear state
 use_all_inputs = 0; % control surface as groups
 Ts             = 0; % continuous-time model
