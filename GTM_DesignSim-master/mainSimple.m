@@ -20,12 +20,12 @@ MWS = grabmws('gtm_design');
 %% Basic setup
 % Parameter grid
 % sas_grid  = convvel([50 85 120],'kts','ft/s'); % [ft/s] (tas 70~85 knot)
-sas_grid  = [70 85 100]; % [kts]
-alt_grid  = [0 5000 10000]; % 700~1100 [ft]
-mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
-% sas_grid  = 85; % [kts]
-% alt_grid  = 0; % 700~1100 [ft]
-% mor_grid  = -12.5; % between -25 and 0 [%]
+% sas_grid  = [70 85 100]; % [kts]
+% alt_grid  = [0]; % 700~1100 [ft]
+% mor_grid  = [-12.5]; % between -25 and 0 [%]
+sas_grid  = 85; % [kts]
+alt_grid  = 0; % 700~1100 [ft]
+mor_grid  = -12.5; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -50,7 +50,7 @@ set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on')
 
 PitchSurf = 'elev'; % pitch surface
-verbose   = 1; % soln disp
+verbose   = 0; % soln disp
 
 if isfile('./result/Trim.mat') == 0
     clearvars MWS_grid sas_trim tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
@@ -73,11 +73,11 @@ if isfile('./result/Trim.mat') == 0
         [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation (attempt #1)
         if (Err > 1e-3)
             loadmws(init_design(),'gtm_design');
-            fprintf('   Poor convergence, trying again. ');
+            fprintf('   Poor convergence, trying again.\');
             [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation (attempt #2)
             if (Err > 1e-3)
                 loadmws(init_design(),'gtm_design');
-                fprintf('   Poor convergence, trying again. ');
+                fprintf('   Poor convergence, trying again.\');
                 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation (attempt #3)
                 if (Err > 1e-3)
                     error('TRIM FAIL')
@@ -85,7 +85,7 @@ if isfile('./result/Trim.mat') == 0
             end
         end
         count = count+1;
-        disp(['Trim Done #',num2str(count)])
+        fprintf('TRIM #%d @ TAS: %d, Alt: %d, Mor: %.3g\',count,tas,alt,mor)
 
         % save trim results
         MWS_grid(i,j,k)      = MWS;
@@ -151,11 +151,16 @@ if isfile('./result/Linearization.mat') == 0
     for i = 1:num_sas
     for j = 1:num_alt
     for k = 1:num_mor 
+        sas = sas_grid(i); % current sas [kts]
+        alt = alt_grid(j); % current alt [ft]
+        mor = mor_grid(k); % current mor []
+        tas = sas2tas(sas,alt); % [kts]
+
         % linearization
         [sys,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
         count = count+1;
-        disp(['Linearization Done #',num2str(count)])
-        
+        fprintf('LINEARIZATION #%d @ TAS: %d, Alt: %d, Mor: %.3g\',count,tas,alt,mor)
+
         % Redefine input name
         set(londyn,'Inputname',{'Elevator','L Morphing','R Morphing','L Throttle','R Throttle'});
         set(latdyn,'Inputname',{'Aileron','Rudder','L Morphing','R Morphing'});
@@ -210,11 +215,6 @@ if isfile('./result/Linearization.mat') == 0
                        'Inputname',{'delt','dele'},...
                        'Outputname',{'tas','alpha','q','gamma'})
 
-        if isstable(londyn_aug) && (rank(ctrb(londyn_aug))==height(londyn_aug)) % stable and controllable
-        else % unstable or uncontrollable
-            error('Unstable or uncontrollable longitudinal dynamics')
-        end
-
         % lateral dimensional derivatives
 %         Y_bet = latdyn.A(1,1)*V0;
 %         Y_p = latdyn.A(1,2)*V0;
@@ -231,10 +231,19 @@ if isfile('./result/Linearization.mat') == 0
         set(latdyn_aug,'Statename',{'beta','p','r','phi'},...
                        'Inputname',{'dela','delr','delm'},...
                        'Outputname',{'beta','p','r','phi'})
-
-        if isstable(latdyn_aug) && (rank(ctrb(latdyn_aug))==height(latdyn_aug)) % stable and controllable
-        else % unstable or uncontrollable
-            error('Unstable or uncontrollable lateral dynamics')
+        
+        % check linear dynamics
+        if ~isstable(londyn_aug) % unstable
+            disp('Unstablelongitudinal dynamics') 
+        end
+        if rank(ctrb(londyn_aug)) < height(londyn_aug) % uncontrollable
+            error('Uncontrollable longitudinal dynamics')
+        end
+        if ~isstable(latdyn_aug) % unstable
+            disp('Unstable lateral dynamics')
+        end
+        if rank(ctrb(latdyn_aug)) < height(latdyn_aug) % uncontrollable
+            error('Uncontrollable lateral dynamics')
         end
 
         % stacking
@@ -698,8 +707,8 @@ drawnow
 
 set_param('gtm_design/Control/Controller','commented','off') % control on
 % set_param('gtm_design/Control/Controller','commented','on') % control off
-set_param(model,'MinStep','0.0049')
-% set_param(model,'MaxStep','')
+set_param('gtm_design','MinStep','0.0049')
+% set_param('gtm_design','MaxStep','')
 
 MWS               = init_design('GTM');
 target            = struct('gamma',0,'tas',85); % start trim condition target [knot]
