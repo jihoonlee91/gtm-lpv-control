@@ -10,9 +10,6 @@ r2d=180/pi;
 per2deci = 0.01;
 deci2per = 100;
 
-W_r_bet = 1;
-W_r_phi = 1;
-
 setup
 
 MWS = grabmws('gtm_design');
@@ -186,7 +183,7 @@ if isfile('./result/Linearization.mat') == 0
         % Lat input: Aileron [rad], Rudder [rad], L Morphing [], R Morphing []
         
         % Trim condition
-%         V0 = convvel(sas2tas(sas_grid(i),alt_grid(j)),'kts','ft/s'); % trim speed [ft/s]
+        V0 = convvel(sas2tas(sas_grid(i),alt_grid(j)),'kts','ft/s'); % trim speed [ft/s]
 %         alp_0 = deg2rad(sch_alp_trim.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(i),'rho3_mor_param',mor_grid(i)).D); % trim angle of attack [rad]
 %         theta_0 = sch_pitch_trim.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(i),'rho3_mor_param',mor_grid(i)).D;
 %         gam_0 = deg2rad(theta_0-alp_0); % trim pitch angle [rad]
@@ -195,25 +192,27 @@ if isfile('./result/Linearization.mat') == 0
 %         X_V = londyn.A(1,1); % [ft/s^2] / [ft/s]
 %         X_alp = londyn.A(1,2); % [ft/s^2] / [rad]
 %         Z_V = londyn.A(2,1)*V0; % [rad/s]
-%         Z_alp  = londyn.A(2,2)*V0; % [rad/s] X [ft/s] / [rad]
+        Z_alp  = londyn.A(2,2)*V0; % [rad/s] X [ft/s] / [rad]
 %         Z_q = (londyn.A(2,3)-1)*V0; % [ft/s]
 %         M_V = londyn.A(3,1); % [rad/s^2] / [ft/s]
 %         M_alp = londyn.A(3,2); % [rad/s^2] / [rad]
 %         M_q = londyn.A(3,3); % [rad/s^2] / [rad/s]
 %         X_dele = londyn.B(1,2); % [ft/s^2] / [rad]
-%         Z_dele = londyn.B(2,1)*V0; % [rad/s] X [ft/s] / [rad]
+        Z_dele = londyn.B(2,1)*V0; % [rad/s] X [ft/s] / [rad]
 %         M_dele = londyn.B(3,1); % [rad/s] / [rad]
 
-        Alon = londyn.A;
-        Blon = [londyn.B(:,4)+londyn.B(:,5) londyn.B(:,1)];
-        Alon(4,:) = Alon(4,:)-Alon(2,:); % gamma = theta-alpha
-        Blon(4,:) = Blon(4,:)-Blon(2,:); % gamma = theta-alpha
-        Clon = eye(4);
+        Alon = [londyn.A zeros(4,1);
+                0 -V0 0 V0 0]; % dh/dt = V0*(theta-alpha) [ft]
+        Blon = [londyn.B(:,4)+londyn.B(:,5) londyn.B(:,1);
+                0 0];
+%         Alon(4,:) = Alon(4,:)-Alon(2,:); % gamma = theta-alpha
+%         Blon(4,:) = Blon(4,:)-Blon(2,:); % gamma = theta-alpha
+        Clon = eye(5);
 
         londyn_aug = ss(Alon,Blon,Clon,0);
-        set(londyn_aug,'Statename',{'tas','alpha','q','gamma'},...
+        set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt'},...
                        'Inputname',{'delt','dele'},...
-                       'Outputname',{'tas','alpha','q','gamma'})
+                       'Outputname',{'tas','alpha','q','theta','alt'})
 
         % lateral dimensional derivatives
 %         Y_bet = latdyn.A(1,1)*V0;
@@ -265,9 +264,7 @@ end
 
 %% Component modeling (longitudinal performance)
 % W_a
-Throttle_Lag = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0));
-% Throttle_Lag = 1;
-P_a_eng = Throttle_Lag; % Throttle Lag Model
+P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
 P_a_ele = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % figure
@@ -282,15 +279,16 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % legend('Pa_{eng}','Pa_{ele}')
 
 % W_cmd
-W_r_tas = 10*knots2fps; % 10 knot command
-W_r_gam = 3*d2r; % 3 deg command
-W_r_lon = blkdiag(W_r_tas,W_r_gam);
+W_r_tas = 10*knots2fps; % 1 knot command
+% W_r_gam = 3*d2r; % 3 deg command
+W_r_alt = 10; % 10 ft command
+W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % W_model
-omega_tas = 10; % [rad/s]
+omega_tas = 1; % [rad/s]
 zeta_tas = 0.7; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 10; % [rad/s]
+omega_gam = 1; % [rad/s]
 zeta_gam = 0.7; % []
 W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_gam);
@@ -301,11 +299,13 @@ W_m_lon = blkdiag(W_m_tas,W_m_gam);
 % legend('Wm_{tas}','Wm_{gam}')
 
 % sensor noise (white)
-W_n_tas     = 0.06*knots2fps; % 0.06 knots broadband
-W_n_alp     = 0.031*d2r; % 0.031 deg broadband
-W_n_q       = 0.3857*d2r; % 0.3857 deg/s broadband (MAG3) 
-W_n_gam     = 0.031*d2r; % 0.031 deg broadband (same with alpha)
-W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_gam);
+W_n_tas     = 0.06*knots2fps; % 0.06 knots broadband (ADS)
+W_n_alp     = 0.031*d2r; % 0.031 deg broadband (ADS)
+W_n_q       = 0.3857*d2r; % 0.3857 deg/s broadband (MAG3)
+% W_n_gam     = 0.031*d2r; % 0.031 deg broadband (same with alpha)
+W_n_theta     = 0.02*d2r; % 0.02 deg broadband (MIDG)
+W_n_alt     = 2.36; % 2.36 ft broadband (ADS)
+W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
 % P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
@@ -327,19 +327,9 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
-% W_p_tas = 1/(s+0.001)/10;
-% W_p_gam = 1/(s+0.001)/1;
-% W_p_tas = W_r_tas;
-% W_p_gam = 10;
-% W_p_tas = (s/100+1)/(s/0.005+1)/(0.1*knots2fps);
-% W_p_gam = (s/100+1)/(s/0.005+1)/(0.1*d2r);
-% W_p_tas = 1*(s/100+1)/(s/0.005+1); % not diverging
-% W_p_gam = 100*(s/100+1)/(s/0.005+1); % not diverging
-% W_p_tas = (s/100+1)/(s/0.005+1)*fps2knots*10;
-% W_p_gam = (s/100+1)/(s/0.005+1)*r2d*10;
 W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
-W_p_gam = (s/100+1)/(s/0.005+1)/(d2r*3)*10;
-W_p_lon = blkdiag(W_p_tas,W_p_gam);
+W_p_alt = (s/100+1)/(s/0.005+1)*10;
+W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % figure
 % bode(W_p_tas)
 % hold on, grid on
@@ -347,18 +337,18 @@ W_p_lon = blkdiag(W_p_tas,W_p_gam);
 % legend('Wp_{tas}','Wp_{gam}')
 
 ncont_lon = 2;
-nmeas_lon = 4;
+nmeas_lon = 7;
 
 % Longitudinal LPV modeling
 % control interconnection
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon';
-inputvar            = '[r{2} ; n{4} ; u{2}]';
-outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-P_lon(1)+W_n_lon(1) ; W_r_lon(2)-P_lon(4)+W_n_lon(4) ; P_lon(2)+W_n_lon(2) ; P_lon(3)+W_n_lon(3)]';
+inputvar            = '[r{2} ; n{5} ; u{2}]';
+outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon ; P_lon+W_n_lon]';
 input_to_P_lon      = '[P_a_lon]';
 input_to_W_m_lon    = '[W_r_lon]';
 input_to_W_n_lon    = '[n]';
 input_to_W_c_lon    = '[u]';
-input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(4)]';
+input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[u]';
 sysoutname          = 'G_lon';
@@ -393,9 +383,9 @@ end
 % Closed-loop interconnection with Longitudinal H_infinity controller
 systemnames         = 'P_lon K_lon_hinf W_r_lon P_a_lon';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lon;K_lon_hinf]';
+outputvar           = '[P_lon ; K_lon_hinf]';
 input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_hinf = '[W_r_lon(1)-P_lon(1);W_r_lon(2)-P_lon(4);P_lon(2);P_lon(3)]';
+input_to_K_lon_hinf = '[W_r_lon ; P_lon]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[K_lon_hinf]';
 sysoutname          = 'CL_lon_hinf';
@@ -434,7 +424,7 @@ systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lon;K_lon_lpv]';
 input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_lpv  = '[W_r_lon(1)-P_lon(1);W_r_lon(2)-P_lon(4);P_lon(2);P_lon(3)]';
+input_to_K_lon_lpv  = '[W_r_lon ; P_lon]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[K_lon_lpv]';
 sysoutname          = 'CL_lon_lpv';
@@ -504,7 +494,7 @@ drawnow
 %% Component modeling (lateral performance)
 % W_cmd
 W_r_bet = 2*d2r;
-W_r_phi = 60*d2r;
+W_r_phi = 30*d2r;
 W_r_lat = blkdiag(W_r_bet,W_r_phi);
 
 % W_model
@@ -515,11 +505,11 @@ omega_phi = 3.5; % [rad/s]
 zeta_phi = .7; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
-figure
-step(W_m_bet)
-hold on, grid on
-step(W_m_phi)
-legend('Wm_{bet}','Wm_{phi}')
+% figure
+% step(W_m_bet)
+% hold on, grid on
+% step(W_m_phi)
+% legend('Wm_{bet}','Wm_{phi}')
 
 W_n_bet     = 0.033*d2r; % 0.033 deg
 W_n_p       = 0.5220*d2r; % 0.5220 deg/sec
@@ -529,32 +519,32 @@ W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 % W_c_ail = 0.01*tf([0.8 42.91],[1 119.2]);
 % W_c_rud = 0.01*tf([0.8 42.91],[1 119.2]);
-W_c_ail = 0.0001*(s/0.5+1)/(s/100+1);
-W_c_rud = 0.0001*(s/0.5+1)/(s/100+1);
-W_c_mor = 0.0001*(s/0.5+1)/(s/100+1);
+W_c_ail = 0.01*(s/0.5+1)/(s/100+1);
+W_c_rud = 0.01*(s/0.5+1)/(s/100+1);
+W_c_mor = 0.01*(s/0.5+1)/(s/100+1);
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
-figure
-bode(W_c_ail)
-hold on, grid on
-bode(W_c_rud)
-bode(W_c_mor)
-legend('Wc_{ail}','Wc_{rud}','Wc_{mor}')
+% figure
+% bode(W_c_ail)
+% hold on, grid on
+% bode(W_c_rud)
+% bode(W_c_mor)
+% legend('Wc_{ail}','Wc_{rud}','Wc_{mor}')
 
 % W_p_bet = 1/(s+0.001);
 % W_p_phi = 1/(s+0.001);
 W_p_bet = 200*(s/100+1)/(s/0.005+1);
 W_p_phi = 200*(s/100+1)/(s/0.005+1);
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
-figure
-bode(W_p_bet)
-hold on, grid on
-bode(W_p_phi)
-legend('Wp_{bet}','Wp_{phi}')
+% figure
+% bode(W_p_bet)
+% hold on, grid on
+% bode(W_p_phi)
+% legend('Wp_{bet}','Wp_{phi}')
 
 % Lateral LPV modeling
 systemnames         = 'P_lat W_m_lat W_n_lat W_c_lat W_p_lat W_r_lat';
-inputvar            = '[r{2};n{4};u{3}]';
-outputvar           = '[W_c_lat;W_p_lat;W_r_lat(1)-P_lat(1)+W_n_lat(1);W_r_lat(2);P_lat(2)+W_n_lat(2);P_lat(3)+W_n_lat(3);P_lat(4)+W_n_lat(4)]';
+inputvar            = '[r{2} ; n{4} ; u{3}]';
+outputvar           = '[W_c_lat ; W_p_lat ; W_r_lat ; P_lat+W_n_lat]';
 input_to_P_lat      = '[u]';
 input_to_W_m_lat    = '[W_r_lat]';
 input_to_W_n_lat    = '[n]';
@@ -566,6 +556,9 @@ cleanupsysic        = 'yes';
 sysic
 size(G_lat.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)))
 
+nmeas_lat = 6;
+ncont_lat = 3;
+
 % Lateral H_infinity synthesis
 if isfile('./result/K_lat_hinf.mat') == 0
     clearvars K_lat_hinfs gamma_lat_hinfs
@@ -574,7 +567,7 @@ if isfile('./result/K_lat_hinf.mat') == 0
     for k = 1:num_mor 
         G_lat_LTI = G_lat.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
-        [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,5,3,opt_hinf);
+        [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,nmeas_lat,ncont_lat,opt_hinf);
         SynTime_lat_hinfs(i,j,k) = toc;
         disp(['Gamma (Lateral H_infinity) = ',num2str(gamma_lat_hinf_point)])
         gamma_lat_hinfs(i,j,k) = gamma_lat_hinf_point;
@@ -597,9 +590,9 @@ end
 
 systemnames         = 'P_lat K_lat_hinf W_r_lat';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lat;K_lat_hinf]';
+outputvar           = '[P_lat ; K_lat_hinf]';
 input_to_P_lat      = '[K_lat_hinf]';
-input_to_K_lat_hinf = '[W_r_lat(1)-P_lat(1);W_r_lat(2);P_lat(2);P_lat(3);P_lat(4)]';
+input_to_K_lat_hinf = '[W_r_lat ; P_lat]';
 input_to_W_r_lat    = '[r]';
 sysoutname          = 'CL_lat_hinf';
 cleanupsysic        = 'yes'; 
@@ -615,7 +608,7 @@ if isfile('./result/K_lat_lpv.mat') == 0
     disp('Lateral LPV Synthess Started')
     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
     tic
-    [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,5,3,opt_lpv);
+    [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,nmeas_lat,ncont_lat,opt_lpv);
     SynTime_lat_lpv = toc;
     disp('Lateral LPV Synthess Finished')
     disp(['Synthesis Time: ',num2str(SynTime_lat_lpv),' sec'])
@@ -632,9 +625,9 @@ disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/i
 % Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
 systemnames         = 'P_lat K_lat_lpv W_r_lat';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lat;K_lat_lpv]';
+outputvar           = '[P_lat ; K_lat_lpv]';
 input_to_P_lat      = '[K_lat_lpv]';
-input_to_K_lat_lpv  = '[W_r_lat(1)-P_lat(1);W_r_lat(2);P_lat(2);P_lat(3);P_lat(4)]';
+input_to_K_lat_lpv  = '[W_r_lat ; P_lat]';
 input_to_W_r_lat    = '[r]';
 sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
@@ -707,6 +700,7 @@ drawnow
 
 set_param('gtm_design/Control/Controller','commented','off') % control on
 % set_param('gtm_design/Control/Controller','commented','on') % control off
+
 set_param('gtm_design','MinStep','0.0049')
 % set_param('gtm_design','MaxStep','')
 
