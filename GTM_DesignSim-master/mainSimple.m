@@ -9,6 +9,8 @@ d2r=pi/180;
 r2d=180/pi;
 per2deci = 0.01;
 deci2per = 100;
+ft2m = 0.3048;
+m2ft = 3.28084;
 
 setup
 
@@ -70,11 +72,11 @@ if isfile('./result/Trim.mat') == 0
         [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation (attempt #1)
         if (Err > 1e-3)
             loadmws(init_design(),'gtm_design');
-            fprintf('   Poor convergence, trying again.\');
+            fprintf('   Poor convergence, trying again.\n');
             [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation (attempt #2)
             if (Err > 1e-3)
                 loadmws(init_design(),'gtm_design');
-                fprintf('   Poor convergence, trying again.\');
+                fprintf('   Poor convergence, trying again.\n');
                 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation (attempt #3)
                 if (Err > 1e-3)
                     error('TRIM FAIL')
@@ -82,7 +84,7 @@ if isfile('./result/Trim.mat') == 0
             end
         end
         count = count+1;
-        fprintf('TRIM #%d @ TAS: %d, Alt: %d, Mor: %.3g\',count,tas,alt,mor)
+        fprintf('TRIM #%d @ TAS: %d, Alt: %d, Mor: %.3g\n',count,tas,alt,mor)
 
         % save trim results
         MWS_grid(i,j,k)      = MWS;
@@ -156,7 +158,7 @@ if isfile('./result/Linearization.mat') == 0
         % linearization
         [sys,londyn,latdyn]=linmodel(MWS_grid(i,j,k),vabflag,use_all_inputs,Ts);
         count = count+1;
-        fprintf('LINEARIZATION #%d @ TAS: %d, Alt: %d, Mor: %.3g\',count,tas,alt,mor)
+        fprintf('LINEARIZATION #%d @ TAS: %d, Alt: %d, Mor: %.3g\n',count,tas,alt,mor)
 
         % Redefine input name
         set(londyn,'Inputname',{'Elevator','L Morphing','R Morphing','L Throttle','R Throttle'});
@@ -183,7 +185,7 @@ if isfile('./result/Linearization.mat') == 0
         % Lat input: Aileron [rad], Rudder [rad], L Morphing [], R Morphing []
         
         % Trim condition
-        V0 = convvel(sas2tas(sas_grid(i),alt_grid(j)),'kts','ft/s'); % trim speed [ft/s]
+%         V0 = convvel(sas2tas(sas_grid(i),alt_grid(j)),'kts','ft/s'); % trim speed [ft/s]
 %         alp_0 = deg2rad(sch_alp_trim.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(i),'rho3_mor_param',mor_grid(i)).D); % trim angle of attack [rad]
 %         theta_0 = sch_pitch_trim.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(i),'rho3_mor_param',mor_grid(i)).D;
 %         gam_0 = deg2rad(theta_0-alp_0); % trim pitch angle [rad]
@@ -192,17 +194,17 @@ if isfile('./result/Linearization.mat') == 0
 %         X_V = londyn.A(1,1); % [ft/s^2] / [ft/s]
 %         X_alp = londyn.A(1,2); % [ft/s^2] / [rad]
 %         Z_V = londyn.A(2,1)*V0; % [rad/s]
-        Z_alp  = londyn.A(2,2)*V0; % [rad/s] X [ft/s] / [rad]
+%         Z_alp  = londyn.A(2,2)*V0; % [rad/s] X [ft/s] / [rad]
 %         Z_q = (londyn.A(2,3)-1)*V0; % [ft/s]
 %         M_V = londyn.A(3,1); % [rad/s^2] / [ft/s]
 %         M_alp = londyn.A(3,2); % [rad/s^2] / [rad]
 %         M_q = londyn.A(3,3); % [rad/s^2] / [rad/s]
 %         X_dele = londyn.B(1,2); % [ft/s^2] / [rad]
-        Z_dele = londyn.B(2,1)*V0; % [rad/s] X [ft/s] / [rad]
+%         Z_dele = londyn.B(2,1)*V0; % [rad/s] X [ft/s] / [rad]
 %         M_dele = londyn.B(3,1); % [rad/s] / [rad]
 
         Alon = [londyn.A zeros(4,1);
-                0 -V0 0 V0 0]; % dh/dt = V0*(theta-alpha) [ft]
+                0 -tas 0 tas 0]; % dh/dt = tas*(theta-alpha) [ft]
         Blon = [londyn.B(:,4)+londyn.B(:,5) londyn.B(:,1);
                 0 0];
 %         Alon(4,:) = Alon(4,:)-Alon(2,:); % gamma = theta-alpha
@@ -285,13 +287,13 @@ W_r_alt = 10; % 10 ft command
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % W_model
-omega_tas = 1; % [rad/s]
+omega_tas = 0.15; % [rad/s]
 zeta_tas = 0.7; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_gam = 1; % [rad/s]
-zeta_gam = 0.7; % []
-W_m_gam = tf(omega_gam^2,[1 2*zeta_gam*omega_gam omega_gam^2]);
-W_m_lon = blkdiag(W_m_tas,W_m_gam);
+omega_alt = 0.35; % [rad/s]
+zeta_alt = 0.7; % []
+W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]);
+W_m_lon = blkdiag(W_m_tas,W_m_alt);
 % figure
 % step(W_m_tas)
 % hold on, grid on
@@ -303,8 +305,8 @@ W_n_tas     = 0.06*knots2fps; % 0.06 knots broadband (ADS)
 W_n_alp     = 0.031*d2r; % 0.031 deg broadband (ADS)
 W_n_q       = 0.3857*d2r; % 0.3857 deg/s broadband (MAG3)
 % W_n_gam     = 0.031*d2r; % 0.031 deg broadband (same with alpha)
-W_n_theta     = 0.02*d2r; % 0.02 deg broadband (MIDG)
-W_n_alt     = 2.36; % 2.36 ft broadband (ADS)
+W_n_theta   = 0.02*d2r; % 0.02 deg broadband (MIDG)
+W_n_alt     = 0.001; % GPS
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
@@ -314,11 +316,14 @@ W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 % W_c_eng = 0.000001;
 % W_c_ele = 0.000001;
 % W_c_eng = (s/0.5+1)/(s/100+1)*0.01; % [%]
-W_c_ele = (s/0.5+1)/(s/100+1)*0.01; % [deg]
+% W_c_ele = (s/0.5+1)/(s/100+1)*0.01; % [deg]
 % W_c_eng = 1/10000; % [%]
 % W_c_ele = 1/3000; % [deg]
-W_c_eng = (s/0.5+1)/(s/100+1)*0.01; % [%]
 % W_c_ele = (0.8*s+42.91)/(s+119.2); % [deg]
+% W_c_ele = (s/0.5+1)/(s/100+1)*0.01; % [deg]
+% W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [%]
+W_c_ele = 0.05; % [deg]
+W_c_eng = 0.01; % [%]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % figure
 % bode(W_c_eng)
@@ -327,8 +332,8 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
-W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
-W_p_alt = (s/100+1)/(s/0.005+1)*10;
+W_p_tas = (s/100+1)/(s/0.005+1)*1;
+W_p_alt = (s/100+1)/(s/0.005+1)*100;
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % figure
 % bode(W_p_tas)
