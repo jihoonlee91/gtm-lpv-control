@@ -324,8 +324,8 @@ W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 % W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [%]
 % W_c_ele = 0.05; % [deg]
 % W_c_eng = 0.01; % [%]
-W_c_eng = (s/0.5+1)/(s/100+1)*0.01; % [deg]
-W_c_ele = (0.8*s+42.91)/(s+119.2)*0.001; % [deg]
+W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [deg]
+W_c_ele = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % figure
 % bode(W_c_eng)
@@ -501,6 +501,12 @@ drawnow
 % grid on
 
 %% Component modeling (lateral performance)
+% W_a
+P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
+P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
+P_a_mor = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
+P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
+
 % W_cmd
 W_r_bet = 2*d2r;
 W_r_phi = 30*d2r;
@@ -528,9 +534,9 @@ W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 % W_c_ail = 0.01*tf([0.8 42.91],[1 119.2]);
 % W_c_rud = 0.01*tf([0.8 42.91],[1 119.2]);
-W_c_ail = 0.01*(s/0.5+1)/(s/100+1);
-W_c_rud = 0.01*(s/0.5+1)/(s/100+1);
-W_c_mor = 0.01*(s/0.5+1)/(s/100+1);
+W_c_ail = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
+W_c_rud = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
+W_c_mor = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % figure
 % bode(W_c_ail)
@@ -551,10 +557,11 @@ W_p_lat = blkdiag(W_p_bet,W_p_phi);
 % legend('Wp_{bet}','Wp_{phi}')
 
 % Lateral LPV modeling
-systemnames         = 'P_lat W_m_lat W_n_lat W_c_lat W_p_lat W_r_lat';
+systemnames         = 'P_lat W_m_lat W_n_lat W_c_lat W_p_lat W_r_lat P_a_lat';
 inputvar            = '[r{2} ; n{4} ; u{3}]';
-outputvar           = '[W_c_lat ; W_p_lat ; W_r_lat ; P_lat+W_n_lat]';
-input_to_P_lat      = '[u]';
+outputvar           = '[W_c_lat ; W_p_lat ; W_r_lat(1)-P_lat(1)-W_n_lat(1) ; W_r_lat(2)-P_lat(4)-W_n_lat(4) ; P_lat(2)+W_n_lat(2) ; P_lat(3)+W_n_lat(3)]';
+input_to_P_lat      = '[P_a_lat]';
+input_to_P_a_lat    = '[u]';
 input_to_W_m_lat    = '[W_r_lat]';
 input_to_W_n_lat    = '[n]';
 input_to_W_c_lat    = '[u]';
@@ -565,7 +572,7 @@ cleanupsysic        = 'yes';
 sysic
 size(G_lat.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)))
 
-nmeas_lat = 6;
+nmeas_lat = 4;
 ncont_lat = 3;
 
 % Lateral H_infinity synthesis
@@ -576,7 +583,7 @@ if isfile('./result/K_lat_hinf.mat') == 0
     for k = 1:num_mor 
         G_lat_LTI = G_lat.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
-        [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,nmeas_lat,ncont_lat,opt_hinf);
+        [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_LTI,nmeas_lat,ncont_lat);
         SynTime_lat_hinfs(i,j,k) = toc;
         disp(['Gamma (Lateral H_infinity) = ',num2str(gamma_lat_hinf_point)])
         gamma_lat_hinfs(i,j,k) = gamma_lat_hinf_point;
@@ -597,11 +604,12 @@ end
 % P_a_mor = 2*pi*5/(s+2*pi*1)*pade(exp(-15e-3*s),1)*(1+w_Delta*Delta); % Bandwidth 5 Hz
 % P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
-systemnames         = 'P_lat K_lat_hinf W_r_lat';
+systemnames         = 'P_lat K_lat_hinf W_r_lat P_a_lat';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lat ; K_lat_hinf]';
-input_to_P_lat      = '[K_lat_hinf]';
-input_to_K_lat_hinf = '[W_r_lat ; P_lat]';
+input_to_P_lat      = '[P_a_lat]';
+input_to_P_a_lat    = '[K_lat_hinf]';
+input_to_K_lat_hinf = '[W_r_lat(1)-P_lat(1) ; W_r_lat(2)-P_lat(4) ; P_lat(2) ; P_lat(3)]';
 input_to_W_r_lat    = '[r]';
 sysoutname          = 'CL_lat_hinf';
 cleanupsysic        = 'yes'; 
@@ -632,11 +640,12 @@ disp(['Gamma (Lateral Rate-Unbounded LPV) = ',num2str(gamma_lat_lpv)])
 disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100),' %'])
 
 % Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
-systemnames         = 'P_lat K_lat_lpv W_r_lat';
+systemnames         = 'P_lat K_lat_lpv W_r_lat P_a_lat';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lat ; K_lat_lpv]';
-input_to_P_lat      = '[K_lat_lpv]';
-input_to_K_lat_lpv  = '[W_r_lat ; P_lat]';
+input_to_P_lat      = '[P_a_lat]';
+input_to_P_a_lat    = '[K_lat_lpv]';
+input_to_K_lat_lpv  = '[W_r_lat(1)-P_lat(1) ; W_r_lat(2)-P_lat(4) ; P_lat(2) ; P_lat(3)]';
 input_to_W_r_lat    = '[r]';
 sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
