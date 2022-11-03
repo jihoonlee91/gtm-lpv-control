@@ -281,17 +281,17 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % legend('Pa_{eng}','Pa_{ele}')
 
 % W_cmd
-W_r_tas = 10*knots2fps; % 1 knot command
+W_r_tas = 5*knots2fps; % 1 knot command
 % W_r_gam = 3*d2r; % 3 deg command
 W_r_alt = 10; % 10 ft command
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % W_model
-omega_tas = 0.15; % [rad/s]
-zeta_tas = 0.7; % []
+omega_tas = .1; % [rad/s]
+zeta_tas = 1; % []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-omega_alt = 0.35; % [rad/s]
-zeta_alt = 0.7; % []
+omega_alt = .35; % [rad/s]
+zeta_alt = 1; % []
 W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_alt);
 % figure
@@ -322,8 +322,10 @@ W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 % W_c_ele = (0.8*s+42.91)/(s+119.2); % [deg]
 % W_c_ele = (s/0.5+1)/(s/100+1)*0.01; % [deg]
 % W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [%]
-W_c_ele = 0.05; % [deg]
-W_c_eng = 0.01; % [%]
+% W_c_ele = 0.05; % [deg]
+% W_c_eng = 0.01; % [%]
+W_c_eng = (s/0.5+1)/(s/100+1)*0.01; % [deg]
+W_c_ele = (0.8*s+42.91)/(s+119.2)*0.001; % [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % figure
 % bode(W_c_eng)
@@ -332,8 +334,10 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
-W_p_tas = (s/100+1)/(s/0.005+1)*1;
-W_p_alt = (s/100+1)/(s/0.005+1)*100;
+% W_p_tas = (s/100+1)/(s/0.005+1)*1;
+% W_p_alt = (s/100+1)/(s/0.005+1)*100;
+W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
+W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*1000;
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % figure
 % bode(W_p_tas)
@@ -342,13 +346,13 @@ W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % legend('Wp_{tas}','Wp_{gam}')
 
 ncont_lon = 2;
-nmeas_lon = 7;
+nmeas_lon = 5;
 
 % Longitudinal LPV modeling
 % control interconnection
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon';
 inputvar            = '[r{2} ; n{5} ; u{2}]';
-outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon ; P_lon+W_n_lon]';
+outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-P_lon(1)-W_n_lon(1) ; W_r_lon(2)-P_lon(5)-W_n_lon(5) ; P_lon(2)+W_n_lon(2) ; P_lon(3)+W_n_lon(3) ; P_lon(4)+W_n_lon(4)]';
 input_to_P_lon      = '[P_a_lon]';
 input_to_W_m_lon    = '[W_r_lon]';
 input_to_W_n_lon    = '[n]';
@@ -364,13 +368,13 @@ size(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3
 % Longitudinal H_infinity synthesis
 if isfile('./result/K_lon_hinf.mat') == 0
     clearvars K_lon_hinfs gamma_lon_hinfs
-    opt_hinf = hinfsynOptions('Method','RIC');
+%     opt_hinf = hinfsynOptions('Method','RIC');
     for i = 1:num_sas
     for j = 1:num_alt
     for k = 1:num_mor 
         G_lon_LTI = G_lon.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
         tic
-        [K_lon_hinf_point,CL,gamma_lon_hinf_point] = hinfsyn(G_lon_LTI,nmeas_lon,ncont_lon,opt_hinf);
+        [K_lon_hinf_point,CL,gamma_lon_hinf_point] = hinfsyn(G_lon_LTI,nmeas_lon,ncont_lon);
         SynTime_lon_hinfs(i,j,k) = toc;
         disp(['Gamma (Longitudinal H_infinity) = ',num2str(gamma_lon_hinf_point)])
         gamma_lon_hinfs(i,j,k) = gamma_lon_hinf_point;
@@ -390,7 +394,7 @@ systemnames         = 'P_lon K_lon_hinf W_r_lon P_a_lon';
 inputvar            = '[r{2}]';
 outputvar           = '[P_lon ; K_lon_hinf]';
 input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_hinf = '[W_r_lon ; P_lon]';
+input_to_K_lon_hinf = '[W_r_lon(1)-P_lon(1) ; W_r_lon(2)-P_lon(5) ; P_lon(2) ; P_lon(3) ; P_lon(4)]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[K_lon_hinf]';
 sysoutname          = 'CL_lon_hinf';
@@ -406,18 +410,18 @@ sysic
 
 % Longitudinal LPV synthesis
 if isfile('./result/K_lon_lpv.mat') == 0
-    disp('Longitudinal LPV Synthess Started')
-    datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
-    opt_lpv  = lpvsynOptions('BackOffFactor',1.02);
+%     disp('Longitudinal LPV Synthess Started')
+%     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
+    opt_lpv = lpvsynOptions('BackOffFactor',1.2);
     tic
     [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon,opt_lpv);
     SynTime_lon_lpv = toc;
-    disp('Longitudinal LPV Synthess Finished')
-    disp(['Synthesis Time: ',num2str(SynTime_lon_lpv),' sec'])
-    datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
+%     disp('Longitudinal LPV Synthess Finished')
+%     disp(['Synthesis Time: ',num2str(SynTime_lon_lpv),' sec'])
+%     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
     save K_lon_lpv.mat K_lon_lpv gamma_lon_lpv info_lon_lpv SynTime_lon_lpv
 else
-    disp('Longitudinal LPV Synthesis Skipped & Data Loaded')
+%     disp('Longitudinal LPV Synthesis Skipped & Data Loaded')
     load('./result/K_lon_lpv.mat')
 end
 disp(['Min Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(info_lon_lpv.MinGamma)])
@@ -427,9 +431,9 @@ disp(['Back-Off Factor (Longitudinal Rate-Unbounded LPV) = ',num2str((gamma_lon_
 % Closed-loop interconnection with Longitudinal LPV controller
 systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon';
 inputvar            = '[r{2}]';
-outputvar           = '[P_lon;K_lon_lpv]';
+outputvar           = '[P_lon ; K_lon_lpv]';
 input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_lpv  = '[W_r_lon ; P_lon]';
+input_to_K_lon_lpv  = '[W_r_lon(1)-P_lon(1) ; W_r_lon(2)-P_lon(5) ; P_lon(2) ; P_lon(3) ; P_lon(4)]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[K_lon_lpv]';
 sysoutname          = 'CL_lon_lpv';
