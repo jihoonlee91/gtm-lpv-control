@@ -3,14 +3,9 @@ close all
 clear all
 clc
 
-fps2knots = 0.592487;
-knots2fps = 1/fps2knots;
-d2r=pi/180;
-r2d=180/pi;
-per2deci = 0.01;
-deci2per = 100;
-ft2m = 0.3048;
-m2ft = 3.28084;
+knots2fps = 1.68781;
+m2ft      = 3.28084;
+d2r       =pi/180;
 
 setup
 
