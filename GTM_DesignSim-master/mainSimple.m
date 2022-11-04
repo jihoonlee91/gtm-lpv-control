@@ -413,7 +413,7 @@ P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
 % Maximum expected command
 W_r_bet = 2*d2r;
-W_r_phi = 30*d2r;
+W_r_phi = 20*d2r;
 W_r_lat = blkdiag(W_r_bet,W_r_phi);
 
 % Ideal model
@@ -587,7 +587,6 @@ drawnow
 % P_lat.Domain = Domain;
 
 %% Nonlinear simulation
-
 MWS               = init_design('GTM');
 target            = struct('gamma',0,'tas',85); % start trim condition target [knot]
 MWS.StatesInp(9)  = 0; % set altitude [ft]
@@ -612,5 +611,5 @@ set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design/Guidance/Heading Control','commented','off') % control on
 set_param('gtm_design/Guidance/Windless','commented','off') % control off
 set_param('gtm_design','MinStep','0.0049')
-tf = 100;
-[tsim,xsim,ysim]=sim('gtm_design',[0 tf]);
+t_final = 250;
+[tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
