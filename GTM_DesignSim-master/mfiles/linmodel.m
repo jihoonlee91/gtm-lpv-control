@@ -31,7 +31,7 @@ if (exist('MWS','var') && ~isempty(MWS))
 end
 
 % Set optional flags
-if ~exist('vabflag','var') || isempty(vabflag),
+if ~exist('vabflag','var') || isempty(vabflag)
     vabflag = 0;
 end
 
@@ -80,17 +80,17 @@ end
 %% Extract the Linear Model using dlinmod.  For Ts > 0, the model is discrete.
 warning('off','Simulink:tools:dlinmodIgnoreDiscreteStates');
 [a,b,c,d]=dlinmod('gtm_design',Ts,Xo,Args);
-sys=ss(a,b,c,d,Ts);
+sys=ss(a,b,c,d,Ts); % 68x23x21
 warning('on','Simulink:tools:dlinmodIgnoreDiscreteStates');
 
 % Define states to retain, remove others
 keep=EOM(1)+[0:11]';
 elim=setdiff([1:length(a)]',keep);
-sys=modred(sys,elim,'del');
+sys=modred(sys,elim,'del'); % 12x23x21
 
 % Remove some of the outputs that are used for trim only
-% First 6 are from AUX, last 12 are from the EOM
-sys=sys([2:4,7:18],:);
+% First 6 are from AUX, second 12 are from the EOM, last 3 are from AUX
+sys=sys([2:4,7:18,19:21],:); % 12x23x(15+3)
 
 % Remove firsst four inputs (trim inputs)
 sys=sys(:,[5:23]);
@@ -119,7 +119,8 @@ Onames={'tas', 'alpha', 'beta', ... %  1  2  3
         'u',   'v',     'w',    ... %  4  5  6
         'p',   'q',     'r',    ... %  7  8  9
         'Lat', 'Lon',   'Alt',  ... % 10 11 12
-        'phi', 'theta', 'psi'};     % 13 14 15
+        'phi', 'theta', 'psi',  ... % 13 14 15
+        'Ax',  'Ay',    'Az'};      % 16 17 18
 
 set(sys,'Statename',Snames,'Outputname',Onames,'Inputname',Inames);
 
