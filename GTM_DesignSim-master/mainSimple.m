@@ -6,7 +6,7 @@ clc
 % Unit conversion parameters
 knots2fps = 1.68781; % knots to feet per seconds
 m2ft      = 3.28084; % meters to feet
-d2r       =pi/180; % degrees to radians
+d2r       = pi/180; % degrees to radians
 
 % Model basic setup
 setup
@@ -182,10 +182,10 @@ if isfile('./result/Linearization.mat') == 0
                        'Outputname',{'beta','p','r','phi'})
         
         % stability check
-        if ~isstable(londyn_aug) % unstable
+        if ~isstable(londyn) % unstable
             warning('Unstable Longitudinal dynamics') 
         end
-        if ~isstable(latdyn_aug) % unstable
+        if ~isstable(latdyn) % unstable
             warning('Unstable lateral dynamics')
         end
         
@@ -219,7 +219,9 @@ end
 s = tf('s');
 
 % W_a (actuator dynamics)
-P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
+% P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
+P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[0 0.7314],0)); % Throttle Lag Model
+% P_a_eng = sqrt(0.7314)/(s+sqrt(0.7314)); % Throttle Lag Model
 P_a_ele = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % figure
@@ -229,18 +231,23 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % legend('Pa_{eng}','Pa_{ele}')
 
 % W_r (maximum expected command)
-W_r_tas = 10*knots2fps; % 10 knot command
+W_r_tas = 5*knots2fps; % 10 knot command
 W_r_alt = 10; % 10 ft command
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % W_m (ideal model)
-omega_tas = .1; % [rad/s]
-zeta_tas = 1; % []
-W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
+omega_tas = .35; % [rad/s]
 omega_alt = .35; % [rad/s]
+zeta_tas = 1; % []
 zeta_alt = 1; % []
+W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
 W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]);
 W_m_lon = blkdiag(W_m_tas,W_m_alt);
+figure
+step(W_m_tas)
+hold on, grid on
+step(W_m_alt)
+legend('Wm_{tas}','Wm_{alt}')
 
 % sensor noise (white)
 W_n_tas     = 0.06*knots2fps; % 0.06 knots broadband (ADS)
@@ -253,22 +260,23 @@ W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 % control weight
 W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [deg]
 W_c_ele = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
+% W_c_ele = (s/0.5+1)/(s/100+1)*0.1; % [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
-% figure
-% bode(W_c_eng)
-% hold on, grid on
-% bode(W_c_ele)
-% legend('Wc_{eng}','Wc_{ele}')
+figure
+bode(W_c_eng)
+hold on, grid on
+bode(W_c_ele)
+legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
 W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
 W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*1000;
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
-% figure
-% bode(W_p_tas)
-% hold on, grid on
-% bode(W_p_gam)
-% legend('Wp_{tas}','Wp_{gam}')
+figure
+bode(W_p_tas)
+hold on, grid on
+bode(W_p_alt)
+legend('Wp_{tas}','Wp_{alt}')
 
 % control interconnection
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon';
@@ -539,12 +547,12 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-figure
-step(CL_lat_hinf);
-hold on, grid on
-step(CL_lat_lpv);
-legend('H\infty','LPV')
-drawnow
+% figure
+% step(CL_lat_hinf);
+% hold on, grid on
+% step(CL_lat_lpv);
+% legend('H\infty','LPV')
+% drawnow
 
 %% Lateral rate-bounded LPV synthesis
 % G_lat.Domain = DomainRB;
@@ -587,29 +595,31 @@ drawnow
 % P_lat.Domain = Domain;
 
 %% Nonlinear simulation
+etas0 = -12.5;
+alt0  = 0;
+sas0  = 85;
+tas0  = sas2tas(sas0,alt0);
+gam0  = 0;
 MWS               = init_design('GTM');
-target            = struct('gamma',0,'tas',85); % start trim condition target [knot]
-MWS.StatesInp(9)  = 0; % set altitude [ft]
-MWS.bias.morphing = -12.5; % set morphing parameter
+MWS.bias.morphing = etas0; % set morphing parameter
+MWS.StatesInp(9)  = alt0; % set altitude [ft]
+target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
 % MWS.bias.aileron = 0;
 % MWS.bias.rudder = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design/Control/Controller','commented','on') % control off
-set_param('gtm_design/Guidance/Heading Control','commented','on') % control off
-set_param('gtm_design/Guidance/Windless','commented','on') % control off
 set_param('gtm_design','MinStep','auto')
-[MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,verbose); % trim calculation
+[MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,1); % trim calculation
 % MWS.StatesInp(4) = 1*d2r; % p [rad/s]
-% MWS.StatesInp(5) = 1*d2r; % q [rad/s] 
+% MWS.StatesInp(5) = 1*d2r; % q [rad/s]
 % MWS.StatesInp(6) = 1*d2r; % r [rad/s]
 % MWS.StatesInp(10) = 1*d2r; % phi [rad/s]
 % MWS.StatesInp(11) = 1*d2r; % theta [rad/s]
-% MWS.StatesInp(12) = 1*d2r; % psi [rad/s]
+% MWS.StatesInp(12) = 1*d2r; % psi [rad/s] 
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design/Control/Controller','commented','off') % control on
-set_param('gtm_design/Guidance/Heading Control','commented','off') % control on
-set_param('gtm_design/Guidance/Windless','commented','off') % control off
 set_param('gtm_design','MinStep','0.0049')
-t_final = 250;
+t_final = 100;
+GuidanceMode = 2;
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);

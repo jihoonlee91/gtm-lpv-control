@@ -3,9 +3,6 @@ slprj/
 .DS_Store
 *.slxc
 *.avi
-*.mat
-*.mat
-*.mat
 GTM_DesignSim-master/K_lat_hinf.mat
 GTM_DesignSim-master/K_lat_lpv.mat
 GTM_DesignSim-master/K_lon_hinf.mat
