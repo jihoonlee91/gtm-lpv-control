@@ -68,13 +68,17 @@ open_system('gtm_design');
 % set_param(model,'MaxStep','auto')
 set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
-set_param('gtm_design/Control/Controller','commented','on')
+set_param('gtm_design/Control/Controller','commented','on') % control off
+% set_param('gtm_design/Guidance/Heading Control','commented','on') % control off
+% set_param('gtm_design/Guidance/Windless','commented','on') % control off
+load FixedWingBus.mat
+GuidanceMode = 1;
 
 % load nominal starting point
 loadmws(init_design('GTM'),'gtm_design');
 
 % Trim model, and load trimmed conditions
-appendmws(trimgtm(struct('tas',85, 'gamma',0),'elev',0));
+% appendmws(trimgtm(struct('tas',85, 'gamma',0),'elev',0));
 
 warning('on','Simulink:SL_MdlFileNotOnPath');
 

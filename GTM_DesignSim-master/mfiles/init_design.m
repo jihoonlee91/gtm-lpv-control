@@ -20,7 +20,7 @@ if ~exist('vehicle','var') || isempty(vehicle)
     vehicle='GTM_T2';
 end
 
-if strcmp(vehicle,'GTM'),
+if strcmp(vehicle,'GTM')
     vehicle='GTM_T2';  % Backwards compatible
 end
 
@@ -44,8 +44,8 @@ MWS.WindShearOn = 1;
 MWS.Timestep = 1/200; % sec
 
 % Initial Conditions
-ini.Altitude =     800; % ft
-ini.tas      =     85;      % knots
+ini.Altitude =     1000; % ft
+ini.tas      =     80;      % knots
 ini.alpha    =     3;        % deg
 ini.gamma    =     0;        % deg
 ini.stab     =     0;
@@ -61,7 +61,7 @@ MWS.fuel_in_use  = fuelburn_on; % fuel burn on/off
 
 
 switch(upper(vehicle))
-    case 'GTM_T2',
+    case 'GTM_T2'
       %MWS.Aero=load('T2_restricted_aerodatabase');
       MWS.Aero=load('T2_polynomial_aerodatabase');
 
@@ -71,7 +71,7 @@ switch(upper(vehicle))
 
        % Generate Damage Models
        MWS = DamageModels_T2(MWS);
-    otherwise,
+    otherwise
        error('No Parameters defined for vehicles: %s',vehicle);
 end
 
