@@ -54,12 +54,12 @@ RudLim  = [-30;  30];     % Rudder limits (deg), symmetric
 
 
 % Elevator Trim by default
-if (~exist('PitchSurf','var') || isempty (PitchSurf)),
+if (~exist('PitchSurf','var') || isempty (PitchSurf))
     PitchSurf='elev';
 end
 
 % Assign logical TrimWithStab variable, set appropriate pitchsurface limits
-if strncmpi(PitchSurf,'elev',4), 
+if strncmpi(PitchSurf,'elev',4) 
   appendmws(struct('TrimWithStab',0),'gtm_design');
   PitchSurfLim=EleLim;  
 elseif strncmpi(PitchSurf,'stab',4)
@@ -86,7 +86,7 @@ knownfields={ 'eas','tas','alpha','beta','gamma','gndtrack',...
     'rollrate','pitchrate','yawrate',...
     'pdeg','qdeg','rdeg'};
 saywhat=setdiff(fieldnames(target),knownfields);
-if ~isempty(saywhat),
+if ~isempty(saywhat)
     for i=1:length(saywhat),fprintf(1,'Unknown field in target: %s\n',saywhat{i}),end
     error('Unknown fields');
 end
@@ -106,7 +106,7 @@ for i=1:length(fn)
 end
 
 % Warn on zero gndtrack|yaw
-if isfield(target,'yaw') && target.yaw==0,
+if isfield(target,'yaw') && target.yaw==0
     warning('0 degree yaw is at 0/360 discontinuity, optimizer may stall'); pause(1);
 end
 
@@ -149,13 +149,17 @@ para(14)=2500; % Iteration limit
 
 % Run optimization
 
-if (verbose==1), fprintf(1,'Optimizing using simulink function nlconst...'); end
+if (verbose==1) 
+%     fprintf(1,'Optimizing using simulink function nlconst...'); 
+end
 warning('off','MATLAB:nearlySingularMatrix');
 warning('off','MATLAB:divideByZero');
 [XU_opt,opt] = simcnstr('trim',@(x) simio(x,Xo,Index,target),XU_0,para,XU_lower,XU_upper,[]);
 warning('on','MATLAB:nearlySingularMatrix');
 warning('on','MATLAB:divideByZero');
-if (verbose==1), fprintf(1,' Done\n'), end
+if (verbose==1) 
+%     fprintf(1,' Done\n'), 
+end
 
 
 % Map angular trim conditions to this range:
@@ -185,7 +189,7 @@ MWS=grabmws('gtm_design');
 % Update values effected by trimming
 MWS.StatesInp(1:6)   = XU_opt(1:6);
 MWS.StatesInp(10:12) = XU_opt(7:9);
-if (MWS.TrimWithStab),
+if (MWS.TrimWithStab)
     MWS.bias.stabilizer = XU_opt(10);
 else
     MWS.bias.elevator   = XU_opt(10);
@@ -209,31 +213,31 @@ Err = max(abs(dx(Index.EOM(1:6)))); %Accelerations, should all be zero
 outnames={'eas','tas','alpha','beta','gamma','gndtrack','roll','pitch','yaw','rollrate','pitchrate','yawrate','pdeg','qdeg','rdeg'};
 outvalues=[yout(1:6);Xtrim(Index.EOM(10:12))*180/pi;dx(Index.EOM(10:12))*180/pi; Xtrim(Index.EOM(4:6))*180/pi];
 for i=1:length(outnames)
-    if isfield(target,outnames{i}),  % for ones that are specified target points
+    if isfield(target,outnames{i})  % for ones that are specified target points
         Err = max(Err,abs(outvalues(i)-target.(outnames{i})));
     end
 end
 
 % Print results to screen
-if (verbose),
-    fprintf(1,'\nTarget conditions:\n  ');
-    fn=sort(fieldnames(target));
-    for i=1:length(fn),  if (target.(fn{i})~=0),   fprintf(1,'%s: %5.2f   ',fn{i},target.(fn{i})); end, end
-    fprintf('\n  ');
-    for i=1:length(fn),  if (target.(fn{i})==0),   fprintf(1,'%s: %5.2f   ',fn{i},target.(fn{i})); end, end
-    fprintf(1,'\n\nTrim conditions (Err=%5.3e)\n',Err);
-    fprintf(1,'  morphing: %5.2f\t\tmorphingL: %5.2f\t\tmorphingR: %8.2f\n',MWS.bias.morphing,MWS.bias.morphing,MWS.bias.morphing);
-    fprintf(1,'  gamma: %5.2f\t\ttas: %5.2f\t\talt: %8.2f\n',yout(5),yout(2),Xtrim(Index.EOM(9)));
+if (verbose)
+%     fprintf(1,'\nTarget conditions:\n  ');
+%     fn=sort(fieldnames(target));
+%     for i=1:length(fn),  if (target.(fn{i})~=0),   fprintf(1,'%s: %5.2f   ',fn{i},target.(fn{i})); end, end
+%     fprintf('\n  ');
+%     for i=1:length(fn),  if (target.(fn{i})==0),   fprintf(1,'%s: %5.2f   ',fn{i},target.(fn{i})); end, end
+    fprintf(1,'Trim conditions (Err=%5.3e)\n',Err);
+    fprintf(1,'  morphS: %5.2f\tmorphL: %5.2f\t\tmorphR: %5.2f\n',MWS.bias.morphing,MWS.bias.morphing,MWS.bias.morphing);
+    fprintf(1,'  gamma: %5.2f\t\ttas: %5.2f\t\t\talt: %5.2f\n',yout(5),yout(2),Xtrim(Index.EOM(9)));
     fprintf(1,'  eas: %5.2f\t\talpha: %5.2f\t\tbeta: %5.2f\n',yout(1),yout(3),yout(4));
-    fprintf(1,'  pdeg: %5.2f\t\tqdeg: %5.2f\t\trdeg: %5.2f\n',Xtrim(Index.EOM(4:6))*180/pi);
-    fprintf(1,'  roll: %5.2f\t\tpitch: %5.2f\t\tyaw: %5.2f\t\tgndtrack:%5.2f\n',Xtrim(Index.EOM(10:12))*180/pi,yout(6));
-    fprintf(1,'  rollrate: %5.2f\tpitchrate: %5.2f\tyawrate: %5.2f\n\n',dx(Index.EOM(10:12))*180/pi);
-    fprintf(1,'  elevator: %5.2f\tstabilizer: %5.2f\tailerons: %5.2f\t\trudder:% 5.2f\n',...
-        MWS.bias.elevator, MWS.bias.stabilizer, MWS.bias.aileron, MWS.bias.rudder);
-    fprintf(1,'  throttle: %5.2f\tspeedbrake: %5.2f\tflaps: %5.2f\t\tgeardown:% 5.2f\n\n',...
-        MWS.bias.throttle, MWS.bias.speedbrake, MWS.bias.flaps, MWS.bias.geardown);
-    fprintf(1,'  d/dt(u,v,w,p,q,r)\t[%5.2e %5.2e %5.2e %5.2e %5.2e %5.2e]\n',dx(Index.EOM(1:6)));
-    fprintf(1,'  d/dt(phi,theta,psi)\t[%5.2e %5.2e %5.2e]\n\n',dx(Index.EOM(10:12)));
+    fprintf(1,'  pdeg: %5.2f\t\tqdeg: %5.2f\t\t\trdeg: %5.2f\n',Xtrim(Index.EOM(4:6))*180/pi);
+    fprintf(1,'  roll: %5.2f\t\tpitch: %5.2f\t\tyaw: %5.2f\t\t\tgndtrack:%5.2f\n',Xtrim(Index.EOM(10:12))*180/pi,yout(6));
+    fprintf(1,'  rollrate: %5.2f\tpitchrate: %5.2f\tyawrate: %5.2f\n',dx(Index.EOM(10:12))*180/pi);
+    fprintf(1,'  throttle: %5.2f\televator: %5.2f\t\tailerons: %5.2f\t\trudder:% 5.2f\n',...
+        MWS.bias.throttle, MWS.bias.elevator, MWS.bias.aileron, MWS.bias.rudder);
+    fprintf(1,'  stabilizer: %5.2f\tspeedbrake: %5.2f\tflaps: %5.2f\t\tgeardown:% 5.2f\n',...
+        MWS.bias.stabilizer, MWS.bias.speedbrake, MWS.bias.flaps, MWS.bias.geardown);
+%     fprintf(1,'  d/dt(u,v,w,p,q,r)\t[%5.2e %5.2e %5.2e %5.2e %5.2e %5.2e]\n',dx(Index.EOM(1:6)));
+%     fprintf(1,'  d/dt(phi,theta,psi)\t[%5.2e %5.2e %5.2e]\n\n',dx(Index.EOM(10:12)));
 end
 
 % Tabulate results in Trim Condition structure

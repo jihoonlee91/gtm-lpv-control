@@ -14,7 +14,7 @@ MWS = grabmws('gtm_design');
 
 %% Basic setup
 % Parameter grid
-sas_grid  = [85]; % [kts]
+sas_grid  = [80]; % [kts]
 alt_grid  = [0]; % 700~1100 [ft]
 mor_grid  = [-12.5]; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
@@ -274,7 +274,7 @@ legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
 W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
-W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
+W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10;
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 figure
 bode(W_p_tas)
@@ -310,7 +310,7 @@ if isfile('./result/K_lon_hinf.mat') == 0
         tic
         [K_lon_hinf_point,CL,gamma_lon_hinf_point] = hinfsyn(G_lon_LTI,nmeas_lon,ncont_lon);
         SynTime_lon_hinfs(i,j,k) = toc;
-        disp(['Gamma (Longitudinal H_infinity) = ',num2str(gamma_lon_hinf_point)])
+        disp(['Lon Hinf Gam    = ',num2str(gamma_lon_hinf_point)])
         gamma_lon_hinfs(i,j,k) = gamma_lon_hinf_point;
         K_lon_hinfs(:,:,i,j,k) = K_lon_hinf_point;
     end
@@ -345,9 +345,9 @@ if isfile('./result/K_lon_lpv.mat') == 0
 else
     load('./result/K_lon_lpv.mat')
 end
-disp(['Min Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(info_lon_lpv.MinGamma)])
-disp(['Gamma (Longitudinal Rate-Unbounded LPV) = ',num2str(gamma_lon_lpv)])
-disp(['Back-Off Factor (Longitudinal Rate-Unbounded LPV) = ',num2str((gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100),' %'])
+disp(['Lon LPV Min Gam = ',num2str(info_lon_lpv.MinGamma)])
+disp(['Lon LPV Gam     = ',num2str(gamma_lon_lpv)])
+disp(['Lon LPV Backoff = ',num2str((gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100),' %'])
 
 % Closed-loop interconnection with Longitudinal LPV controller
 systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon';
@@ -601,7 +601,7 @@ sysic
 %% Nonlinear simulation
 etas0 = -12.5;
 alt0  = 0;
-sas0  = 85;
+sas0  = 80;
 tas0  = sas2tas(sas0,alt0);
 gam0  = 0;
 MWS               = init_design('GTM');
@@ -625,5 +625,5 @@ loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
 t_final = 100;
-GuidanceMode = 4;
+GuidanceMode = 2;
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
