@@ -219,8 +219,12 @@ end
 s = tf('s');
 
 % W_a (actuator dynamics)
-% P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
-P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[0 0.7314],0)); % Throttle Lag Model
+A_eng = [-1.336,-0.7314;1,0];
+B_eng = [1;0];
+C_eng = [-0.1474   0.7314];
+D_eng = 0;
+P_a_eng = tf(ss(A_eng,B_eng,C_eng,D_eng)); % Throttle Lag Model
+% P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[0 0.7314],0)); % Throttle Lag Model
 % P_a_eng = sqrt(0.7314)/(s+sqrt(0.7314)); % Throttle Lag Model
 P_a_ele = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lon = blkdiag(P_a_eng,P_a_ele);
@@ -231,7 +235,7 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % legend('Pa_{eng}','Pa_{ele}')
 
 % W_r (maximum expected command)
-W_r_tas = 5*knots2fps; % 10 knot command
+W_r_tas = 10*knots2fps; % 10 knot command
 W_r_alt = 10; % 10 ft command
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
@@ -258,7 +262,7 @@ W_n_alt     = 0.1; % [ft] (MIDG II GPS)
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
-W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [deg]
+W_c_eng = (s/30+1)/(s/100+1)*0.01; % [deg]
 W_c_ele = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
 % W_c_ele = (s/0.5+1)/(s/100+1)*0.1; % [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
@@ -270,7 +274,7 @@ legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
 W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
-W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*1000;
+W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 figure
 bode(W_p_tas)
@@ -333,9 +337,10 @@ sysic
 
 % Longitudinal LPV synthesis
 if isfile('./result/K_lon_lpv.mat') == 0
-    opt_lpv = lpvsynOptions('BackOffFactor',1.2);
+%     opt_lpv = lpvsynOptions('BackOffFactor',1.2);
     tic
-    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon,opt_lpv);
+%     [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon,opt_lpv);
+    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon);
     SynTime_lon_lpv = toc;
     save K_lon_lpv.mat K_lon_lpv gamma_lon_lpv info_lon_lpv SynTime_lon_lpv
 else
