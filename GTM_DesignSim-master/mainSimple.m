@@ -337,9 +337,9 @@ sysic
 
 % Longitudinal LPV synthesis
 if isfile('./result/K_lon_lpv.mat') == 0
-    opt_lpv = lpvsynOptions('BackOffFactor',1.2);
+%     opt_lpv = lpvsynOptions('BackOffFactor',1.2);
     tic
-    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon,opt_lpv);
+    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon);
     SynTime_lon_lpv = toc;
     save K_lon_lpv.mat K_lon_lpv gamma_lon_lpv info_lon_lpv SynTime_lon_lpv
 else
@@ -525,7 +525,7 @@ if isfile('./result/K_lat_lpv.mat') == 0
 %     disp('Lateral LPV Synthess Started')
     datetime('now','TimeZone','local','Format','d-MMM-y HH:mm:ss Z')
     tic
-    [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,nmeas_lat,ncont_lat,opt_lpv);
+    [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,nmeas_lat,ncont_lat);
     SynTime_lat_lpv = toc;
 %     disp('Lateral LPV Synthess Finished')
 %     disp(['Synthesis Time: ',num2str(SynTime_lat_lpv),' sec'])
