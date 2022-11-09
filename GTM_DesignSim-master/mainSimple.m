@@ -337,10 +337,9 @@ sysic
 
 % Longitudinal LPV synthesis
 if isfile('./result/K_lon_lpv.mat') == 0
-%     opt_lpv = lpvsynOptions('BackOffFactor',1.2);
+    opt_lpv = lpvsynOptions('BackOffFactor',1.2);
     tic
-%     [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon,opt_lpv);
-    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon);
+    [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon,opt_lpv);
     SynTime_lon_lpv = toc;
     save K_lon_lpv.mat K_lon_lpv gamma_lon_lpv info_lon_lpv SynTime_lon_lpv
 else

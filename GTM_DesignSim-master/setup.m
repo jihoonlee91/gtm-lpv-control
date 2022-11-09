@@ -22,6 +22,16 @@ addpath(genpath('./result_archive/'));
 addpath(genpath('./LPVToolsV1.0/'));
 run('./LPVToolsV1.0/addlpv');
 
+addpath(genpath('./YALMIP-master/'));
+
+addpath(genpath('./robust_lmi_parser/'));
+
+addpath(genpath('./SDPT3-4.0/'));
+% Installmex(1)
+
+addpath(genpath('./LPVcore-v0.3/'));
+install_lpvcore
+
 addpath(genpath('./temporary/'));
 % load TempSch.mat
 % load TempK.mat

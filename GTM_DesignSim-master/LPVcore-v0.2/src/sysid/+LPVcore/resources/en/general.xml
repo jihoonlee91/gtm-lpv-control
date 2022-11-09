@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rsccat version="1.0" locale="en_US" product="LPVcore" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schema/msgcat.xsd">
+  <message>
+    <!--THIS FILE CONTAINS THE LPVCORE MESSAGE CATALOGS-->
+    <!--(c) Copyright 2018 - Control systems group, University of Eindhoven-->
+    <!-- Pepijn Cox (p.b.cox@tue.nl) AND Roland Tóth (r.toth@tue.nl).-->
+    <!-- v.1.0.b -->  
+      
+    <entry key="Lpvcore_title">The LPVcore Toolbox</entry>
+    <entry key="Lpvcore_Description">The LPVcore Toolbox enables users to model, simulate, identify, and control linear parameter-varying model representations</entry>
+
+    <!-- General messages -->
+    <entry key="InvalidInput">{1} Type "help {2}" for more information.</entry>
+    <entry key="InvalidInputArgument">The {1} argument must be a {2}. Type "help {3}" for more information.</entry>
+    <entry key="InvalidProperty">The value of the "{1}" property must be a {2}. Type "help {3}" for more information.</entry>
+    <entry key="InvalidNumOfInputs">Invalid number of inputs. Type "help {1}" for more information.</entry>
+    <entry key="InvalidOption">The option "{1}" in "{2}" must be a {3}. Type "help {4}" for more information.</entry>
+    <entry key="CompletePropertyValuePairs">Use name/value pairs to specify property values. Type "help {1}" for more information.</entry>
+    <entry key="UnknownPropertyValuePairs">Unknown name "{1}" for the name/value pairs to specify property values. Type "help {2}" for more information.</entry>
+    <entry key="NoCharPropertyValuePairs">Name of the name/value pairs must be a single-line character vector. Type "help {1}" for more information.</entry>
+    <entry key="PropertyNotInUse">The property "{1}" is not used. Hence, it cannot be modified. Type "help {2}" for more information.</entry>
+    <entry key="NotImplemented"> The operation for {1} is not implemented in LPVcore yet. </entry>
+    <entry key="InternalError">The LPVcore toolbox encountered an internal problem in file {1}. If this error occurs regularly, please contact the developers.</entry>
+    
+    <entry key="hline">--------------------------------------\n</entry>
+    <entry key="bold">&lt;strong&gt;{1}&lt;/strong&gt;</entry>
+    
+    <entry key="EstimationProc">Estimation Process</entry>
+    <entry key="Result">Result</entry>
+    
+  </message>
+</rsccat>

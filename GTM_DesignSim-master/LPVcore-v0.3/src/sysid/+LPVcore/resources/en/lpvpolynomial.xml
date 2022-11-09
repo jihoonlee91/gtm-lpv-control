@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rsccat version="1.0" locale="en_US" product="LPVcore" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schema/msgcat.xsd">
+  <message>
+    <!--THIS FILE CONTAINS THE LPVCORE MESSAGE CATALOGS-->
+    <!--(c) Copymiddle 2018 - Control systems group, University of Eindhoven-->
+    <!-- Pepijn Cox (p.b.cox@tue.nl) AND Roland Tóth (r.toth@tue.nl).-->
+    
+    <!-- LPVPOLYNOMIAL messages -->
+    <entry key="badp">Invalid parameterization of variable "{1}" for the {2,number,integer}-th order and {3,number,integer}-th basis function. Should be param.Continuous object</entry>
+    
+    <entry key="badbas">Invalid basis function of variable "{1}" for the {2,number,integer}-th order and {3,number,integer}-th basis function. Either empty ( [] ) or function handle.</entry>
+    
+    <entry key="pNotRow">Parameterization of variable "{1}" should be a vector.</entry>
+    
+    <entry key="parmNotRow">The parameter set of the {1,number,integer}-th order of the parameterization of variable "{2}" should be a vector.</entry>
+    
+    <entry key="basisNotRow">The parameter set of the {1,number,integer}-th order of the parameterization of variable "{2}" should be a vector.</entry>
+   
+    <entry key="parmBasisDifferSize">The number of parameters matrices is different from the number of basis functions of the {1,number,integer}-th order of the parameterization of variable "{2}".</entry>
+    
+    <entry key="parmOrBasisEmpty">Either the parameter or the basis function of variable "{1}" for the {2,number,integer}-th order and {3,number,integer}-th basis function is empty.</entry>
+
+    <entry key="emptypolyval">The value of the "{1}" parameter for the {2,number,integer}-th order and {3,number,integer}-th basis function cannot be empty.</entry>
+    
+    
+  </message>
+</rsccat>

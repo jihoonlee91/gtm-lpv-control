@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rsccat version="1.0" locale="en_US" product="LPVcore" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../schema/msgcat.xsd">
+  <message>
+    <!--THIS FILE CONTAINS THE LPVCORE MESSAGE CATALOGS-->
+    <!--(c) Copymiddle 2018 - Control systems group, University of Eindhoven-->
+    <!-- Pepijn Cox (p.b.cox@tue.nl) AND Roland Tóth (r.toth@tue.nl).-->
+    
+    <!-- LPVIDDATA messages -->
+    <entry key="EmptyInputOutputData">{1} Type "help {2}" for more information.</entry>
+    
+    
+    <!-- LPV Identification messages -->
+    <entry key="EstDataMess">Data has {1,number,integer} outputs, {2,number,integer} scheduling signals, {3,number,integer} inputs, and {4,number,integer} samples.</entry>
+    
+  </message>
+</rsccat>
