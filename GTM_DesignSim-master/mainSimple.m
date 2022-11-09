@@ -530,9 +530,9 @@ else
     disp('Lateral LPV Synthesis Skipped & Data Loaded')
     load('./result/K_lat_lpv.mat')
 end
-% disp(['Min Gamma (Lateral Rate-Unbounded LPV) = ',num2str(info_lat_lpv.MinGamma)])
+disp(['Min Gamma (Lateral Rate-Unbounded LPV) = ',num2str(info_lat_lpv.MinGamma)])
 disp(['Gamma (Lateral Rate-Unbounded LPV) = ',num2str(gamma_lat_lpv)])
-% disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100),' %'])
+disp(['Back-Off Factor (Lateral Rate-Unbounded LPV) = ',num2str((gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100),' %'])
 
 % Closed-loop interconnection with Lateral LPV controller and anti-aliasing filter
 systemnames         = 'P_lat K_lat_lpv W_r_lat P_a_lat';
