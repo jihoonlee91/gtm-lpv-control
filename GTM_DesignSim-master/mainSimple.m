@@ -22,7 +22,7 @@ num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
 
 % Parameters for rate-bounded design
-% g = 32.174; % gravitational acceleration [ft/s^2]
+g = 32.174; % gravitational acceleration [ft/s^2]
 % Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
 % Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
 % T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
@@ -158,14 +158,19 @@ if isfile('./result/Linearization.mat') == 0
         % Lon input: Elevator [deg], L Morphing [%], R Morphing [%], L Throttle [%], R Throttle [%]
         % Lat state: beta [rad], p [rad/s], r [rad/s], phi [rad]
         % Lat input: Aileron [deg], Rudder [deg], L Morphing [deg], R Morphing [deg]
-    
+        
+        Z_alp = londyn.A(2,2)*tas;
+        Z_q = (londyn.A(2,3)-1)*tas;
+        Z_dele = londyn.B(2,1)*tas;
+        
         % Dynamics augmentation
-        Alon = [londyn.A zeros(4,1);
-                0 -tas 0 tas 0]; % altitude [ft]
-        Blon = [londyn.B(:,4)+londyn.B(:,5) londyn.B(:,1);
-                0 0];
-        Clon = eye(5);
-        Dlon = 0;
+        Alon = londyn.A(2:3,2:3);
+        Blon = londyn.B(2:3,1);
+        Clon = [eye(2);
+                Z_alp Z_q];
+        Dlon = [0;
+                0;
+                Z_dele];
         Alat = latdyn.A;
         Blat = [latdyn.B(:,1:2) (latdyn.B(:,4)-latdyn.B(:,3))/2]; % (eta_R-eta_L)/2
         Clat = eye(4);
@@ -173,9 +178,9 @@ if isfile('./result/Linearization.mat') == 0
         
         % Form state-space model
         londyn_aug = ss(Alon,Blon,Clon,Dlon);
-        set(londyn_aug,'Statename',{'tas','alpha','q','theta','alt'},...
-                       'Inputname',{'delt','dele'},...
-                       'Outputname',{'tas','alpha','q','theta','alt'})
+        set(londyn_aug,'Statename',{'alpha','q'},...
+                       'Inputname',{'dele'},...
+                       'Outputname',{'alpha','q','az'})
         latdyn_aug = ss(Alat,Blat,Clat,Dlat);
         set(latdyn_aug,'Statename',{'beta','p','r','phi'},...
                        'Inputname',{'dela','delr','delm'},...
@@ -190,10 +195,10 @@ if isfile('./result/Linearization.mat') == 0
         end
         
         % controllability check
-        if rank(ctrb(londyn_aug)) < height(londyn_aug) % uncontrollable
+        if rank(ctrb(londyn)) < height(londyn.A) % uncontrollable
             error('Uncontrollable longitudinal dynamics')
         end
-        if rank(ctrb(latdyn_aug)) < height(latdyn_aug) % uncontrollable
+        if rank(ctrb(latdyn)) < height(latdyn.A) % uncontrollable
             error('Uncontrollable lateral dynamics')
         end
 
@@ -220,10 +225,10 @@ s = tf('s');
 
 % W_a (actuator dynamics)
 % P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[-0.1474 0.7314],0)); % Throttle Lag Model
-P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[0 0.7314],0)); % Throttle Lag Model
+% P_a_eng = tf(ss([-1.336,-0.7314;1,0;],[1;0],[0 0.7314],0)); % Throttle Lag Model
 % P_a_eng = sqrt(0.7314)/(s+sqrt(0.7314)); % Throttle Lag Model
 P_a_ele = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
-P_a_lon = blkdiag(P_a_eng,P_a_ele);
+P_a_lon = blkdiag(P_a_ele);
 % figure
 % step(P_a_eng)
 % hold on, grid on
@@ -231,62 +236,56 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele);
 % legend('Pa_{eng}','Pa_{ele}')
 
 % W_r (maximum expected command)
-W_r_tas = 5*knots2fps; % 10 knot command
-W_r_alt = 10; % 10 ft command
-W_r_lon = blkdiag(W_r_tas,W_r_alt);
+% W_r_tas = 5*knots2fps; % 10 knot command
+% W_r_alt = 10; % 10 ft command
+W_r_az = 3*g; % 3g command
+W_r_lon = blkdiag(W_r_az);
 
 % W_m (ideal model)
-omega_tas = .35; % [rad/s]
-omega_alt = .35; % [rad/s]
-zeta_tas = 1; % []
-zeta_alt = 1; % []
-W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]);
-W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]);
-W_m_lon = blkdiag(W_m_tas,W_m_alt);
-figure
-step(W_m_tas)
-hold on, grid on
-step(W_m_alt)
-legend('Wm_{tas}','Wm_{alt}')
+omega_az = 1; % [rad/s]
+zeta_az = 1; % []
+W_m_az = tf(omega_az^2,[1 2*zeta_az*omega_az omega_az^2]);
+W_m_lon = blkdiag(W_m_az);
+% figure
+% step(W_m_tas)
+% hold on, grid on
+% step(W_m_alt)
+% legend('Wm_{tas}','Wm_{alt}')
 
 % sensor noise (white)
-W_n_tas     = 0.06*knots2fps; % 0.06 knots broadband (ADS)
 W_n_alp     = 0.031*d2r; % 0.031 deg broadband (ADS)
 W_n_q       = 0.3857*d2r; % 0.3857 deg/s broadband (MAG3)
-W_n_theta   = 0.02*d2r; % 0.02 deg broadband (MIDG II)
-W_n_alt     = 0.1; % [ft] (MIDG II GPS)
-W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
+W_n_az   = 0.0082*g; % 0.0082g broadband (MAG3 IMU)
+W_n_lon = blkdiag(W_n_alp,W_n_q,W_n_az);
 
 % control weight
-W_c_eng = (s/0.5+1)/(s/100+1)*0.1; % [deg]
 W_c_ele = (0.8*s+42.91)/(s+119.2)*0.1; % [deg]
 % W_c_ele = (s/0.5+1)/(s/100+1)*0.1; % [deg]
-W_c_lon = blkdiag(W_c_eng,W_c_ele);
-figure
-bode(W_c_eng)
-hold on, grid on
-bode(W_c_ele)
-legend('Wc_{eng}','Wc_{ele}')
+W_c_lon = blkdiag(W_c_ele);
+% figure
+% bode(W_c_eng)
+% hold on, grid on
+% bode(W_c_ele)
+% legend('Wc_{eng}','Wc_{ele}')
 
 % performance weight
-W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100;
-W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*1000;
-W_p_lon = blkdiag(W_p_tas,W_p_alt);
-figure
-bode(W_p_tas)
-hold on, grid on
-bode(W_p_alt)
-legend('Wp_{tas}','Wp_{alt}')
+W_p_az = (s/100+1)/(s/0.005+1)/(knots2fps*10)*1000;
+W_p_lon = blkdiag(W_p_az);
+% figure
+% bode(W_p_tas)
+% hold on, grid on
+% bode(W_p_alt)
+% legend('Wp_{tas}','Wp_{alt}')
 
 % control interconnection
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon';
-inputvar            = '[r{2} ; n{5} ; u{2}]';
-outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-P_lon(1)-W_n_lon(1) ; W_r_lon(2)-P_lon(5)-W_n_lon(5) ; P_lon(2)+W_n_lon(2) ; P_lon(3)+W_n_lon(3) ; P_lon(4)+W_n_lon(4)]';
+inputvar            = '[r{1} ; n{3} ; u{1}]';
+outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-P_lon(3)-W_n_lon(3) ; P_lon(1)+W_n_lon(1) ; P_lon(2)+W_n_lon(2)]';
 input_to_P_lon      = '[P_a_lon]';
 input_to_W_m_lon    = '[W_r_lon]';
 input_to_W_n_lon    = '[n]';
 input_to_W_c_lon    = '[u]';
-input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
+input_to_W_p_lon    = '[W_m_lon(1)-P_lon(3)]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[u]';
 sysoutname          = 'G_lon';
@@ -295,8 +294,8 @@ sysic
 % size(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)))
 
 % Longitudinal H-infinity synthesis
-ncont_lon = 2;
-nmeas_lon = 5;
+ncont_lon = 1;
+nmeas_lon = 3;
 if isfile('./result/K_lon_hinf.mat') == 0
     clearvars K_lon_hinfs gamma_lon_hinfs
     for i = 1:num_sas
@@ -321,10 +320,10 @@ end
 
 % Closed-loop interconnection with Longitudinal H_infinity controller
 systemnames         = 'P_lon K_lon_hinf W_r_lon P_a_lon';
-inputvar            = '[r{2}]';
+inputvar            = '[r{1}]';
 outputvar           = '[P_lon ; K_lon_hinf]';
 input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_hinf = '[W_r_lon(1)-P_lon(1) ; W_r_lon(2)-P_lon(5) ; P_lon(2) ; P_lon(3) ; P_lon(4)]';
+input_to_K_lon_hinf = '[W_r_lon(1)-P_lon(3) ; P_lon(1) ; P_lon(2)]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[K_lon_hinf]';
 sysoutname          = 'CL_lon_hinf';
@@ -347,10 +346,10 @@ disp(['Back-Off Factor (Longitudinal Rate-Unbounded LPV) = ',num2str((gamma_lon_
 
 % Closed-loop interconnection with Longitudinal LPV controller
 systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon';
-inputvar            = '[r{2}]';
+inputvar            = '[r{1}]';
 outputvar           = '[P_lon ; K_lon_lpv]';
 input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_lpv  = '[W_r_lon(1)-P_lon(1) ; W_r_lon(2)-P_lon(5) ; P_lon(2) ; P_lon(3) ; P_lon(4)]';
+input_to_K_lon_lpv  = '[W_r_lon(1)-P_lon(3) ;P_lon(1) ; P_lon(2)]';
 input_to_W_r_lon    = '[r]';
 input_to_P_a_lon    = '[K_lon_lpv]';
 sysoutname          = 'CL_lon_lpv';
@@ -621,5 +620,5 @@ loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
 t_final = 100;
-GuidanceMode = 4;
+GuidanceMode = 1;
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
