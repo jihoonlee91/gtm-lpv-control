@@ -625,5 +625,5 @@ loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
 t_final = 100;
-GuidanceMode = 2;
+GuidanceMode = 6;
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
