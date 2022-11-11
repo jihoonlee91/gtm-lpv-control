@@ -611,9 +611,10 @@ target            = struct('gamma',gam0,'tas',tas0); % start trim condition targ
 % MWS.bias.aileron = 0;
 % MWS.bias.rudder = 0;
 loadmws(MWS,'gtm_design'); % load MWS
+set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design','MinStep','auto')
-[MWS,Xtrim,Trimcond,Err] = trimgtm(target,PitchSurf,1); % trim calculation
+[MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
 % MWS.StatesInp(4) = 1*d2r; % p [rad/s]
 % MWS.StatesInp(5) = 1*d2r; % q [rad/s]
 % MWS.StatesInp(6) = 1*d2r; % r [rad/s]
@@ -622,6 +623,7 @@ set_param('gtm_design','MinStep','auto')
 % MWS.StatesInp(12) = 1*d2r; % psi [rad/s] 
 loadmws(MWS,'gtm_design'); % load MWS
 
+set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
 t_final = 100;
