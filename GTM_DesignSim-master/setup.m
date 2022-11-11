@@ -3,6 +3,9 @@
 
 % Add mat file directory
 addpath(genpath('./config/'));
+addpath(genpath('./data/'));
+addpath(genpath('./sfunction/'));
+addpath(genpath('./trajectory3/'));
 
 % Add mfiles directories.
 addpath('./mfiles');
@@ -17,6 +20,8 @@ addpath('./libs');
 addpath(genpath('./figure/'));
 addpath(genpath('./result/'));
 addpath(genpath('./result_archive/'));
+
+addpath(genpath('./NDI/'));
 
 % Add LPV directory
 addpath(genpath('./LPVToolsV1.0/'));
@@ -83,6 +88,7 @@ set_param('gtm_design/Control/Controller','commented','on') % control off
 % set_param('gtm_design/Guidance/Windless','commented','on') % control off
 load FixedWingBus.mat
 GuidanceMode = 1;
+ControlMode = 0;
 
 % load nominal starting point
 loadmws(init_design('GTM'),'gtm_design');

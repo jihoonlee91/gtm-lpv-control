@@ -1,4 +1,0 @@
-- Fork
-- Fazer um equivalente ao affine2poly
-
-
