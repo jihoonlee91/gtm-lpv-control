@@ -18,9 +18,9 @@ r2d       = 180/pi;
 % T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
 
 % scheduling parameter gridding
-sas_grid  = [80]; % [kt]
+sas_grid  = [70 80 90]; % [kt]
 alt_grid  = [0]; % 700~1100 [ft]
-mor_grid  = [-12.5]; % between -25 and 0 [%]
+mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -519,7 +519,7 @@ alt0  = 0;
 sas0  = 80;
 tas0  = sas2tas(sas0,alt0);
 gam0  = 0;
-MWS               = init_design('GTM',1);
+MWS               = init_design('GTM',0);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
@@ -545,4 +545,4 @@ t_final = 100;
 GuidanceMode = 6;
 ControlMode = 3;
 
-[tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
+[tsim,xsim,ysim] = sim('gtm_design',[0 t_final]);
