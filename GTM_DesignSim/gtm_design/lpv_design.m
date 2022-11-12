@@ -18,9 +18,9 @@ r2d       = 180/pi;
 % T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
 
 % scheduling parameter gridding
-sas_grid  = [70 80 90]; % [kt]
+sas_grid  = [80]; % [kt]
 alt_grid  = [0]; % 700~1100 [ft]
-mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
+mor_grid  = [-12.5]; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -131,7 +131,7 @@ set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % switch off controller
 
-clearvars GTM_lon GTM_lat
+clearvars GTM_lon GTM_lat GTM_lon_ex GTM_lat_ex
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor 
@@ -153,7 +153,7 @@ for k = 1:num_mor
                'Outputname',{'beta_rad','p_rad','r_rad','phi_rad'});
     
     % augment altitude dynamics & modify input
-    Alon_aug = [londyn.A zeros(4,1); 0 -tas 0 tas 0]; % altitude [ft]
+    Alon_aug = [londyn.A zeros(4,1); 0 -tas*knots2fps 0 tas*knots2fps 0]; % altitude [ft]
     Blon_aug = [londyn.B(:,4)+londyn.B(:,5) londyn.B(:,1); 0 0];
     Clon_aug = eye(5);
     Dlon_aug = 0;
@@ -173,26 +173,37 @@ for k = 1:num_mor
     set(latdyn_aug,'Statename',{'beta_rad','p_rad','r_rad','phi_rad'},...
                    'Inputname',{'dela_deg','delr_deg','mor_percent'},...
                    'Outputname',{'beta_rad','p_rad','r_rad','phi_rad'});
-    
-    % check stability
-    if ~isstable(londyn)
-        warning('unstable longitudinal dynamics') 
-    end
-    if ~isstable(latdyn) 
-        warning('unstable lateral-directional dynamics')
-    end
-    
-    % check controllability
-    if rank(ctrb(londyn_aug)) < height(londyn_aug) 
-        error('uncontrollable longitudinal dynamics')
-    end
-    if rank(ctrb(latdyn_aug)) < height(latdyn_aug) 
-        error('uncontrollable lateral dynamics')
-    end
 
     % stack LTI model
     GTM_lon(:,:,i,j,k) = londyn_aug;
     GTM_lat(:,:,i,j,k) = latdyn_aug;
+
+%     % extract short-period dynamics & modify input
+%     Z_alp = londyn.a(2,2)
+%     Alon_ex = londyn.A(2:3,2:3); % altitude [ft]
+%     Blon_ex = londyn.B(2:3,1);
+%     Clon_ex = [eye(2); ];
+%     Dlon_ex = 0;
+% 
+%     % modify input
+%     Alat_ex = latdyn.A;
+%     Blat_ex = [latdyn.B(:,1:2) (latdyn.B(:,4)-latdyn.B(:,3))/2]; % asymmetric morphing parameter [percent]
+%     Clat_ex = eye(4);
+%     Dlat_ex = 0;
+%     
+%     % Form state-space model
+%     londyn_aug = ss(Alon_aug,Blon_aug,Clon_aug,Dlon_aug);
+%     latdyn_aug = ss(Alat_aug,Blat_aug,Clat_aug,Dlat_aug);
+%     set(londyn_aug,'Statename',{'tas_ft','alp_rad','q_rad','theta_rad','alt_ft'},...
+%                    'Inputname',{'delt_percent','dele_deg'},...
+%                    'Outputname',{'tas_ft','alp_rad','q_rad','theta_rad','alt_ft'});
+%     set(latdyn_aug,'Statename',{'beta_rad','p_rad','r_rad','phi_rad'},...
+%                    'Inputname',{'dela_deg','delr_deg','mor_percent'},...
+%                    'Outputname',{'beta_rad','p_rad','r_rad','phi_rad'});
+% 
+%     % stack LTI model
+%     GTM_lon(:,:,i,j,k) = londyn_aug;
+%     GTM_lat(:,:,i,j,k) = latdyn_aug;
 end
 end
 end
@@ -513,13 +524,13 @@ lat_step_lin
 % save('data/lat_lpvr.mat','K_lat_lpvr','gamma_lat_lpvr','info_lat_lpvr','time_lat_lpvr')
 % fprintf('lat LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_lpv,(gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100,info_lat_lpv.MinGamma)
 
-% Nonlinear simulation
+%%
 etas0 = -12.5;
 alt0  = 0;
 sas0  = 80;
 tas0  = sas2tas(sas0,alt0);
 gam0  = 0;
-MWS               = init_design('GTM',0);
+MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
@@ -529,7 +540,7 @@ loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design','MinStep','auto')
-[MWS,~,~,~] = trimgtm(target,'elev',1); % trim calculation
+[MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
 % MWS.StatesInp(4) = 1*d2r; % p [rad/s]
 % MWS.StatesInp(5) = 1*d2r; % q [rad/s]
 % MWS.StatesInp(6) = 1*d2r; % r [rad/s]
@@ -545,4 +556,4 @@ t_final = 100;
 GuidanceMode = 6;
 ControlMode = 3;
 
-[tsim,xsim,ysim] = sim('gtm_design',[0 t_final]);
+[tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);

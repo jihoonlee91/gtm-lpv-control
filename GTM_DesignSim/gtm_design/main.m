@@ -17,6 +17,18 @@ load lat_hinf.mat
 load lat_lpv.mat
 
 %% Nonlinear simulation
+FlightMode = 1.0;
+% Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)
+% Maneuver: 2.1 (push-over and pull-up), 2.2 (high-g turn)
+% Step: 3.0 (zero), 3.1 (airspeed), 3.2 (altitude), 3.3 (sideslip), 3.4 (roll)
+% Trajectory: 4.1 (waypoint following), 4.2 (orbit following)
+
+ControlMode = 0;
+% Off: 0
+% H-Infinity: 1
+% LPV: 2
+% RBLPV: 3
+
 etas0 = -12.5;
 alt0  = 0;
 sas0  = 80;
