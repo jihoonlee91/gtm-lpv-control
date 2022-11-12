@@ -226,7 +226,7 @@ W_r_alt = 10; % altitude reference scale [ft]
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % ideal response
-omega_tas = .7; % ideal tas model natural frequency [rad/s]
+omega_tas = .35; % ideal tas model natural frequency [rad/s]
 omega_alt = .7; % ideal alt model natural frequency [rad/s]
 % omega_tas = .2; % ideal tas model natural frequency [rad/s]
 % omega_alt = .4; % ideal alt model natural frequency [rad/s]
@@ -263,7 +263,7 @@ legend('Wc_{eng}','Wc_{ele}')
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
 % W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
 W_p_tas = 1/(s/0.35+1)*3; % tas tracking error weight
-W_p_alt = 1/(s/0.5+1)*0.3; % alt tracking error weight
+W_p_alt = 1/(s/0.7+1)*0.3; % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 figure('units','centimeters','position',[39 2 13 10])
 bodemag(W_p_tas,W_p_alt)
