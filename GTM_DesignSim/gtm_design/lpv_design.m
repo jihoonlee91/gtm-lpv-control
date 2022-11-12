@@ -141,7 +141,7 @@ for k = 1:num_mor
     tas = sas2tas(sas,alt); % [kt]
 
     % linearization
-    [~,londyn,latdyn]=linmodel(MWS_grid(i,j,k),1,0,0);
+    [sys,londyn,latdyn]=linmodel(MWS_grid(i,j,k),1,0,0);
     fprintf('Linearization #%d @ TAS: %d kt, Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_mor num_alt num_sas],k,j,i),tas,alt,mor)
 
     % input name
@@ -218,7 +218,7 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele); % actuator model
 % figure('units','centimeters','position',[0 2 13 10])
 % step(P_a_eng,P_a_ele)
 % grid on
-% legend('Pa_{eng}','Pa_{ele}')
+% legend('$Pa\_t$','$Pa\_e$','location','best','interpreter','latex')
 
 % reference scale (maximum expected command)
 W_r_tas = 10*knots2fps; % tas reference scale [ft/s]
@@ -238,7 +238,7 @@ W_m_lon = blkdiag(W_m_tas,W_m_alt); % ideal response
 % figure('units','centimeters','position',[13 2 13 10])
 % step(W_m_tas,W_m_alt)
 % grid on
-% legend('Wm_{tas}','Wm_{alt}')
+% legend('$Wm\_V$','$Wm\_h$','location','best','interpreter','latex')
 
 % sensor measurement noise
 W_n_tas   = 0.06*knots2fps; % 0.06 kt tas white noise (ADS)
@@ -249,26 +249,24 @@ W_n_alt   = 0.1; % altitude white noise [ft] (MIDG II GPS)
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
-% W_c_eng = (s/3+1)/(s/10+1)*0.01; % throttle weight [%]
 W_c_eng = (s/0.8552+1)/(s/2+1)*0.01; % throttle weight [%]
-% W_c_ele = (s/31.4+1)/(s/100+1)*0.03; % elevator weight [deg]
 W_c_ele = (s/31.4+1)/(s/120+1)*0.03; % elevator weight [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 figure('units','centimeters','position',[26 2 13 10])
 bodemag(W_c_eng,W_c_ele)
 grid on
-legend('Wc_{eng}','Wc_{ele}')
+legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
 
 % performance weight
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
 % W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
 W_p_tas = 1/(s/0.35+1)*3; % tas tracking error weight
-W_p_alt = 1/(s/0.7+1)*0.3; % alt tracking error weight
+W_p_alt = 0.3; % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 figure('units','centimeters','position',[39 2 13 10])
 bodemag(W_p_tas,W_p_alt)
 grid on
-legend('Wp_{tas}','Wp_{alt}')
+legend('$Wp\_V$','$Wp\_h$','location','best','interpreter','latex')
 
 % time delay
 TD30ms = pade(exp(-30e-3*s),1);
@@ -401,7 +399,7 @@ set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
 t_final = 100;
-GuidanceMode = 6;
+GuidanceMode = 2;
 ControlMode = 3;
 
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
@@ -412,25 +410,28 @@ P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_mor = 2*pi*0.5/(s+2*pi*0.5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
+figure('units','centimeters','position',[0 2 13 10])
+step(P_a_ail,P_a_rud,P_a_mor)
+grid on
+legend('$Pa\_a$','$Pa\_r$','$Pa\_m$','location','best','interpreter','latex')
 
 % maximum expected command
-W_r_bet = 2*d2r;
-W_r_phi = 20*d2r;
+W_r_bet = 3*d2r;
+W_r_phi = 45*d2r;
 W_r_lat = blkdiag(W_r_bet,W_r_phi);
 
 % ideal model
-omega_bet = 1.25; % [rad/s]
+omega_bet = 2; % [rad/s]
 zeta_bet = 1; % []
 W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
-omega_phi = 2; % [rad/s]
+omega_phi = 6; % [rad/s]
 zeta_phi = 1; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
-% figure
-% step(W_m_bet)
-% hold on, grid on
-% step(W_m_phi)
-% legend('Wm_{bet}','Wm_{phi}')
+figure('units','centimeters','position',[13 2 13 10])
+step(W_m_bet,W_m_phi)
+grid on
+legend('$Wm\_\beta$','$Wm\_\phi$','location','best','interpreter','latex')
 
 % noise model
 W_n_bet = 0.033*d2r; % 0.033 deg
@@ -440,26 +441,26 @@ W_n_phi = 0.02*d2r; % 0.02 deg
 W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 % control weight
-W_c_ail = (s+5*2*pi)/(s+100)*0.1; % [deg]
-W_c_rud = (s+5*2*pi)/(s+100)*0.1; % [deg]
-W_c_mor = (s+0.5*2*pi)/(s+10)*0.1; % [deg]
+W_c_ail = (s/61.4+1)/(s/120+1)*0.01; % [deg]
+W_c_rud = (s/61.4+1)/(s/120+1)*0.01; % [deg]
+W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
-figure
+figure('units','centimeters','position',[26 2 13 10])
 bode(W_c_ail)
 hold on, grid on
 bode(W_c_rud)
 bode(W_c_mor)
-legend('Wc_{ail}','Wc_{rud}','Wc_{mor}')
+legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
 
 % performance weight
-W_p_bet = 20*(s/100+1)/(s/1+1);
-W_p_phi = 100*(s/100+1)/(s/5+1);
+W_p_bet = 1/(s/1.25+1)*100;
+W_p_phi = 1/(s/4+1)*100;
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
-figure
+figure('units','centimeters','position',[39 2 13 10])
 bode(W_p_bet)
 hold on, grid on
 bode(W_p_phi)
-legend('Wp_{bet}','Wp_{phi}')
+legend('$Wp\_\beta$','$Wp\_\phi$','location','best','interpreter','latex')
 
 % time delay
 TD4 = blkdiag(TD30ms,TD30ms,TD30ms,TD30ms);
@@ -592,8 +593,8 @@ loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
-t_final = 100;
-GuidanceMode = 4;
+t_final = 300;
+GuidanceMode = 6;
 ControlMode = 3;
 
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
