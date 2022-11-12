@@ -1,5 +1,5 @@
 %% bet step state response
-figure('units','centimeters','position',[8*2 2 13 20])
+figure('units','centimeters','position',[0 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -18,7 +18,7 @@ for k = 1:num_mor
     end
     [y,t] = step(CL_lat_lpv_point,30);
     subplot(4,1,1), plot(t,y(:,1,1),'color',[0.8500 0.3250 0.0980]), ylabel('Angle of Sideslip [deg]'), xticklabels('')
-    plot(t,y(:,1,1)*0+2,':','color',[0.9290 0.6940 0.1250]), legend('H_\infty','LPV','Reference','location','best')
+    plot(t,y(:,1,1)*0+3,':','color',[0.9290 0.6940 0.1250]), legend('H_\infty','LPV','Reference','location','best')
     subplot(4,1,2), plot(t,y(:,2,1),'color',[0.8500 0.3250 0.0980]), ylabel('Roll Rate [deg/s]'), xticklabels(''), legend('H_\infty','LPV','location','best')
     subplot(4,1,3), plot(t,y(:,3,1),'color',[0.8500 0.3250 0.0980]), ylabel('Yaw Rate [deg/s]'), xticklabels(''), legend('H_\infty','LPV','location','best')
     subplot(4,1,4), plot(t,y(:,4,1),'color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
@@ -29,7 +29,7 @@ end
 exportgraphics(gcf,'figure/bet_step_lin_state.png','resolution',300)
 
 %% bet step input response
-figure('units','centimeters','position',[10*2 2 13 20])
+figure('units','centimeters','position',[13 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -54,7 +54,7 @@ end
 exportgraphics(gcf,'figure/bet_step_lin_input.png','resolution',300)
 
 %% phi step state response
-figure('units','centimeters','position',[12*2 2 13 20])
+figure('units','centimeters','position',[26 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -77,14 +77,14 @@ for k = 1:num_mor
     subplot(4,1,2), plot(t,y(:,2,2),'color',[0.8500 0.3250 0.0980]), ylabel('Roll Rate [deg/s]'), xticklabels(''), legend('H_\infty','LPV','location','best')
     subplot(4,1,3), plot(t,y(:,3,2),'color',[0.8500 0.3250 0.0980]), ylabel('Yaw Rate [deg/s]'), xticklabels(''), legend('H_\infty','LPV','location','best')
     subplot(4,1,4), plot(t,y(:,4,2),'color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
-    plot(t,y(:,1,1)*0+20,':','color',[0.9290 0.6940 0.1250]), legend('H_\infty','LPV','Reference','location','best')
+    plot(t,y(:,1,1)*0+45,':','color',[0.9290 0.6940 0.1250]), legend('H_\infty','LPV','Reference','location','best')
 end
 end
 end
 exportgraphics(gcf,'figure/phi_step_lin_state.png','resolution',300)
 
 %% bet step input response
-figure('units','centimeters','position',[14*2 2 13 20])
+figure('units','centimeters','position',[39 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor

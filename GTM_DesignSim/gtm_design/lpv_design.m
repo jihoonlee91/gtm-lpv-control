@@ -226,8 +226,8 @@ W_r_alt = 10; % altitude reference scale [ft]
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % ideal response
-omega_tas = .35; % ideal tas model natural frequency [rad/s]
-omega_alt = .7; % ideal alt model natural frequency [rad/s]
+omega_tas = 2; % ideal tas model natural frequency [rad/s]
+omega_alt = 2; % ideal alt model natural frequency [rad/s]
 % omega_tas = .2; % ideal tas model natural frequency [rad/s]
 % omega_alt = .4; % ideal alt model natural frequency [rad/s]
 zeta_tas = 1; % ideal tas model damping ratio []
@@ -235,10 +235,10 @@ zeta_alt = 1; % ideal alt model damping ratio []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]); % ideal tas model (2nd-order system)
 W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]); % ideal alt model (2nd-order system)
 W_m_lon = blkdiag(W_m_tas,W_m_alt); % ideal response
-% figure('units','centimeters','position',[13 2 13 10])
-% step(W_m_tas,W_m_alt)
-% grid on
-% legend('$Wm\_V$','$Wm\_h$','location','best','interpreter','latex')
+figure('units','centimeters','position',[13 2 13 10])
+step(W_m_tas,W_m_alt)
+grid on
+legend('$Wm\_V$','$Wm\_h$','location','best','interpreter','latex')
 
 % sensor measurement noise
 W_n_tas   = 0.06*knots2fps; % 0.06 kt tas white noise (ADS)
@@ -249,8 +249,8 @@ W_n_alt   = 0.1; % altitude white noise [ft] (MIDG II GPS)
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
-W_c_eng = (s/0.8552+1)/(s/2+1)*0.01; % throttle weight [%]
-W_c_ele = (s/31.4+1)/(s/120+1)*0.03; % elevator weight [deg]
+W_c_eng = (s/0.8552+1)/(s/2+1)*0.001; % throttle weight [%]
+W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 figure('units','centimeters','position',[26 2 13 10])
 bodemag(W_c_eng,W_c_ele)
@@ -260,8 +260,8 @@ legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
 % performance weight
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
 % W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
-W_p_tas = 1/(s/0.005+1)*3; % tas tracking error weight
-W_p_alt = 1/(s/0.005+1)*0.3; % alt tracking error weight
+W_p_tas = 1/(s/0.001+1)*fps2knots*10; % tas tracking error weight
+W_p_alt = 1/(s/0.001+1)*10; % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 figure('units','centimeters','position',[39 2 13 10])
 bodemag(W_p_tas,W_p_alt)
@@ -352,58 +352,6 @@ sysic
 
 lon_step_lin
 
-% longitudinal rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lon_RB = G_lon;
-% G_lon_RB.Domain = Domain_RB;
-% tic
-% [K_lon_lpvr,gamma_lon_lpvr,info_lon_lpvr] = lpvsyn(G_lon_RB,nmeas_lon,ncont_lon,Xb,Yb);
-% time_lon_lpvr = toc;
-% save('data/lon_lpvr.mat','K_lon_lpvr','gamma_lon_lpvr','info_lon_lpvr','time_lon_lpvr')
-% fprintf('Lon LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
-
-% Nonlinear simulation
-etas0 = -12.5;
-alt0  = 0;
-sas0  = 80;
-tas0  = sas2tas(sas0,alt0);
-gam0  = 0;
-MWS               = init_design('GTM',0);
-MWS.bias.morphing = etas0; % set morphing parameter
-MWS.StatesInp(9)  = alt0; % set altitude [ft]
-target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
-% MWS.bias.aileron = 0;
-% MWS.bias.rudder = 0;
-loadmws(MWS,'gtm_design'); % load MWS
-set_param('gtm_design','ReturnWorkspaceOutputs','off')
-set_param('gtm_design/Control/Controller','commented','on') % control off
-set_param('gtm_design','MinStep','auto')
-[MWS,~,~,~] = trimgtm(target,'elev',1); % trim calculation
-% MWS.StatesInp(4) = 1*d2r; % p [rad/s]
-% MWS.StatesInp(5) = 1*d2r; % q [rad/s]
-% MWS.StatesInp(6) = 1*d2r; % r [rad/s]
-% MWS.StatesInp(10) = 1*d2r; % phi [rad/s]
-% MWS.StatesInp(11) = 1*d2r; % theta [rad/s]
-% MWS.StatesInp(12) = 1*d2r; % psi [rad/s] 
-loadmws(MWS,'gtm_design'); % load MWS
-
-set_param('gtm_design','ReturnWorkspaceOutputs','off')
-set_param('gtm_design/Control/Controller','commented','off') % control on
-set_param('gtm_design','MinStep','0.0049')
-t_final = 100;
-GuidanceMode = 2;
-ControlMode = 3;
-
-[tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
-
 %% lateral-directional control design
 % actuator model
 P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
@@ -441,8 +389,8 @@ W_n_phi = 0.02*d2r; % 0.02 deg
 W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 % control weight
-W_c_ail = (s/61.4+1)/(s/120+1)*0.01; % [deg]
-W_c_rud = (s/61.4+1)/(s/120+1)*0.01; % [deg]
+W_c_ail = (s/31.4+1)/(s/100+1)*0.01; % [deg]
+W_c_rud = (s/31.4+1)/(s/100+1)*0.01; % [deg]
 W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 figure('units','centimeters','position',[26 2 13 10])
@@ -453,8 +401,8 @@ bode(W_c_mor)
 legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
 
 % performance weight
-W_p_bet = 1/(s/1.25+1)*100;
-W_p_phi = 1/(s/4+1)*100;
+W_p_bet = 1/(s/0.001+1)*r2d*20;
+W_p_phi = 1/(s/0.001+1)*r2d*50;
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
 figure('units','centimeters','position',[39 2 13 10])
 bode(W_p_bet)
@@ -545,8 +493,8 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-% lat_step_lin
-
+lat_step_lin
+%%
 % lateral rate-bounded LPV synthesis
 % b0 = basis(1,0);
 % sas_param = pgrid('rho1_sas_param',sas_grid);
@@ -571,7 +519,7 @@ alt0  = 0;
 sas0  = 80;
 tas0  = sas2tas(sas0,alt0);
 gam0  = 0;
-MWS               = init_design('GTM',0);
+MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
@@ -593,7 +541,7 @@ loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design','MinStep','0.0049')
-t_final = 300;
+t_final = 100;
 GuidanceMode = 6;
 ControlMode = 3;
 
