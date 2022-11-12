@@ -1,5 +1,5 @@
 %% bet step state response
-figure('units','centimeters','position',[8*2 2 18.2-5 25.7-5.5])
+figure('units','centimeters','position',[8*2 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -29,7 +29,7 @@ end
 exportgraphics(gcf,'figure/bet_step_lin_state.png','resolution',300)
 
 %% bet step input response
-figure('units','centimeters','position',[10*2 2 18.2-5 25.7-5.5])
+figure('units','centimeters','position',[10*2 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -54,7 +54,7 @@ end
 exportgraphics(gcf,'figure/bet_step_lin_input.png','resolution',300)
 
 %% phi step state response
-figure('units','centimeters','position',[12*2 2 18.2-5 25.7-5.5])
+figure('units','centimeters','position',[12*2 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -84,7 +84,7 @@ end
 exportgraphics(gcf,'figure/phi_step_lin_state.png','resolution',300)
 
 %% bet step input response
-figure('units','centimeters','position',[14*2 2 18.2-5 25.7-5.5])
+figure('units','centimeters','position',[14*2 2 13 20])
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
