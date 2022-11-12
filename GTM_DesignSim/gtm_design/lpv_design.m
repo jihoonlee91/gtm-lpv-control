@@ -260,8 +260,8 @@ legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
 % performance weight
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
 % W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
-W_p_tas = 1/(s/0.35+1)*3; % tas tracking error weight
-W_p_alt = 0.3; % alt tracking error weight
+W_p_tas = 1/(s/0.005+1)*3; % tas tracking error weight
+W_p_alt = 1/(s/0.005+1)*0.3; % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 figure('units','centimeters','position',[39 2 13 10])
 bodemag(W_p_tas,W_p_alt)
@@ -350,7 +350,7 @@ sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-% lon_step_lin
+lon_step_lin
 
 % longitudinal rate-bounded LPV synthesis
 % b0 = basis(1,0);
