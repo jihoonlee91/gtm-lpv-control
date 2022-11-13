@@ -34,7 +34,7 @@ mor_RateBound = 5; % 10 sec for full deployment
 Domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid});
 Domain_RB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid},[[-1,1]*sas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
 
-plot_parameter_grid
+% plot_parameter_grid
 
 %% trimming
 set_param('gtm_design','MinStep','auto')
@@ -128,7 +128,7 @@ sch_param.sch_rudder_trim   = sch_rudder_trim;
 % save scheduled trim condition
 save('data/trim_data.mat','sch_param')
 
-plot_trim_condition
+% plot_trim_condition
 
 %% linearization
 set_param('gtm_design','MinStep','auto')
@@ -226,7 +226,9 @@ P_lat_ex = pss(GTM_lat_ex,Domain);
 % save LPV model
 save('data/linear_model_data.mat','P_lon','P_lat','P_lon_ex','P_lat_ex')
 
-plot_mode
+% plot_mode
+
+save('data/trim_and_linearize.mat')
 
 %% longitudinal control design
 s = tf('s'); % Laplace variable
@@ -377,26 +379,8 @@ sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-plot_lon_step_lin
-plot_lon_bode
-
-%% longitudinal rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lon_RB = G_lon;
-% G_lon_RB.Domain = Domain_RB;
-% tic
-% [K_lon_lpvr,gamma_lon_lpvr,info_lon_lpvr] = lpvsyn(G_lon_RB,nmeas_lon,ncont_lon,Xb,Yb);
-% time_lon_lpvr = toc;
-% save('data/lon_lpvr.mat','K_lon_lpvr','gamma_lon_lpvr','info_lon_lpvr','time_lon_lpvr')
-% fprintf('Lon LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
+% plot_lon_step_lin
+% plot_lon_bode
 
 %% lateral-directional control design
 % actuator model
@@ -540,26 +524,8 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-plot_lat_step_lin
-plot_lat_bode
-
-% lateral rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lat_RB = G_lat;
-% G_lat_RB.Domain = Domain_RB;
-% tic
-% [K_lat_lpvr,gamma_lat_lpvr,info_lat_lpvr] = lpvsyn(G_lat_RB,nmeas_lat,ncont_lat,Xb,Yb);
-% time_lat_lpvr = toc;
-% save('data/lat_lpvr.mat','K_lat_lpvr','gamma_lat_lpvr','info_lat_lpvr','time_lat_lpvr')
-% fprintf('lat LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_lpv,(gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100,info_lat_lpv.MinGamma)
+% plot_lat_step_lin
+% plot_lat_bode
 
 %% longitudinal control design
 s = tf('s'); % Laplace variable
@@ -674,26 +640,8 @@ sysoutname          = 'CL_lon_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-plot_lon_ex_step_lin
-plot_lon_ex_bode
-
-% longitudinal rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lon_ex_RB = G_lon;
-% G_lon_ex_RB.Domain = Domain_RB;
-% tic
-% [Klonelpvr,gamma_lon_ex_lpvr,info_lon_ex_lpvr] = lpvsyn(G_lon_ex_RB,nmeas_lon_ex,ncont_lon_ex,Xb,Yb);
-% time_lon_ex_lpvr = toc;
-% save('data/lon_ex_lpvr.mat','Klonelpvr','gamma_lon_ex_lpvr','info_lon_ex_lpvr','time_lon_ex_lpvr')
-% fprintf('Lon Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_ex_lpv,(gamma_lon_ex_lpv/info_lon_ex_lpv.MinGamma-1)*100,info_lon_ex_lpv.MinGamma)
+% plot_lon_ex_step_lin
+% plot_lon_ex_bode
 
 %% lateral-directional control design
 % actuator model
@@ -730,7 +678,7 @@ W_c_lat_ex = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 
 % performance weight
 W_p_bet = 1/(s/0.001+1)*r2d*20;
-W_p_p   = 1/(s/0.001+1)*r2d*50;
+W_p_p   = 1/(s/0.001+1)*r2d*1;
 W_p_lat_ex = blkdiag(W_p_bet,W_p_p);
 
 % time delay
@@ -816,10 +764,65 @@ sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-plot_lat_ex_step_lin
-plot_lat_ex_bode
+% plot_lat_ex_step_lin
+% plot_lat_ex_bode
 
-% lateral rate-bounded LPV synthesis
+%% rate-bounded design
+% % longitudinal rate-bounded LPV synthesis
+% b0 = basis(1,0);
+% sas_param = pgrid('rho1_sas_param',sas_grid);
+% alt_param = pgrid('rho2_alt_param',alt_grid);
+% mor_param = pgrid('rho3_mor_param',mor_grid);
+% bsas = basis(sas_param,'rho1_sas_param',1);
+% balt = basis(alt_param,'rho2_alt_param',1);
+% bmor = basis(mor_param,'rho3_mor_param',1);
+% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
+% Yb = Xb;
+% G_lon_RB = G_lon;
+% G_lon_RB.Domain = Domain_RB;
+% tic
+% [K_lon_lpvr,gamma_lon_lpvr,info_lon_lpvr] = lpvsyn(G_lon_RB,nmeas_lon,ncont_lon,Xb,Yb);
+% time_lon_lpvr = toc;
+% save('data/lon_lpvr.mat','K_lon_lpvr','gamma_lon_lpvr','info_lon_lpvr','time_lon_lpvr')
+% fprintf('Lon LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
+% 
+% % lateral rate-bounded LPV synthesis
+% b0 = basis(1,0);
+% sas_param = pgrid('rho1_sas_param',sas_grid);
+% alt_param = pgrid('rho2_alt_param',alt_grid);
+% mor_param = pgrid('rho3_mor_param',mor_grid);
+% bsas = basis(sas_param,'rho1_sas_param',1);
+% balt = basis(alt_param,'rho2_alt_param',1);
+% bmor = basis(mor_param,'rho3_mor_param',1);
+% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
+% Yb = Xb;
+% G_lat_RB = G_lat;
+% G_lat_RB.Domain = Domain_RB;
+% tic
+% [K_lat_lpvr,gamma_lat_lpvr,info_lat_lpvr] = lpvsyn(G_lat_RB,nmeas_lat,ncont_lat,Xb,Yb);
+% time_lat_lpvr = toc;
+% save('data/lat_lpvr.mat','K_lat_lpvr','gamma_lat_lpvr','info_lat_lpvr','time_lat_lpvr')
+% fprintf('lat LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_lpv,(gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100,info_lat_lpv.MinGamma)
+% 
+% % longitudinal rate-bounded LPV synthesis
+% b0 = basis(1,0);
+% sas_param = pgrid('rho1_sas_param',sas_grid);
+% alt_param = pgrid('rho2_alt_param',alt_grid);
+% mor_param = pgrid('rho3_mor_param',mor_grid);
+% bsas = basis(sas_param,'rho1_sas_param',1);
+% balt = basis(alt_param,'rho2_alt_param',1);
+% bmor = basis(mor_param,'rho3_mor_param',1);
+% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
+% Yb = Xb;
+% G_lon_ex_RB = G_lon;
+% G_lon_ex_RB.Domain = Domain_RB;
+% tic
+% [Klonelpvr,gamma_lon_ex_lpvr,info_lon_ex_lpvr] = lpvsyn(G_lon_ex_RB,nmeas_lon_ex,ncont_lon_ex,Xb,Yb);
+% time_lon_ex_lpvr = toc;
+% save('data/lon_ex_lpvr.mat','Klonelpvr','gamma_lon_ex_lpvr','info_lon_ex_lpvr','time_lon_ex_lpvr')
+% fprintf('Lon Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_ex_lpv,(gamma_lon_ex_lpv/info_lon_ex_lpv.MinGamma-1)*100,info_lon_ex_lpv.MinGamma)
+% 
+% % lateral rate-bounded LPV synthesis
 % b0 = basis(1,0);
 % sas_param = pgrid('rho1_sas_param',sas_grid);
 % alt_param = pgrid('rho2_alt_param',alt_grid);
@@ -836,7 +839,7 @@ plot_lat_ex_bode
 % time_lat_ex_lpvr = toc;
 % save('data/lat_ex_lpvr.mat','Klatelpvr','gamma_lat_ex_lpvr','info_lat_ex_lpvr','time_lat_ex_lpvr')
 % fprintf('lat Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_lpv,(gamma_lat_ex_lpv/info_lat_ex_lpv.MinGamma-1)*100,info_lat_ex_lpv.MinGamma)
-
+% 
 %%
 plot_parameter_grid
 plot_trim_condition

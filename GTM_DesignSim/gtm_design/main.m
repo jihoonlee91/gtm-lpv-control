@@ -7,18 +7,17 @@ clc
 setup
 
 %%
-% lpv_design
-
-load trim_data.mat
-load linear_model_data.mat
-load lon_hinf.mat
-load lon_lpv.mat
-load lat_hinf.mat
-load lat_lpv.mat
-load lon_ex_hinf.mat
-load lon_ex_lpv.mat
-load lat_ex_hinf.mat
-load lat_ex_lpv.mat
+load lpv_design_data.mat
+% load trim_data.mat
+% load linear_model_data.mat
+% load lon_hinf.mat
+% load lon_lpv.mat
+% load lat_hinf.mat
+% load lat_lpv.mat
+% load lon_ex_hinf.mat
+% load lon_ex_lpv.mat
+% load lat_ex_hinf.mat
+% load lat_ex_lpv.mat
 
 knots2fps = 1.68781; % knots to feet per seconds
 fps2knots = 1/knots2fps; % knots to feet per seconds
