@@ -136,7 +136,7 @@ StatesInp(8)  = ini.lon*d2r;	 %  8 - lon (rad), +east,
 StatesInp(9)  = ini.Altitude;	 %  9 - h (ft)
 StatesInp(10) = 0;	             % 10 - phi (rad)
 StatesInp(11) = theta*d2r;       % 11 - theta (rad)
-StatesInp(12) = pi/2;            % 12 - psi (rad)
+StatesInp(12) = 0;            % 12 - psi (rad)
 
 
 
