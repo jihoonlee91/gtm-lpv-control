@@ -18,10 +18,7 @@ addpath('./libs');
 
 % Add aux directory
 addpath(genpath('./figure/'));
-addpath(genpath('./result/'));
-addpath(genpath('./result_archive/'));
-
-addpath(genpath('./NDI/'));
+addpath(genpath('./plot/'));
 
 % Add LPV directory
 addpath(genpath('./LPVToolsV1.0/'));

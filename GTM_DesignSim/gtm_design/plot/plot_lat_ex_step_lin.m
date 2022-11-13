@@ -23,7 +23,7 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/bet_step_lin_state.png','resolution',300)
+exportgraphics(gcf,'figure/lat_ex_step_lin_bet_state.png','resolution',300)
 
 %% bet step input response
 figure('units','centimeters','position',[13 2 13 20])
@@ -48,7 +48,7 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/bet_step_lin_input.png','resolution',300)
+exportgraphics(gcf,'figure/lat_ex_step_lin_bet_input.png','resolution',300)
 
 %% p step state response
 figure('units','centimeters','position',[26 2 13 20])
@@ -75,7 +75,7 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/phi_step_lin_state.png','resolution',300)
+exportgraphics(gcf,'figure/lat_ex_step_lin_phi_state.png','resolution',300)
 
 %% p step input response
 figure('units','centimeters','position',[39 2 13 20])
@@ -100,4 +100,4 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/phi_step_lin_input.png','resolution',300)
+exportgraphics(gcf,'figure/lat_ex_step_lin_phi_input.png','resolution',300)

@@ -30,7 +30,7 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/tas_step_lin_state.png','resolution',300)
+exportgraphics(gcf,'figure/lon_step_lin_tas_state.png','resolution',300)
 
 %% tas step input response
 figure('units','centimeters','position',[13 7 13 20])
@@ -52,7 +52,7 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/tas_step_lin_input.png','resolution',300)
+exportgraphics(gcf,'figure/lon_step_lin_tas_input.png','resolution',300)
 
 %% alt step state response
 figure('units','centimeters','position',[26 7 13 20])
@@ -85,7 +85,7 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/alt_step_lin_state.png','resolution',300)
+exportgraphics(gcf,'figure/lon_step_lin_alt_state.png','resolution',300)
 
 %% alt step input response
 figure('units','centimeters','position',[39 7 13 20])
@@ -107,4 +107,4 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/alt_step_lin_input.png','resolution',300)
+exportgraphics(gcf,'figure/lon_step_lin_alt_input.png','resolution',300)

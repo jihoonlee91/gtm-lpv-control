@@ -18,9 +18,9 @@ g = 32.174; % gravitational acceleration [ft/s^2]
 % T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
 
 % scheduling parameter gridding
-sas_grid  = [80]; % [kt]
-alt_grid  = [0]; % 700~1100 [ft]
-mor_grid  = [-12.5]; % between -25 and 0 [%]
+sas_grid  = [60 70 80 90]; % [kt]
+alt_grid  = [0 5000 10000]; % 700~1100 [ft]
+mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
@@ -33,6 +33,8 @@ mor_RateBound = 5; % 10 sec for full deployment
 % construct Domain 
 Domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid});
 Domain_RB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid},[[-1,1]*sas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
+
+plot_parameter_grid
 
 %% trimming
 set_param('gtm_design','MinStep','auto')
@@ -126,6 +128,8 @@ sch_param.sch_rudder_trim   = sch_rudder_trim;
 % save scheduled trim condition
 save('data/trim_data.mat','sch_param')
 
+plot_trim_condition
+
 %% linearization
 set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -143,6 +147,10 @@ for k = 1:num_mor
     % linearization
     [sys,londyn,latdyn]=linmodel(MWS_grid(i,j,k),1,0,0);
     fprintf('Linearization #%d @ TAS: %d kt, Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_mor num_alt num_sas],k,j,i),tas,alt,mor)
+
+    % stack LTI model
+    LTI_lon(:,:,i,j,k) = londyn;
+    LTI_lat(:,:,i,j,k) = latdyn;
 
     % input name
     set(londyn,'Statename',{'tas_ft','alp_rad','q_rad','theta_rad'},...
@@ -218,6 +226,8 @@ P_lat_ex = pss(GTM_lat_ex,Domain);
 % save LPV model
 save('data/linear_model_data.mat','P_lon','P_lat','P_lon_ex','P_lat_ex')
 
+plot_mode
+
 %% longitudinal control design
 s = tf('s'); % Laplace variable
 
@@ -249,10 +259,10 @@ zeta_alt = 1; % ideal alt model damping ratio []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]); % ideal tas model (2nd-order system)
 W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]); % ideal alt model (2nd-order system)
 W_m_lon = blkdiag(W_m_tas,W_m_alt); % ideal response
-figure('units','centimeters','position',[13 2 13 10])
-step(W_m_tas,W_m_alt)
-grid on
-legend('$Wm\_V$','$Wm\_h$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[13 2 13 10])
+% step(W_m_tas,W_m_alt)
+% grid on
+% legend('$Wm\_V$','$Wm\_h$','location','best','interpreter','latex')
 
 % sensor measurement noise
 W_n_tas   = 0.06*knots2fps; % 0.06 kt tas white noise (ADS)
@@ -266,10 +276,10 @@ W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 W_c_eng = (s/0.8552+1)/(s/2+1)*0.001; % throttle weight [%]
 W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
-figure('units','centimeters','position',[26 2 13 10])
-bodemag(W_c_eng,W_c_ele)
-grid on
-legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[26 2 13 10])
+% bodemag(W_c_eng,W_c_ele)
+% grid on
+% legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
 
 % performance weight
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
@@ -277,10 +287,10 @@ legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
 W_p_tas = 1/(s/0.001+1)*fps2knots*10; % tas tracking error weight
 W_p_alt = 1/(s/0.001+1)*10; % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
-figure('units','centimeters','position',[39 2 13 10])
-bodemag(W_p_tas,W_p_alt)
-grid on
-legend('$Wp\_V$','$Wp\_h$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[39 2 13 10])
+% bodemag(W_p_tas,W_p_alt)
+% grid on
+% legend('$Wp\_V$','$Wp\_h$','location','best','interpreter','latex')
 
 % time delay
 TD30ms = pade(exp(-30e-3*s),1);
@@ -367,7 +377,8 @@ sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-lon_step_lin
+plot_lon_step_lin
+plot_lon_bode
 
 %% longitudinal rate-bounded LPV synthesis
 % b0 = basis(1,0);
@@ -393,10 +404,10 @@ P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_mor = 2*pi*0.5/(s+2*pi*0.5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
-figure('units','centimeters','position',[0 2 13 10])
-step(P_a_ail,P_a_rud,P_a_mor)
-grid on
-legend('$Pa\_a$','$Pa\_r$','$Pa\_m$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[0 2 13 10])
+% step(P_a_ail,P_a_rud,P_a_mor)
+% grid on
+% legend('$Pa\_a$','$Pa\_r$','$Pa\_m$','location','best','interpreter','latex')
 
 % maximum expected command
 W_r_bet = 3*d2r;
@@ -411,10 +422,10 @@ omega_phi = 6; % [rad/s]
 zeta_phi = 1; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
-figure('units','centimeters','position',[13 2 13 10])
-step(W_m_bet,W_m_phi)
-grid on
-legend('$Wm\_\beta$','$Wm\_\phi$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[13 2 13 10])
+% step(W_m_bet,W_m_phi)
+% grid on
+% legend('$Wm\_\beta$','$Wm\_\phi$','location','best','interpreter','latex')
 
 % noise model
 W_n_bet = 0.033*d2r; % 0.033 deg
@@ -428,22 +439,22 @@ W_c_ail = (s/31.4+1)/(s/100+1)*0.01; % [deg]
 W_c_rud = (s/31.4+1)/(s/100+1)*0.01; % [deg]
 W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
-figure('units','centimeters','position',[26 2 13 10])
-bode(W_c_ail)
-hold on, grid on
-bode(W_c_rud)
-bode(W_c_mor)
-legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[26 2 13 10])
+% bode(W_c_ail)
+% hold on, grid on
+% bode(W_c_rud)
+% bode(W_c_mor)
+% legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
 
 % performance weight
 W_p_bet = 1/(s/0.001+1)*r2d*20;
 W_p_phi = 1/(s/0.001+1)*r2d*50;
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
-figure('units','centimeters','position',[39 2 13 10])
-bode(W_p_bet)
-hold on, grid on
-bode(W_p_phi)
-legend('$Wp\_\beta$','$Wp\_\phi$','location','best','interpreter','latex')
+% figure('units','centimeters','position',[39 2 13 10])
+% bode(W_p_bet)
+% hold on, grid on
+% bode(W_p_phi)
+% legend('$Wp\_\beta$','$Wp\_\phi$','location','best','interpreter','latex')
 
 % time delay
 TD70ms = pade(exp(-70e-3*s),1);
@@ -529,7 +540,8 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-lat_step_lin
+plot_lat_step_lin
+plot_lat_bode
 
 % lateral rate-bounded LPV synthesis
 % b0 = basis(1,0);
@@ -557,7 +569,7 @@ P_a_ele = 2*pi*5/(s+2*pi*5); % elevator model
 P_a_lon_ex = blkdiag(P_a_ele); % actuator model
 
 % reference scale (maximum expected command)
-W_r_an  = 3*g; % an reference scale [ft/s^2]
+W_r_an  = 2*g; % an reference scale [ft/s^2]
 W_r_lon_ex = blkdiag(W_r_an);
 
 % ideal response
@@ -585,12 +597,12 @@ TD3 = blkdiag(TD30ms,TD30ms,TD30ms);
 % control interconnection
 systemnames         = 'P_lon_ex W_m_lon_ex W_n_lon_ex W_c_lon_ex W_p_lon_ex W_r_lon_ex P_a_lon_ex TD3';
 inputvar            = '[r{1} ; n{3} ; u{1}]';
-outputvar           = '[W_c_lon_ex ; W_p_lon_ex ; W_r_lon_ex-TD3(3) ; TD3(1) ; TD3(2)]';
+outputvar           = '[W_c_lon_ex ; W_p_lon_ex ; W_r_lon_ex+TD3(3) ; TD3(1) ; TD3(2)]';
 input_to_P_lon_ex   = '[P_a_lon_ex]';
 input_to_W_m_lon_ex = '[W_r_lon_ex]';
 input_to_W_n_lon_ex = '[n]';
 input_to_W_c_lon_ex = '[u]';
-input_to_W_p_lon_ex = '[W_m_lon_ex-P_lon_ex(3)]';
+input_to_W_p_lon_ex = '[W_m_lon_ex+P_lon_ex(3)]';
 input_to_W_r_lon_ex = '[r]';
 input_to_P_a_lon_ex = '[u]';
 input_to_TD3        = '[P_lon_ex+W_n_lon_ex]';
@@ -637,7 +649,7 @@ systemnames         = 'P_lon_ex Klonexhinf W_r_lon_ex P_a_lon_ex TD3 Plonexscl K
 inputvar            = '[r{1}]';
 outputvar           = '[Plonexscl ; Klonexscl]';
 input_to_P_lon_ex   = '[P_a_lon_ex]';
-input_to_Klonexhinf = '[W_r_lon_ex-P_lon_ex(3) ; P_lon_ex(1) ; P_lon_ex(2)]';
+input_to_Klonexhinf = '[W_r_lon_ex+P_lon_ex(3) ; P_lon_ex(1) ; P_lon_ex(2)]';
 input_to_W_r_lon_ex = '[r]';
 input_to_P_a_lon_ex = '[Klonexhinf]';
 input_to_TD3        = '[P_lon_ex]';
@@ -652,7 +664,7 @@ systemnames         = 'P_lon_ex Klonexlpv W_r_lon_ex P_a_lon_ex TD3 Plonexscl Kl
 inputvar            = '[r{1}]';
 outputvar           = '[Plonexscl ; Klonexscl]';
 input_to_P_lon_ex   = '[P_a_lon_ex]';
-input_to_Klonexlpv  = '[W_r_lon_ex-P_lon_ex(3) ; P_lon_ex(1) ; P_lon_ex(2)]';
+input_to_Klonexlpv  = '[W_r_lon_ex+P_lon_ex(3) ; P_lon_ex(1) ; P_lon_ex(2)]';
 input_to_W_r_lon_ex = '[r]';
 input_to_P_a_lon_ex = '[Klonexlpv]';
 input_to_TD3        = '[P_lon_ex]';
@@ -662,9 +674,10 @@ sysoutname          = 'CL_lon_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-lon_ex_step_lin
+plot_lon_ex_step_lin
+plot_lon_ex_bode
 
-%% longitudinal rate-bounded LPV synthesis
+% longitudinal rate-bounded LPV synthesis
 % b0 = basis(1,0);
 % sas_param = pgrid('rho1_sas_param',sas_grid);
 % alt_param = pgrid('rho2_alt_param',alt_grid);
@@ -803,7 +816,8 @@ sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-lat_ex_step_lin
+plot_lat_ex_step_lin
+plot_lat_ex_bode
 
 % lateral rate-bounded LPV synthesis
 % b0 = basis(1,0);
@@ -824,35 +838,14 @@ lat_ex_step_lin
 % fprintf('lat Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_lpv,(gamma_lat_ex_lpv/info_lat_ex_lpv.MinGamma-1)*100,info_lat_ex_lpv.MinGamma)
 
 %%
-% etas0 = -12.5;
-% alt0  = 0;
-% sas0  = 80;
-% tas0  = sas2tas(sas0,alt0);
-% gam0  = 0;
-% MWS               = init_design('GTM',1);
-% MWS.bias.morphing = etas0; % set morphing parameter
-% MWS.StatesInp(9)  = alt0; % set altitude [ft]
-% target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
-% % MWS.bias.aileron = 0;
-% % MWS.bias.rudder = 0;
-% loadmws(MWS,'gtm_design'); % load MWS
-% set_param('gtm_design','ReturnWorkspaceOutputs','off')
-% set_param('gtm_design/Control/Controller','commented','on') % control off
-% set_param('gtm_design','MinStep','auto')
-% [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-% % MWS.StatesInp(4) = 1*d2r; % p [rad/s]
-% % MWS.StatesInp(5) = 1*d2r; % q [rad/s]
-% % MWS.StatesInp(6) = 1*d2r; % r [rad/s]
-% % MWS.StatesInp(10) = 1*d2r; % phi [rad/s]
-% % MWS.StatesInp(11) = 1*d2r; % theta [rad/s]
-% % MWS.StatesInp(12) = 1*d2r; % psi [rad/s] 
-% loadmws(MWS,'gtm_design'); % load MWS
-% 
-% set_param('gtm_design','ReturnWorkspaceOutputs','off')
-% set_param('gtm_design/Control/Controller','commented','off') % control on
-% set_param('gtm_design','MinStep','0.0049')
-% t_final = 100;
-% GuidanceMode = 6;
-% ControlMode = 3;
-% 
-% [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
+plot_parameter_grid
+plot_trim_condition
+plot_mode
+plot_lon_bode
+plot_lon_ex_bode
+plot_lon_step_lin
+plot_lon_ex_step_lin
+plot_lat_bode
+plot_lat_ex_bode
+plot_lat_step_lin
+plot_lat_ex_step_lin
