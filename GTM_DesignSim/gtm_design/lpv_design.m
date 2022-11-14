@@ -539,7 +539,8 @@ W_r_an  = 2*g; % an reference scale [ft/s^2]
 W_r_lon_ex = blkdiag(W_r_an);
 
 % ideal response
-W_m_an  = 1/(s/1+1); % ideal an model (1st-order system)
+% W_m_an  = 1/(s/1+1); % ideal an model (1st-order system)
+W_m_an  = 16/(s^2+5.6*s+16); % ideal an model (1st-order system)
 W_m_lon_ex = blkdiag(W_m_an); % ideal response
 
 % sensor measurement noise
@@ -553,7 +554,8 @@ W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
 W_c_lon_ex = blkdiag(W_c_ele);
 
 % performance weight
-W_p_an = 1/(s/0.001+1)/g*100; % an tracking error weight
+% W_p_an = (1)/(s/0.001+1)/g*100; % an tracking error weight
+W_p_an = (s/59.73+1)/(s/1.76+1)/10*59.73/0.176; % an tracking error weight
 W_p_lon_ex = blkdiag(W_p_an);
 
 % time delay
@@ -652,16 +654,18 @@ P_a_lat_ex = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
 % maximum expected command
 W_r_bet = 3*d2r;
-W_r_p   = 45*d2r;
+W_r_p   = 10*d2r;
 W_r_lat_ex = blkdiag(W_r_bet,W_r_p);
 
 % ideal model
 omega_bet = 2; % [rad/s]
 zeta_bet = 1; % []
 W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
-omega_p = 6; % [rad/s]
+omega_p = 10; % [rad/s]
 zeta_p = 1; % []
 W_m_p = tf(omega_p^2,[1 2*zeta_p*omega_p omega_p^2]);
+% W_m_bet = 5.78/(s^2+3.92*s+5.78);
+% W_m_p = 39.06/(s^2+8.75+39.06);
 W_m_lat_ex = blkdiag(W_m_bet,W_m_p);
 
 % noise model
@@ -677,8 +681,10 @@ W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
 W_c_lat_ex = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 
 % performance weight
-W_p_bet = 1/(s/0.001+1)*r2d*20;
-W_p_p   = 1/(s/0.001+1)*r2d*1;
+% W_p_bet = 1/(s/0.001+1)*r2d*20;
+% W_p_p   = 1/(s/0.001+1)*r2d*1;
+W_p_bet = (s/59.73+1)/(s/0.299+1)/10*59.73/0.299*10;
+W_p_p   = (s/59.73+1)/(s/0.001+1)/10*59.73/0.299*100;
 W_p_lat_ex = blkdiag(W_p_bet,W_p_p);
 
 % time delay
@@ -762,7 +768,6 @@ input_to_Platexscl  = '[P_lat_ex]';
 input_to_Klatexscl  = '[Klatexlpv]';
 sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
-sysic
 
 % plot_lat_ex_step_lin
 % plot_lat_ex_bode

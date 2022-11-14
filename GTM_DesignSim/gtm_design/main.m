@@ -27,17 +27,48 @@ r2d       = 180/pi;
 g         = 32.174; % gravitational acceleration [ft/s^2]
 
 %% Nonlinear simulation
-etas0 = -12.5; % [%]
-alt0  = 1000; % [ft]
-% sas0  = 80; % [kt]
-% tas0  = sas2tas(sas0,alt0); % [kt]
-tas0  = 75; % [kt]
-gam0  = 0; % [deg]
+FlightMode = 2.1;
+ControlMode = 2;
 
+if FlightMode == 2.1 % push-over and pull-up
+    etas0 = 0; % [%]
+    tas0  = 50; % [kt] 
+    deltc = 90;
+    ControlMode = 2;
+    t_final = 10;
+    set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','off')
+    set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','on')
+elseif FlightMode == 2.2 % high-g turn
+    etas0 = 0; % [%]
+    tas0  = 100; % [kt]
+    deltc = 100;
+    ControlMode = 2;
+    t_final = 20;
+    set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','on')
+    set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','off')
+elseif FlightMode == 4.1 % waypoint 
+    etas0 = 0; % [%]
+    tas0  = 75; % [kt]
+    deltc = MWS.bias.throttle;
+    ControlMode = 4;
+    t_final = 200;
+elseif FlightMode == 4.2 % orbit
+    etas0 = 0; % [%]
+    tas0  = 75; % [kt]
+    deltc = MWS.bias.throttle;
+    ControlMode = 4;
+    t_final = 200;
+else
+    etas0 = -12.5; % [%]
+    tas0  = 75; % [kt]
+    deltc = MWS.bias.throttle;
+end
+
+alt0  = 1000; % [ft]
 MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
-target            = struct('gamma',gam0,'tas',tas0); % start trim condition target [knot]
+target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
 % MWS.bias.aileron = 0;
 % MWS.bias.rudder = 0;
 loadmws(MWS,'gtm_design'); % load MWS
@@ -62,7 +93,7 @@ set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-2')
 % set_param('gtm_design','MinStep','0.0049')
-set_param('gtm_design','MinStep','0.003')
+set_param('gtm_design','MinStep','0.002')
 
 % FlightMode
 % Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)
@@ -77,10 +108,6 @@ set_param('gtm_design','MinStep','0.003')
 % Hinf Autopilot: 3
 % LPV Autopilot: 4
 
-FlightMode = 4.2;
-ControlMode = 4;
-deltc = MWS.bias.throttle;
-% deltc = 100;
 if FlightMode < 4
     set_param('gtm_design/Guidance/Autopilot Step','commented','off')
     set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
@@ -96,4 +123,4 @@ Waypoints = [0 0 -alt0;
              0 3000 -alt0;
              0 0 -alt0];
 
-[tsim,xsim,ysim]=sim('gtm_design',[0 300]);
+[tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
