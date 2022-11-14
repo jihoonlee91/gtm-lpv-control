@@ -27,7 +27,7 @@ r2d       = 180/pi;
 g         = 32.174; % gravitational acceleration [ft/s^2]
 
 %% Nonlinear simulation
-FlightMode = 2.1;
+FlightMode = 2.2;
 ControlMode = 2;
 
 if FlightMode == 2.1 % push-over and pull-up
@@ -43,7 +43,7 @@ elseif FlightMode == 2.2 % high-g turn
     tas0  = 100; % [kt]
     deltc = 100;
     ControlMode = 2;
-    t_final = 20;
+    t_final = 15;
     set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','on')
     set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','off')
 elseif FlightMode == 4.1 % waypoint 

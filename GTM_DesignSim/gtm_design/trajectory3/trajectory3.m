@@ -1,4 +1,4 @@
-function [M]=trajectory3(x,y,z,pitch,roll,yaw,scale_factor,step,selector,varargin);
+function [M]=trajectory3(x,y,z,pitch,roll,yaw,scale_factor,step,selector,varargin,plane_color,line_color)
 
 %   function trajectory2(x,y,z,pitch,roll,yaw,scale_factor,step,[selector,SoR])
 %   
@@ -84,16 +84,17 @@ if step<1
 
 end
 
-if nargin==10
+if nargin>=10
     
-    theView=cell2mat(varargin(1));
+%     theView=cell2mat(varargin(1));
+    theView=varargin;
 
 end
-if nargin>10
-    disp('Too many inputs arguments');
-    M=0;
-    return
-end
+% if nargin>10
+%     disp('Too many inputs arguments');
+%     M=0;
+%     return
+% end
 if nargin<10
 
     theView=[82.50 2];
@@ -216,9 +217,9 @@ frame = 0;
 for i=1:step:(ii-resto+1)
 if mov | (i == 1)
       clf;
-patch('FaceColor','black','EdgeColor','none'), hold on
-patch('FaceColor','blue','EdgeColor','none')
-      plot3(x,y,z,'black');
+patch('FaceColor','blue','EdgeColor','none'), hold on
+patch('FaceColor','red','EdgeColor','none')
+      plot3(x,y,z,line_color);
       grid on;
       hold on;
       light;
@@ -242,7 +243,7 @@ Vnew=Vnew+X0;
 hold on, p=patch('faces', F, 'vertices' ,Vnew); hold on
 set(p, 'facec', [1 0 0]);          
 set(p, 'EdgeColor','none'); 
-set(p, 'FaceColor','black');
+set(p, 'FaceColor',plane_color);
 if mov | (i == 1)
      view(theView);
       axis equal;
@@ -260,7 +261,7 @@ else
 
 end
 hold on;
-plot3(x,y,z,'black'); hold on;
+plot3(x,y,z,line_color); hold on;
 lighting phong;
 grid on;
 view(theView);

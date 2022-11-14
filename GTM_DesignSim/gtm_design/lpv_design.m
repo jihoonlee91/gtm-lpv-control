@@ -768,6 +768,7 @@ input_to_Platexscl  = '[P_lat_ex]';
 input_to_Klatexscl  = '[Klatexlpv]';
 sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
+sysic
 
 % plot_lat_ex_step_lin
 % plot_lat_ex_bode
@@ -846,14 +847,16 @@ cleanupsysic        = 'yes';
 % fprintf('lat Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_lpv,(gamma_lat_ex_lpv/info_lat_ex_lpv.MinGamma-1)*100,info_lat_ex_lpv.MinGamma)
 % 
 %%
-plot_parameter_grid
-plot_trim_condition
-plot_mode
-plot_lon_bode
-plot_lon_ex_bode
-plot_lon_step_lin
-plot_lon_ex_step_lin
-plot_lat_bode
-plot_lat_ex_bode
-plot_lat_step_lin
-plot_lat_ex_step_lin
+save('data/lpv_design_data.mat')
+
+% plot_parameter_grid
+% plot_trim_condition
+% plot_mode
+% plot_lon_bode
+% plot_lon_ex_bode
+% plot_lon_step_lin
+% plot_lon_ex_step_lin
+% plot_lat_bode
+% plot_lat_ex_bode
+% plot_lat_step_lin
+% plot_lat_ex_step_lin

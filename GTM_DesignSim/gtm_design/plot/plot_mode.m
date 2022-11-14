@@ -29,8 +29,8 @@ lat_real_vec = lat_real(:);
 lat_imag_vec = lat_imag(:);
 lat_real_vec_sort = lat_real_vec(abs(lat_imag_vec)<0.1);
 lat_imag_vec_sort = lat_imag_vec(abs(lat_imag_vec)<0.1);
-scatter(lat_real_vec_sort(1:num_sas*num_alt*num_mor),lat_imag_vec_sort(1:num_sas*num_alt*num_mor),'x')
-xlim([-1.5*max(abs(lat_real_vec_sort)) 0])
+scatter(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2),lat_imag_vec_sort(2:2:num_sas*num_alt*num_mor*2),'x')
+xlim([2.5*min((lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2))) 1.5*max(abs(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2)))])
 ylim([-1 1]), yticks(0)
 box on % put box around new pair of axes
 grid on
