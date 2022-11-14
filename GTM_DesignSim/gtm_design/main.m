@@ -29,6 +29,7 @@ g         = 32.174; % gravitational acceleration [ft/s^2]
 %% Nonlinear simulation
 FlightMode = 2.2;
 ControlMode = 2;
+phi_to_eta = 0;
 
 if FlightMode == 2.1 % push-over and pull-up
     etas0 = 0; % [%]
