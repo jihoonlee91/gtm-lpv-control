@@ -1,4 +1,4 @@
-figure('units','centimeters','position',[0 2 13 10])
+fig1 = figure('units','centimeters','position',[0 2 13 10]);
 h = pzplot(LTI_lon); grid on, axis equal
 xlim([-15 10])
 axes('position',[.66 .175 .22 .25])
@@ -17,9 +17,10 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/mode_lon.png','resolution',300)
+exportgraphics(fig1,'figure/mode_lon.png','resolution',300)
+savefig(fig1,'figure/mode_lon.fig')
 
-figure('units','centimeters','position',[13 2 13 10])
+fig2 = figure('units','centimeters','position',[13 2 13 10]);
 h = pzplot(LTI_lat); grid on, axis equal
 xlim([-15 10])
 axes('position',[.66 .175 .22 .25])
@@ -38,5 +39,5 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/mode_lat.png','resolution',300)
-
+exportgraphics(fig2,'figure/mode_lat.png','resolution',300)
+savefig(fig2,'figure/mode_lat.fig')

@@ -1,5 +1,5 @@
 %% bode
-figure('units','centimeters','position',[6.5 7 13 10])
+fig = figure('units','centimeters','position',[6.5 7 13 10]);
 w = {1e-2,1e2};
 
 for i = 1:num_sas
@@ -20,4 +20,5 @@ title('')
 legend('Elevator [deg]','H-Infinity','LPV','location','best')
 ylabel('Normal Acceleration [g]')
 
-exportgraphics(gcf,'figure/lon_ex_bode.png','resolution',300)
+exportgraphics(fig,'figure/lon_ex_bode.png','resolution',300)
+savefig(fig,'figure/lon_ex_bode.fig')

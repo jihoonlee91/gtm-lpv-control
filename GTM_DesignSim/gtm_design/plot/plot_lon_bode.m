@@ -1,5 +1,5 @@
 %% bode
-figure('units','centimeters','position',[6.5 7 13 20])
+fig = figure('units','centimeters','position',[6.5 7 13 20]);
 w = {1e-2,1e2};
 
 subplot(2,1,1)
@@ -40,4 +40,5 @@ title('')
 legend('Elevator [deg]','H-Infinity','LPV','location','best')
 ylabel('Altitude [ft]')
 
-exportgraphics(gcf,'figure/lon_bode.png','resolution',300)
+exportgraphics(fig,'figure/lon_bode.png','resolution',300)
+savefig(fig,'figure/lon_bode.fig')

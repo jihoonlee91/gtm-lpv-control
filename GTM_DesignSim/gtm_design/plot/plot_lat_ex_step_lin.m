@@ -1,7 +1,7 @@
 set(0,'DefaultLineLineWidth',1)
 tlim = 5;
 %% bet step state response
-figure('units','centimeters','position',[0 2 13 20])
+fig1 = figure('units','centimeters','position',[0 2 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -25,10 +25,11 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/lat_ex_step_lin_bet_state.png','resolution',300)
+exportgraphics(fig1,'figure/lat_ex_step_lin_bet_state.png','resolution',300)
+savefig(fig1,'figure/lat_ex_step_lin_bet_state.fig')
 
 %% bet step input response
-figure('units','centimeters','position',[13 2 13 20])
+fig2 = figure('units','centimeters','position',[13 2 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -50,11 +51,12 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/lat_ex_step_lin_bet_input.png','resolution',300)
+exportgraphics(fig2,'figure/lat_ex_step_lin_bet_input.png','resolution',300)
+savefig(fig2,'figure/lat_ex_step_lin_bet_input.fig')
 
 %% p step state response
 tlim = 2;
-figure('units','centimeters','position',[26 2 13 20])
+fig3 = figure('units','centimeters','position',[26 2 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -78,10 +80,11 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/lat_ex_step_lin_p_state.png','resolution',300)
+exportgraphics(fig3,'figure/lat_ex_step_lin_p_state.png','resolution',300)
+savefig(fig3,'figure/lat_ex_step_lin_p_state.fig')
 
 %% p step input response
-figure('units','centimeters','position',[39 2 13 20])
+fig4 = figure('units','centimeters','position',[39 2 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -103,4 +106,5 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/lat_ex_step_lin_p_input.png','resolution',300)
+exportgraphics(fig4,'figure/lat_ex_step_lin_p_input.png','resolution',300)
+savefig(fig4,'figure/lat_ex_step_lin_p_input.fig')

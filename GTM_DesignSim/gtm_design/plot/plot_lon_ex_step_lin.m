@@ -1,7 +1,7 @@
 set(0,'DefaultLineLineWidth',1)
-tlim = 3;
+tlim = 2;
 %% an step state response
-figure('units','centimeters','position',[0 7 13 20])
+fig = figure('units','centimeters','position',[0 7 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -27,4 +27,5 @@ for k = 1:num_mor
 end
 end
 end
-exportgraphics(gcf,'figure/lon_ex_step_lin_an.png','resolution',300)
+exportgraphics(fig,'figure/lon_ex_step_lin_an.png','resolution',300)
+savefig(fig,'figure/lon_ex_step_lin_an.fig')

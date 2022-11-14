@@ -1,5 +1,5 @@
 %% bode
-figure('units','centimeters','position',[6.5 2 13 20])
+fig = figure('units','centimeters','position',[6.5 2 13 20]);
 w = {1e-2,1e2};
 
 subplot(2,1,1)
@@ -44,4 +44,5 @@ title('')
 legend('Aileron [deg]','Morphing [%]','H-Infinity','LPV','location','best')
 ylabel('Roll Rate [deg/s]')
 
-exportgraphics(gcf,'figure/lat_ex_bode.png','resolution',300)
+exportgraphics(fig,'figure/lat_ex_bode.png','resolution',300)
+savefig(fig,'figure/lat_ex_bode.fig')

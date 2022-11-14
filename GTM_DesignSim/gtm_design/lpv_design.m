@@ -849,14 +849,14 @@ sysic
 %%
 save('data/lpv_design_data.mat')
 
-% plot_parameter_grid
-% plot_trim_condition
-% plot_mode
-% plot_lon_bode
-% plot_lon_ex_bode
-% plot_lon_step_lin
-% plot_lon_ex_step_lin
-% plot_lat_bode
-% plot_lat_ex_bode
-% plot_lat_step_lin
-% plot_lat_ex_step_lin
+plot_parameter_grid
+plot_trim_condition
+plot_mode
+plot_lon_bode
+plot_lon_ex_bode
+plot_lon_step_lin
+plot_lon_ex_step_lin
+plot_lat_bode
+plot_lat_ex_bode
+plot_lat_step_lin
+plot_lat_ex_step_lin
