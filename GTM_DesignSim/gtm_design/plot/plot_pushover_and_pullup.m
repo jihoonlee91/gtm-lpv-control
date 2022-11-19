@@ -25,7 +25,7 @@ set_param('gtm_design','MinStep','auto')
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-MWS.SurfaceDeadbandOn = 1;
+MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')

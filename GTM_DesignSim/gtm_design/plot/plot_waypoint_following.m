@@ -1,14 +1,15 @@
 %% Nonlinear simulation
 FlightMode = 4.1;
 phi_to_eta = 12.5/45;
+etas1 = 0;
 
 etas0 = -12.5; % [%]
 tas0  = 75; % [kt]
 deltc = MWS.bias.throttle;
 ControlMode = 4;
 t_final = 90;
-LookaheadDistance = 700;
-TransitionRadius = 1000*0.3048;
+LookaheadDistance = 1200;
+TransitionRadius = 1200*0.3048;
 Radius = 2000; % not used
 TurnDirection = 1; % not used
 
@@ -25,7 +26,7 @@ set_param('gtm_design','MinStep','auto')
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-MWS.SurfaceDeadbandOn = 1;
+MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -33,9 +34,9 @@ set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
-set_param('gtm_design','RelTol','1e-2')
+set_param('gtm_design','RelTol','1e-1')
 % set_param('gtm_design','MinStep','0.0049')
-set_param('gtm_design','MinStep','0.002')
+set_param('gtm_design','MinStep','0.003')
 
 % FlightMode
 % Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)
@@ -119,7 +120,7 @@ p_D_ft = NED(:,3);
 
 %%
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
-trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,4000,'boeing_747',[90 0],'blue','black');
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(5/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
 zlabel('Up [ft]')
@@ -135,6 +136,24 @@ plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'--or')
 legend('Trajectory','Waypoint','location','best')
 exportgraphics(fig1,'figure/waypoint_following_trajectory.png','resolution',300)
 savefig(fig1,'figure/waypoint_following_trajectory.fig')
+
+fig1 = figure('units','centimeters','position',[0 2 26 20]);
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(5/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
+xlabel('East [ft]')
+ylabel('North [ft]')
+zlabel('Up [ft]')
+box on
+grid on
+grid minor, hold on
+view([45 30])
+axis equal
+view([0 90])
+xlim([-500 3500])
+ylim([-500 3500])
+plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'--or')
+legend('Trajectory','Waypoint','location','best')
+exportgraphics(fig1,'figure/waypoint_following_trajectory_top.png','resolution',300)
+savefig(fig1,'figure/waypoint_following_trajectory_top.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);

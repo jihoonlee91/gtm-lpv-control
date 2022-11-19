@@ -25,7 +25,7 @@ set_param('gtm_design','MinStep','auto')
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-MWS.SurfaceDeadbandOn = 1;
+MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -35,7 +35,7 @@ set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-2')
 % set_param('gtm_design','MinStep','0.0049')
-set_param('gtm_design','MinStep','0.001')
+set_param('gtm_design','MinStep','0.004')
 
 % FlightMode
 % Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)
@@ -119,7 +119,7 @@ p_D_ft = NED(:,3);
 
 %%
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
-trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,2000,'boeing_747',[90 0],'blue','black');
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
 zlabel('Up [ft]')
@@ -136,6 +136,25 @@ plot3(2000*cos(x),3500+2000*sin(x),x*0+1000,'--r')
 legend('Trajectory','Waypoint','location','best')
 exportgraphics(fig1,'figure/orbit_following_trajectory.png','resolution',300)
 savefig(fig1,'figure/orbit_following_trajectory.fig')
+
+fig1 = figure('units','centimeters','position',[0 2 26 20]);
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
+xlabel('East [ft]')
+ylabel('North [ft]')
+zlabel('Up [ft]')
+box on
+grid on
+grid minor, hold on
+view([45 30])
+axis equal
+view([0 90])
+% xlim([0 7000])
+% ylim([-500 3500])
+x = linspace(0,2*pi,100);
+plot3(2000*cos(x),3500+2000*sin(x),x*0+1000,'--r')
+legend('Trajectory','Waypoint','location','best')
+exportgraphics(fig1,'figure/orbit_following_trajectory_top.png','resolution',300)
+savefig(fig1,'figure/orbit_following_trajectory_top.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
