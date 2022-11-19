@@ -10,8 +10,9 @@ setup
 knots2fps = 1.68781; % knots to feet per seconds
 fps2knots = 1/knots2fps; % knots to feet per seconds
 m2ft      = 3.28084; % meters to feet
+ft2m      = 1/m2ft; % meters to feet
 d2r       = pi/180; % degrees to radians
-r2d       = 180/pi;
+r2d       = 1/d2r;
 g = 32.174; % gravitational acceleration [ft/s^2]
 % Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
 % Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
@@ -271,11 +272,11 @@ W_n_tas   = 0.06*knots2fps; % 0.06 kt tas white noise (ADS)
 W_n_alp   = 0.031*d2r; % 0.031 deg alp white noise (ADS)
 W_n_q     = 0.3857*d2r; % 0.3857 deg/s q white noise (MAG3)
 W_n_theta = 0.02*d2r; % 0.02 deg theta white noise (MIDG II)
-W_n_alt   = 0.1; % altitude white noise [ft] (MIDG II GPS)
+W_n_alt   = 0.01*m2ft; % altitude white noise, sensor fusion (barometer + MAG3 IMU) [ft]
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
-W_c_eng = (s/0.8552+1)/(s/2+1)*0.001; % throttle weight [%]
+W_c_eng = (s/0.8552+1)/(s/120+1)*0.001; % throttle weight [%]
 W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % figure('units','centimeters','position',[26 2 13 10])
@@ -286,8 +287,8 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % performance weight
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
 % W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
-W_p_tas = 1/(s/0.001+1)*fps2knots*10; % tas tracking error weight
-W_p_alt = 1/(s/0.001+1)*10; % alt tracking error weight
+W_p_tas = (s/2+1)/(s/0.001+1)/(W_n_tas); % tas tracking error weight
+W_p_alt = (s/2+1)/(s/0.001+1)/(W_n_alt); % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % figure('units','centimeters','position',[39 2 13 10])
 % bodemag(W_p_tas,W_p_alt)
@@ -338,13 +339,11 @@ end
 end
 time_lon_hinf = toc;
 K_lon_hinf = pss(K_lon_hinf_grid,Domain);
-save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
 
 % LPV synthesis
 tic
 [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon);
 time_lon_lpv = toc;
-save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
 fprintf('Lon LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
 
 % closed-loop interconnection with Longitudinal H_infinity controller
@@ -379,8 +378,11 @@ sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-% plot_lon_step_lin
-% plot_lon_bode
+save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
+save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
+
+plot_lon_step_lin
+plot_lon_bode
 
 %% lateral-directional control design
 % actuator model
@@ -419,9 +421,9 @@ W_n_phi = 0.02*d2r; % 0.02 deg
 W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 % control weight
-W_c_ail = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_rud = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
+W_c_ail = (s/31.4+1)/(s/120+1)*0.01; % [deg]
+W_c_rud = (s/31.4+1)/(s/120+1)*0.01; % [deg]
+W_c_mor = (s/3.14+1)/(s/120+1)*0.001; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % figure('units','centimeters','position',[26 2 13 10])
 % bode(W_c_ail)
@@ -431,8 +433,8 @@ W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
 
 % performance weight
-W_p_bet = 1/(s/0.001+1)*r2d*20;
-W_p_phi = 1/(s/0.001+1)*r2d*50;
+W_p_bet = (s/2+1)/(s/0.001+1)/(W_n_bet);
+W_p_phi = (s/6+1)/(s/0.001+1)/(W_n_phi);
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
 % figure('units','centimeters','position',[39 2 13 10])
 % bode(W_p_bet)
@@ -483,13 +485,11 @@ end
 end
 time_lat_hinf = toc;
 K_lat_hinf = pss(K_lat_hinf_grid,Domain);
-save('data/lat_hinf.mat','K_lat_hinf','gamma_lat_hinf','time_lat_hinf')
 
 % LPV synthesis
 tic
 [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,nmeas_lat,ncont_lat);
 time_lat_lpv = toc;
-save('data/lat_lpv.mat','K_lat_lpv','gamma_lat_lpv','info_lat_lpv','time_lat_lpv')
 fprintf('lat LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_lpv,(gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100,info_lat_lpv.MinGamma)
 
 % closed-loop interconnection with lateral-directional H_infinity controller
@@ -524,18 +524,21 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-% plot_lat_step_lin
-% plot_lat_bode
+save('data/lat_hinf.mat','K_lat_hinf','gamma_lat_hinf','time_lat_hinf')
+save('data/lat_lpv.mat','K_lat_lpv','gamma_lat_lpv','info_lat_lpv','time_lat_lpv')
+
+plot_lat_step_lin
+plot_lat_bode
 
 %% longitudinal control design
 s = tf('s'); % Laplace variable
 
 % actuator model
-P_a_ele = 2*pi*5/(s+2*pi*5); % elevator model
+% P_a_ele = 2*pi*5/(s+2*pi*5); % elevator model
 P_a_lon_ex = blkdiag(P_a_ele); % actuator model
 
 % reference scale (maximum expected command)
-W_r_an  = 2*g; % an reference scale [ft/s^2]
+W_r_an  = 1*g; % an reference scale [ft/s^2]
 W_r_lon_ex = blkdiag(W_r_an);
 
 % ideal response
@@ -544,8 +547,9 @@ W_m_an  = 16/(s^2+5.6*s+16); % ideal an model (1st-order system)
 W_m_lon_ex = blkdiag(W_m_an); % ideal response
 
 % sensor measurement noise
-W_n_alp = 0.031*d2r; % 0.031 deg alp white noise (ADS)
-W_n_q   = 0.3857*d2r; % 0.3857 deg/s q white noise (MAG3)
+% W_n_alp = 0.031*d2r; % 0.031 deg alp white noise (ADS)
+% W_n_q   = 0.3857*d2r; % 0.3857 deg/s q white noise (MAG3)
+% W_n_an  = (s+0.05)/(s+50)*0.0082*g; % 0.0082g white noise (MAG3)
 W_n_an  = 0.0082*g; % 0.0082g white noise (MAG3)
 W_n_lon_ex = blkdiag(W_n_alp,W_n_q,W_n_an);
 
@@ -555,7 +559,8 @@ W_c_lon_ex = blkdiag(W_c_ele);
 
 % performance weight
 % W_p_an = (1)/(s/0.001+1)/g*100; % an tracking error weight
-W_p_an = (s/59.73+1)/(s/1.76+1)/10*59.73/0.176; % an tracking error weight
+W_p_an = (s/120+1)/(s/1.76+1)/W_n_an; % an tracking error weight
+% W_p_an = (s/4+1)/(s/0.001+1)/(W_n_an); % an tracking error weight
 W_p_lon_ex = blkdiag(W_p_an);
 
 % time delay
@@ -601,13 +606,11 @@ end
 end
 time_lon_ex_hinf = toc;
 Klonexhinf = pss(Klonexhinf_grid,Domain);
-save('data/lon_ex_hinf.mat','Klonexhinf','gamma_lon_ex_hinf','time_lon_ex_hinf')
 
 % LPV synthesis
 tic
 [Klonexlpv,gamma_lon_ex_lpv,info_lon_ex_lpv] = lpvsyn(G_lon_ex,nmeas_lon_ex,ncont_lon_ex);
 time_lon_ex_lpv = toc;
-save('data/lon_ex_lpv.mat','Klonexlpv','gamma_lon_ex_lpv','info_lon_ex_lpv','time_lon_ex_lpv')
 fprintf('Lon Ex LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_ex_lpv,(gamma_lon_ex_lpv/info_lon_ex_lpv.MinGamma-1)*100,info_lon_ex_lpv.MinGamma)
 
 % closed-loop interconnection with Longitudinal H_infinity controller
@@ -642,25 +645,28 @@ sysoutname          = 'CL_lon_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-% plot_lon_ex_step_lin
+save('data/lon_ex_hinf.mat','Klonexhinf','gamma_lon_ex_hinf','time_lon_ex_hinf')
+save('data/lon_ex_lpv.mat','Klonexlpv','gamma_lon_ex_lpv','info_lon_ex_lpv','time_lon_ex_lpv')
+
+plot_lon_ex_step_lin
 % plot_lon_ex_bode
 
 %% lateral-directional control design
 % actuator model
-P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
-P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
-P_a_mor = 2*pi*0.5/(s+2*pi*0.5); % Bandwidth 5 Hz and 5+10 ms time delay
+% P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
+% P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
+% P_a_mor = 2*pi*0.5/(s+2*pi*0.5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lat_ex = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
 % maximum expected command
-W_r_bet = 3*d2r;
+% W_r_bet = 3*d2r;
 W_r_p   = 10*d2r;
 W_r_lat_ex = blkdiag(W_r_bet,W_r_p);
 
 % ideal model
-omega_bet = 2; % [rad/s]
-zeta_bet = 1; % []
-W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
+% omega_bet = 2; % [rad/s]
+% zeta_bet = 1; % []
+% W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
 omega_p = 10; % [rad/s]
 zeta_p = 1; % []
 W_m_p = tf(omega_p^2,[1 2*zeta_p*omega_p omega_p^2]);
@@ -669,9 +675,9 @@ W_m_p = tf(omega_p^2,[1 2*zeta_p*omega_p omega_p^2]);
 W_m_lat_ex = blkdiag(W_m_bet,W_m_p);
 
 % noise model
-W_n_bet = 0.033*d2r; % 0.033 deg
-W_n_p   = 0.5220*d2r; % 0.5220 deg/sec
-W_n_r   = 0.3330*d2r; % 0.3330 deg/sec
+% W_n_bet = 0.033*d2r; % 0.033 deg
+% W_n_p   = 0.5220*d2r; % 0.5220 deg/sec
+% W_n_r   = 0.3330*d2r; % 0.3330 deg/sec
 W_n_lat_ex = blkdiag(W_n_bet,W_n_p,W_n_r);
 
 % control weight
@@ -685,6 +691,8 @@ W_c_lat_ex = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % W_p_p   = 1/(s/0.001+1)*r2d*1;
 W_p_bet = (s/59.73+1)/(s/0.299+1)/10*59.73/0.299*10;
 W_p_p   = (s/59.73+1)/(s/0.001+1)/10*59.73/0.299*100;
+% W_p_bet = (s/2+1)/(s/0.001+1)/(W_n_bet);
+% W_p_p   = (s/10+1)/(s/0.001+1)/(W_n_bet/10);
 W_p_lat_ex = blkdiag(W_p_bet,W_p_p);
 
 % time delay
@@ -729,13 +737,11 @@ end
 end
 time_lat_ex_hinf = toc;
 Klatexhinf = pss(Klatexhinf_grid,Domain);
-save('data/lat_ex_hinf.mat','Klatexhinf','gamma_lat_ex_hinf','time_lat_ex_hinf')
 
 % LPV synthesis
 tic
 [Klatexlpv,gamma_lat_ex_lpv,info_lat_ex_lpv] = lpvsyn(G_lat_ex,nmeas_lat_ex,ncont_lat_ex);
 time_lat_ex_lpv = toc;
-save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','time_lat_ex_lpv')
 fprintf('lat Ex LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_lpv,(gamma_lat_ex_lpv/info_lat_ex_lpv.MinGamma-1)*100,info_lat_ex_lpv.MinGamma)
 
 % closed-loop interconnection with lateral-directional H_infinity controller
@@ -770,7 +776,10 @@ sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-% plot_lat_ex_step_lin
+save('data/lat_ex_hinf.mat','Klatexhinf','gamma_lat_ex_hinf','time_lat_ex_hinf')
+save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','time_lat_ex_lpv')
+
+plot_lat_ex_step_lin
 % plot_lat_ex_bode
 
 %% rate-bounded design
@@ -849,14 +858,19 @@ sysic
 %%
 save('data/lpv_design_data.mat')
 
-plot_parameter_grid
-plot_trim_condition
-plot_mode
-plot_lon_bode
-plot_lon_ex_bode
-plot_lon_step_lin
-plot_lon_ex_step_lin
-plot_lat_bode
-plot_lat_ex_bode
-plot_lat_step_lin
-plot_lat_ex_step_lin
+%%
+% plot_parameter_grid
+% plot_trim_condition
+% plot_mode
+% 
+% plot_lon_ex_step_lin
+% plot_lon_ex_bode
+% 
+% plot_lat_ex_step_lin
+% plot_lat_ex_bode
+% 
+% plot_lon_step_lin
+% plot_lon_bode
+% 
+% plot_lat_step_lin
+% plot_lat_bode

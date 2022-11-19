@@ -1,7 +1,7 @@
 set(0,'DefaultLineLineWidth',1)
 tlim = 2;
 %% an step state response
-fig = figure('units','centimeters','position',[0 7 13 20]);
+fig = figure('units','centimeters','position',[0 6 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -22,7 +22,7 @@ for k = 1:num_mor
     subplot(4,1,1), plot(t,y(:,1),'--','color',[0.8500 0.3250 0.0980]), ylabel('Angle of Attack [deg]'), xticklabels(''), legend('H_\infty','LPV','location','best'), xlim([0 tlim])
     subplot(4,1,2), plot(t,y(:,2),'--','color',[0.8500 0.3250 0.0980]), ylabel('Pitch Rate [deg/s]'), xticklabels(''), legend('H_\infty','LPV','location','best'), xlim([0 tlim])
     subplot(4,1,3), plot(t,-y(:,3),'--','color',[0.8500 0.3250 0.0980]), ylabel('Normal Acceleration [g]'), xticklabels('')
-    plot(t,y(:,1,1)*0+2,':','color',[0.9290 0.6940 0.1250]), legend('H_\infty','LPV','Reference','location','best'), xlim([0 tlim])
+    plot(t,y(:,1,1)*0+W_r_an*Plonexscl(3,3),':','color',[0.9290 0.6940 0.1250]), legend('H_\infty','LPV','Reference','location','best'), xlim([0 tlim])
     subplot(4,1,4), plot(t,y(:,4),'--','color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('H_\infty','LPV','location','best'), xlim([0 tlim])
 end
 end
