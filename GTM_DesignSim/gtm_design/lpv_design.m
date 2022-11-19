@@ -41,6 +41,8 @@ Domain_RB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid
 set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % switch off controller
+set_param('gtm_design/Guidance','commented','on') % switch off controller
+set_param('gtm_design/Monitor','commented','on') % switch off controller
 
 clearvars MWS_grid sas_trim tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
 clearvars sys_sas_trim sys_tas_trim sys_alt_trim sys_mor_trim sys_alp_trim sys_pitch_trim sys_throttle_trim sys_aileron_trim sys_elevator_trim sys_rudder_trim
@@ -135,6 +137,8 @@ save('data/trim_data.mat','sch_param')
 set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % switch off controller
+set_param('gtm_design/Guidance','commented','on') % switch off controller
+set_param('gtm_design/Monitor','commented','on') % switch off controller
 
 clearvars GTM_lon GTM_lat GTM_lon_ex GTM_lat_ex
 for i = 1:num_sas
@@ -229,9 +233,10 @@ save('data/linear_model_data.mat','P_lon','P_lat','P_lon_ex','P_lat_ex')
 
 % plot_mode
 
+% save trim and linearization data
 save('data/trim_and_linearize.mat')
 
-%% longitudinal control design
+%% longitudinal autopilot
 s = tf('s'); % Laplace variable
 
 % actuator model
@@ -248,17 +253,15 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele); % actuator model
 % legend('$Pa\_t$','$Pa\_e$','location','best','interpreter','latex')
 
 % reference scale (maximum expected command)
-W_r_tas = 10*knots2fps; % tas reference scale [ft/s]
+W_r_tas = 4*knots2fps; % tas reference scale [ft/s]
 W_r_alt = 10; % altitude reference scale [ft]
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % ideal response
-omega_tas = 2; % ideal tas model natural frequency [rad/s]
+omega_tas = 1; % ideal tas model natural frequency [rad/s]
 omega_alt = 2; % ideal alt model natural frequency [rad/s]
-% omega_tas = .2; % ideal tas model natural frequency [rad/s]
-% omega_alt = .4; % ideal alt model natural frequency [rad/s]
-zeta_tas = 1; % ideal tas model damping ratio []
-zeta_alt = 1; % ideal alt model damping ratio []
+zeta_tas = .8; % ideal tas model damping ratio []
+zeta_alt = .8; % ideal alt model damping ratio []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]); % ideal tas model (2nd-order system)
 W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]); % ideal alt model (2nd-order system)
 W_m_lon = blkdiag(W_m_tas,W_m_alt); % ideal response
@@ -287,8 +290,8 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % performance weight
 % W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
 % W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
-W_p_tas = (s/2+1)/(s/0.001+1)/(W_n_tas); % tas tracking error weight
-W_p_alt = (s/2+1)/(s/0.001+1)/(W_n_alt); % alt tracking error weight
+W_p_tas = (s/omega_tas+1)/(s/0.001+1)/(W_n_tas); % tas tracking error weight
+W_p_alt = (s/omega_alt+1)/(s/0.001+1)/(W_n_alt); % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % figure('units','centimeters','position',[39 2 13 10])
 % bodemag(W_p_tas,W_p_alt)
@@ -381,10 +384,10 @@ sysic
 save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
 save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
 
-plot_lon_step_lin
-plot_lon_bode
+% plot_lon_step_lin
+% plot_lon_bode
 
-%% lateral-directional control design
+%% lateral-directional autopilot
 % actuator model
 P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
@@ -397,15 +400,15 @@ P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
 % maximum expected command
 W_r_bet = 3*d2r;
-W_r_phi = 45*d2r;
+W_r_phi = 30*d2r;
 W_r_lat = blkdiag(W_r_bet,W_r_phi);
 
 % ideal model
 omega_bet = 2; % [rad/s]
-zeta_bet = 1; % []
+zeta_bet = .8; % []
 W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
-omega_phi = 6; % [rad/s]
-zeta_phi = 1; % []
+omega_phi = 5; % [rad/s]
+zeta_phi = .8; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
 % figure('units','centimeters','position',[13 2 13 10])
@@ -423,7 +426,7 @@ W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 % control weight
 W_c_ail = (s/31.4+1)/(s/120+1)*0.01; % [deg]
 W_c_rud = (s/31.4+1)/(s/120+1)*0.01; % [deg]
-W_c_mor = (s/3.14+1)/(s/120+1)*0.001; % [deg]
+W_c_mor = (s/3.14+1)/(s/120+1)*0.01; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % figure('units','centimeters','position',[26 2 13 10])
 % bode(W_c_ail)
@@ -433,8 +436,8 @@ W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
 
 % performance weight
-W_p_bet = (s/2+1)/(s/0.001+1)/(W_n_bet);
-W_p_phi = (s/6+1)/(s/0.001+1)/(W_n_phi);
+W_p_bet = (s/omega_bet+1)/(s/0.005+1)/(W_n_bet);
+W_p_phi = (s/omega_phi+1)/(s/0.005+1)/(W_n_phi);
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
 % figure('units','centimeters','position',[39 2 13 10])
 % bode(W_p_bet)
@@ -527,10 +530,10 @@ sysic
 save('data/lat_hinf.mat','K_lat_hinf','gamma_lat_hinf','time_lat_hinf')
 save('data/lat_lpv.mat','K_lat_lpv','gamma_lat_lpv','info_lat_lpv','time_lat_lpv')
 
-plot_lat_step_lin
-plot_lat_bode
+% plot_lat_step_lin
+% plot_lat_bode
 
-%% longitudinal control design
+%% longitudinal CAS
 s = tf('s'); % Laplace variable
 
 % actuator model
@@ -542,8 +545,9 @@ W_r_an  = 1*g; % an reference scale [ft/s^2]
 W_r_lon_ex = blkdiag(W_r_an);
 
 % ideal response
-% W_m_an  = 1/(s/1+1); % ideal an model (1st-order system)
-W_m_an  = 16/(s^2+5.6*s+16); % ideal an model (1st-order system)
+omega_an = 2.5;
+zeta_an = 1;
+W_m_an  = omega_an^2/(s^2+2*zeta_an*omega_an*s+omega_an^2); % ideal an model (1st-order system)
 W_m_lon_ex = blkdiag(W_m_an); % ideal response
 
 % sensor measurement noise
@@ -554,12 +558,12 @@ W_n_an  = 0.0082*g; % 0.0082g white noise (MAG3)
 W_n_lon_ex = blkdiag(W_n_alp,W_n_q,W_n_an);
 
 % control weight
-W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
+% W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
 W_c_lon_ex = blkdiag(W_c_ele);
 
 % performance weight
 % W_p_an = (1)/(s/0.001+1)/g*100; % an tracking error weight
-W_p_an = (s/120+1)/(s/1.76+1)/W_n_an; % an tracking error weight
+W_p_an = (s/omega_an+1)/(s/0.03+1)/W_n_an; % an tracking error weight
 % W_p_an = (s/4+1)/(s/0.001+1)/(W_n_an); % an tracking error weight
 W_p_lon_ex = blkdiag(W_p_an);
 
@@ -651,7 +655,7 @@ save('data/lon_ex_lpv.mat','Klonexlpv','gamma_lon_ex_lpv','info_lon_ex_lpv','tim
 plot_lon_ex_step_lin
 % plot_lon_ex_bode
 
-%% lateral-directional control design
+%% lateral-directional CAS
 % actuator model
 % P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 % P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
@@ -673,6 +677,8 @@ W_m_p = tf(omega_p^2,[1 2*zeta_p*omega_p omega_p^2]);
 % W_m_bet = 5.78/(s^2+3.92*s+5.78);
 % W_m_p = 39.06/(s^2+8.75+39.06);
 W_m_lat_ex = blkdiag(W_m_bet,W_m_p);
+% figure
+% step(W_m_p)
 
 % noise model
 % W_n_bet = 0.033*d2r; % 0.033 deg
@@ -681,18 +687,20 @@ W_m_lat_ex = blkdiag(W_m_bet,W_m_p);
 W_n_lat_ex = blkdiag(W_n_bet,W_n_p,W_n_r);
 
 % control weight
-W_c_ail = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_rud = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
+% W_c_ail = (s/31.4+1)/(s/120+1)*0.01; % [deg]
+% W_c_rud = (s/31.4+1)/(s/120+1)*0.01; % [deg]
+% W_c_mor = (s/3.14+1)/(s/120+1)*0.01; % [deg]
 W_c_lat_ex = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 
 % performance weight
 % W_p_bet = 1/(s/0.001+1)*r2d*20;
 % W_p_p   = 1/(s/0.001+1)*r2d*1;
-W_p_bet = (s/59.73+1)/(s/0.299+1)/10*59.73/0.299*10;
-W_p_p   = (s/59.73+1)/(s/0.001+1)/10*59.73/0.299*100;
 % W_p_bet = (s/2+1)/(s/0.001+1)/(W_n_bet);
 % W_p_p   = (s/10+1)/(s/0.001+1)/(W_n_bet/10);
+% W_p_bet = (s/59.73+1)/(s/0.299+1)/10*59.73/0.299*10;
+% W_p_p   = (s/59.73+1)/(s/0.001+1)/10*59.73/0.299*100;
+W_p_bet = (s/omega_bet+1)/(s/0.2+1)/(W_n_bet);
+W_p_p = (s/omega_p+1)/(s/0.1+1)/(W_n_p);
 W_p_lat_ex = blkdiag(W_p_bet,W_p_p);
 
 % time delay
@@ -779,7 +787,7 @@ sysic
 save('data/lat_ex_hinf.mat','Klatexhinf','gamma_lat_ex_hinf','time_lat_ex_hinf')
 save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','time_lat_ex_lpv')
 
-plot_lat_ex_step_lin
+% plot_lat_ex_step_lin
 % plot_lat_ex_bode
 
 %% rate-bounded design
@@ -862,15 +870,15 @@ save('data/lpv_design_data.mat')
 % plot_parameter_grid
 % plot_trim_condition
 % plot_mode
-% 
-% plot_lon_ex_step_lin
-% plot_lon_ex_bode
-% 
-% plot_lat_ex_step_lin
-% plot_lat_ex_bode
-% 
-% plot_lon_step_lin
-% plot_lon_bode
-% 
-% plot_lat_step_lin
-% plot_lat_bode
+
+plot_lon_ex_step_lin
+plot_lon_ex_bode
+
+plot_lat_ex_step_lin
+plot_lat_ex_bode
+
+plot_lon_step_lin
+plot_lon_bode
+
+plot_lat_step_lin
+plot_lat_bode

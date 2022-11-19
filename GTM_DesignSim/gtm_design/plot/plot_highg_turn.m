@@ -3,12 +3,12 @@ FlightMode = 2.2;
 ControlMode = 2;
 phi_to_eta = 12.5/45;
 
-etas0 = -25; % [%]
-etas1 = 0;
+etas0 = -20; % [%]
+etas1 = -5;
 
 tas0  = 100; % [kt]
 deltc = 100;
-t_final = 15;
+t_final = 20;
 set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','on')
 set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','off')
 
@@ -17,13 +17,15 @@ MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
-loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
+MWS.SurfaceDeadbandOn = 0;
+loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
+MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -105,13 +107,26 @@ ylim([-400 2000])
 exportgraphics(fig1_1,'figure/highg_turn_trajectory_1.png','resolution',300)
 savefig(fig1_1,'figure/highg_turn_trajectory_1.fig')
 
+fig1_1 = figure('units','centimeters','position',[13 2 13 20]);
+trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/100,1000,'boeing_747',[30 30],'blue','blue');
+xlabel('East [ft]')
+ylabel('North [ft]')
+zlabel('Up [ft]')
+box on
+grid on
+grid minor
+legend('Configuration #1','Configuration #2','location','best')
+xlim([-200 1200])
+ylim([-400 2000])
+exportgraphics(fig1_1,'figure/highg_turn_trajectory_1_side.png','resolution',300)
+savefig(fig1_1,'figure/highg_turn_trajectory_1_side.fig')
 
 %% Nonlinear simulation
 FlightMode = 2.2;
 ControlMode = 2;
 
-etas0 = 0; % [%]
-etas1 = -25;
+etas0 = -5; % [%]
+etas1 = -20;
 
 tas0  = 100; % [kt]
 deltc = 100;
@@ -123,13 +138,15 @@ MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
-loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
+MWS.SurfaceDeadbandOn = 0;
+loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
+MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -208,6 +225,20 @@ xlim([-200 1200])
 ylim([-400 2000])
 exportgraphics(fig1_2,'figure/highg_turn_trajectory_2.png','resolution',300)
 savefig(fig1_2,'figure/highg_turn_trajectory_2.fig')
+
+fig1_2 = figure('units','centimeters','position',[13 2 13 20]);
+trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/100,1000,'boeing_747',[30 30],'red','red');
+xlabel('East [ft]')
+ylabel('North [ft]')
+zlabel('Up [ft]')
+box on
+grid on
+grid minor, hold on
+legend('Configuration #1','Configuration #2','location','best')
+xlim([-200 1200])
+ylim([-400 2000])
+exportgraphics(fig1_2,'figure/highg_turn_trajectory_2_side.png','resolution',300)
+savefig(fig1_2,'figure/highg_turn_trajectory_2_side.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);

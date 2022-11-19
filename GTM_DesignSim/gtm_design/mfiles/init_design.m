@@ -89,7 +89,7 @@ MWS.bias.morphing   =-12.5;
 % Basic Table Options
 MWS.LinearizeModeOn=0;
 MWS.TrimModeOn=0;
-MWS.SurfaceDeadbandOn=1;
+MWS.SurfaceDeadbandOn=0;
 MWS.TrimWithStab=0;
 MWS.symmetric_aero_on  = 0;
 MWS.DamageCase = 0;

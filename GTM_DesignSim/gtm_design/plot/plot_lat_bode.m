@@ -13,12 +13,11 @@ for k = 1:num_mor
     hold on, grid on, grid minor
     bodemag(CL_lat_hinf_point(1,1)/(W_r_bet*P_lat_scl(1,1)),w,'--b')
     [mag,~,wout] = bode(P_lat_point(1,1),w);
-    semilogx(wout,mag2db(squeeze(mag*P_lat_scl(1,1))),'-.c')
+    semilogx(wout,mag2db(squeeze(mag*P_lat_scl(1,1))),':c')
     [mag,~,wout] = bode(P_lat_point(1,2),w);
     semilogx(wout,mag2db(squeeze(mag*P_lat_scl(1,1))),':m')
     [mag,~,wout] = bode(P_lat_point(1,3),w);
-    semilogx(wout,mag2db(squeeze(mag*P_lat_scl(1,1))),':g')
-    drawnow
+    semilogx(wout,mag2db(squeeze(mag*P_lat_scl(1,1))),'-.g')
 end
 end
 end
@@ -37,11 +36,11 @@ for k = 1:num_mor
     hold on, grid on, grid minor
     bodemag(CL_lat_hinf_point(4,2)/45,w,'--b')
     [mag,~,wout] = bode(P_lat_point(4,1),w);
-    semilogx(wout,mag2db(squeeze(mag)*r2d),'-.c')
+    semilogx(wout,mag2db(squeeze(mag)*r2d),':c')
     [mag,~,wout] = bode(P_lat_point(4,2),w);
     semilogx(wout,mag2db(squeeze(mag)*r2d),':m')
     [mag,~,wout] = bode(P_lat_point(4,3),w);
-    semilogx(wout,mag2db(squeeze(mag)*r2d),':g')
+    semilogx(wout,mag2db(squeeze(mag)*r2d),'-.g')
 end
 end
 end

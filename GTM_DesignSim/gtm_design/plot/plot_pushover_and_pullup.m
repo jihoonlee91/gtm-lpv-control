@@ -4,7 +4,7 @@ ControlMode = 2;
 phi_to_eta = 12.5/45;
 
 etas0 = -25; % [%]
-etas1 = 0;
+etas1 = -0;
 
 tas0  = 50; % [kt]
 deltc = 90;
@@ -17,13 +17,15 @@ MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
-loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
+MWS.SurfaceDeadbandOn = 0;
+loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
+MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -111,7 +113,7 @@ savefig(fig1_1,'figure/pushover_and_pullup_trajectory_1.fig')
 FlightMode = 2.1;
 ControlMode = 2;
 
-etas0 = 0; % [%]
+etas0 = -0; % [%]
 etas1 = -25;
 
 tas0  = 50; % [kt]
@@ -124,13 +126,15 @@ MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
-loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
+MWS.SurfaceDeadbandOn = 0;
+loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
+MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')

@@ -3,60 +3,29 @@ FlightMode = 4.2;
 ControlMode = 4;
 phi_to_eta = 12.5/45;
 
-if FlightMode == 2.1 % push-over and pull-up
-    etas0 = 0; % [%]
-    tas0  = 50; % [kt] 
-    deltc = 90;
-    ControlMode = 2;
-    t_final = 10;
-    set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','off')
-    set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','on')
-elseif FlightMode == 2.2 % high-g turn
-    etas0 = 0; % [%]
-    tas0  = 100; % [kt]
-    deltc = 100;
-    ControlMode = 2;
-    t_final = 15;
-    set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','on')
-    set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','off')
-elseif FlightMode == 4.1 % waypoint 
-    etas0 = -12.5; % [%]
-    tas0  = 75; % [kt]
-    deltc = MWS.bias.throttle;
-    ControlMode = 4;
-    t_final = 100;
-elseif FlightMode == 4.2 % orbit
-    etas0 = -12.5; % [%]
-    tas0  = 75; % [kt]
-    deltc = MWS.bias.throttle;
-    ControlMode = 4;
-    t_final = 110;
-else
-    etas0 = -12.5; % [%]
-    tas0  = 75; % [kt]
-    deltc = MWS.bias.throttle;
-end
+etas0 = -12.5; % [%]
+tas0  = 75; % [kt]
+deltc = MWS.bias.throttle;
+t_final = 110;
+LookaheadDistance = 700;
+TransitionRadius = 1000*0.3048; % not used
+Radius = 2000;
+TurnDirection = 1;
 
 alt0  = 1000; % [ft]
 MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
-% MWS.bias.aileron = 0;
-% MWS.bias.rudder = 0;
-loadmws(MWS,'gtm_design'); % load MWS
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
+MWS.SurfaceDeadbandOn = 0;
+loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-% MWS.StatesInp(4) = 1*d2r; % p [rad/s]
-% MWS.StatesInp(5) = 1*d2r; % q [rad/s]
-% MWS.StatesInp(6) = 1*d2r; % r [rad/s]
-% MWS.StatesInp(10) = 1*d2r; % phi [rad/s]
-% MWS.StatesInp(11) = 1*d2r; % theta [rad/s]
-% MWS.StatesInp(12) = 1*d2r; % psi [rad/s] 
+MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -66,7 +35,7 @@ set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-2')
 % set_param('gtm_design','MinStep','0.0049')
-set_param('gtm_design','MinStep','0.004')
+set_param('gtm_design','MinStep','0.001')
 
 % FlightMode
 % Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)

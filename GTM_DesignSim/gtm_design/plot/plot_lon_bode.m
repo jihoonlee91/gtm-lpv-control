@@ -19,7 +19,6 @@ for k = 1:num_mor
     title('')
     legend('LPV','H-Infinity','Throttle [%]','Elevator [deg]','location','best')
     ylabel('True Airspeed [kt]')
-    drawnow
 end
 end
 end
@@ -41,7 +40,6 @@ for k = 1:num_mor
     title('')
     legend('LPV','H-Infinity','Throttle [%]','Elevator [deg]','location','best')
     ylabel('Altitude [ft]')
-    drawnow
 end
 end
 end
