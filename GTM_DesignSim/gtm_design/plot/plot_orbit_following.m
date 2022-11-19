@@ -33,9 +33,9 @@ set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
-set_param('gtm_design','RelTol','1e-2')
+set_param('gtm_design','RelTol','1e-3')
 % set_param('gtm_design','MinStep','0.0049')
-set_param('gtm_design','MinStep','0.004')
+set_param('gtm_design','MinStep','0.0049')
 
 % FlightMode
 % Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)

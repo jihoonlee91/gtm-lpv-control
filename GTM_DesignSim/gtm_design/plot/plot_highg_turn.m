@@ -33,8 +33,8 @@ set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
-set_param('gtm_design','RelTol','1e-2')
-set_param('gtm_design','MinStep','0.002')
+set_param('gtm_design','RelTol','1e-3')
+set_param('gtm_design','MinStep','0.0049')
 
 set_param('gtm_design/Guidance/Autopilot Step','commented','off')
 set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
