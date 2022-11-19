@@ -7,7 +7,7 @@ etas0 = -12.5; % [%]
 tas0  = 75; % [kt]
 deltc = MWS.bias.throttle;
 ControlMode = 4;
-t_final = 90;
+t_final = 85;
 LookaheadDistance = 1200;
 TransitionRadius = 1200*0.3048;
 Radius = 2000; % not used
@@ -120,7 +120,7 @@ p_D_ft = NED(:,3);
 
 %%
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
-trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(5/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
 zlabel('Up [ft]')
@@ -138,7 +138,7 @@ exportgraphics(fig1,'figure/waypoint_following_trajectory.png','resolution',300)
 % savefig(fig1,'figure/waypoint_following_trajectory.fig')
 
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
-trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(5/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
 zlabel('Up [ft]')
