@@ -135,7 +135,7 @@ x = linspace(0,2*pi,100);
 plot3(2000*cos(x),3500+2000*sin(x),x*0+1000,'--r')
 legend('Trajectory','Waypoint','location','best')
 exportgraphics(fig1,'figure/orbit_following_trajectory.png','resolution',300)
-savefig(fig1,'figure/orbit_following_trajectory.fig')
+% savefig(fig1,'figure/orbit_following_trajectory.fig')
 
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
 trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
@@ -154,7 +154,7 @@ x = linspace(0,2*pi,100);
 plot3(2000*cos(x),3500+2000*sin(x),x*0+1000,'--r')
 legend('Trajectory','Waypoint','location','best')
 exportgraphics(fig1,'figure/orbit_following_trajectory_top.png','resolution',300)
-savefig(fig1,'figure/orbit_following_trajectory_top.fig')
+% savefig(fig1,'figure/orbit_following_trajectory_top.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
@@ -171,4 +171,4 @@ subplot(5,1,5), plot(SurfacePos.FLAPLOB.Time,(SurfacePos.FLAPLOB.Data+SurfacePos
 grid on, grid minor, hold on, xlim([0 t_final])
 
 exportgraphics(fig2,'figure/orbit_following_command.png','resolution',300)
-savefig(fig2,'figure/orbit_following_command.fig')
+% savefig(fig2,'figure/orbit_following_command.fig')

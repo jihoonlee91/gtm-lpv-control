@@ -135,7 +135,7 @@ ylim([-500 3500])
 plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'--or')
 legend('Trajectory','Waypoint','location','best')
 exportgraphics(fig1,'figure/waypoint_following_trajectory.png','resolution',300)
-savefig(fig1,'figure/waypoint_following_trajectory.fig')
+% savefig(fig1,'figure/waypoint_following_trajectory.fig')
 
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
 trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(5/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
@@ -153,7 +153,7 @@ ylim([-500 3500])
 plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'--or')
 legend('Trajectory','Waypoint','location','best')
 exportgraphics(fig1,'figure/waypoint_following_trajectory_top.png','resolution',300)
-savefig(fig1,'figure/waypoint_following_trajectory_top.fig')
+% savefig(fig1,'figure/waypoint_following_trajectory_top.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
@@ -170,4 +170,4 @@ subplot(5,1,5), plot(SurfacePos.FLAPLOB.Time,(SurfacePos.FLAPLOB.Data+SurfacePos
 grid on, grid minor, hold on
 
 exportgraphics(fig2,'figure/waypoint_following_command.png','resolution',300)
-savefig(fig2,'figure/waypoint_following_command.fig')
+% savefig(fig2,'figure/waypoint_following_command.fig')

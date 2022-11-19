@@ -30,7 +30,7 @@ end
 end
 end
 exportgraphics(fig1,'figure/lat_step_lin_bet_state.png','resolution',300)
-savefig(fig1,'figure/lat_step_lin_bet_state.fig')
+% savefig(fig1,'figure/lat_step_lin_bet_state.fig')
 
 %% bet step input response
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
@@ -56,7 +56,7 @@ end
 end
 end
 exportgraphics(fig2,'figure/lat_step_lin_bet_input.png','resolution',300)
-savefig(fig2,'figure/lat_step_lin_bet_input.fig')
+% savefig(fig2,'figure/lat_step_lin_bet_input.fig')
 
 %% phi step state response
 fig3 = figure('units','centimeters','position',[26 2 13 20]);
@@ -88,7 +88,7 @@ end
 end
 end
 exportgraphics(fig3,'figure/lat_step_lin_phi_state.png','resolution',300)
-savefig(fig3,'figure/lat_step_lin_phi_state.fig')
+% savefig(fig3,'figure/lat_step_lin_phi_state.fig')
 
 %% phi step input response
 fig4 = figure('units','centimeters','position',[39 2 13 20]);
@@ -114,4 +114,4 @@ end
 end
 end
 exportgraphics(fig4,'figure/lat_step_lin_phi_input.png','resolution',300)
-savefig(fig4,'figure/lat_step_lin_phi_input.fig')
+% savefig(fig4,'figure/lat_step_lin_phi_input.fig')

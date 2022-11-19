@@ -105,7 +105,7 @@ legend('Configuration #1','Configuration #2','location','best')
 xlim([-200 1200])
 ylim([-400 2000])
 exportgraphics(fig1_1,'figure/highg_turn_trajectory_1.png','resolution',300)
-savefig(fig1_1,'figure/highg_turn_trajectory_1.fig')
+% savefig(fig1_1,'figure/highg_turn_trajectory_1.fig')
 
 fig1_1 = figure('units','centimeters','position',[13 2 13 20]);
 trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/100,1000,'boeing_747',[30 30],'blue','blue');
@@ -119,7 +119,7 @@ legend('Configuration #1','Configuration #2','location','best')
 xlim([-200 1200])
 ylim([-400 2000])
 exportgraphics(fig1_1,'figure/highg_turn_trajectory_1_side.png','resolution',300)
-savefig(fig1_1,'figure/highg_turn_trajectory_1_side.fig')
+% savefig(fig1_1,'figure/highg_turn_trajectory_1_side.fig')
 
 %% Nonlinear simulation
 FlightMode = 2.2;
@@ -224,7 +224,7 @@ legend('Configuration #1','Configuration #2','location','best')
 xlim([-200 1200])
 ylim([-400 2000])
 exportgraphics(fig1_2,'figure/highg_turn_trajectory_2.png','resolution',300)
-savefig(fig1_2,'figure/highg_turn_trajectory_2.fig')
+% savefig(fig1_2,'figure/highg_turn_trajectory_2.fig')
 
 fig1_2 = figure('units','centimeters','position',[13 2 13 20]);
 trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/100,1000,'boeing_747',[30 30],'red','red');
@@ -238,7 +238,7 @@ legend('Configuration #1','Configuration #2','location','best')
 xlim([-200 1200])
 ylim([-400 2000])
 exportgraphics(fig1_2,'figure/highg_turn_trajectory_2_side.png','resolution',300)
-savefig(fig1_2,'figure/highg_turn_trajectory_2_side.fig')
+% savefig(fig1_2,'figure/highg_turn_trajectory_2_side.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
@@ -249,7 +249,7 @@ grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','loca
 subplot(3,1,3), plot(SurfacePos_1.FLAPLOB.Time,(SurfacePos_1.FLAPLOB.Data+SurfacePos_1.FLAPROB.Data)/2,'b',SurfacePos_2.FLAPLOB.Time,(SurfacePos_2.FLAPLOB.Data+SurfacePos_2.FLAPROB.Data)/2,'--r'), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
 exportgraphics(fig2,'figure/highg_turn_command.png','resolution',300)
-savefig(fig2,'figure/highg_turn_command.fig')
+% savefig(fig2,'figure/highg_turn_command.fig')
 
 %%
 fig3 = figure('units','centimeters','position',[13*2 2 13 20]);
@@ -262,7 +262,7 @@ grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','loca
 subplot(4,1,4), plot(t_1,phi_rad_1*r2d,'b',t_2,phi_rad_2*r2d,'--r'), ylabel('Roll Angle [deg]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
 exportgraphics(fig3,'figure/highg_turn_state.png','resolution',300)
-savefig(fig3,'figure/highg_turn_state.fig')
+% savefig(fig3,'figure/highg_turn_state.fig')
 
 %%
 fig4 = figure('units','centimeters','position',[13*3 2 13 20]);
@@ -275,4 +275,4 @@ grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','loca
 subplot(4,1,4), plot(SurfacePos_1.AILL.Time,(SurfacePos_1.FLAPLOB.Data-SurfacePos_1.FLAPROB.Data)/2,'b',SurfacePos_2.AILL.Time,(SurfacePos_2.FLAPLOB.Data-SurfacePos_2.FLAPROB.Data)/2,'--r'), ylabel('Asy. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
 exportgraphics(fig4,'figure/highg_turn_input.png','resolution',300)
-savefig(fig4,'figure/highg_turn_input.fig')
+% savefig(fig4,'figure/highg_turn_input.fig')

@@ -49,4 +49,4 @@ legend('LPV','H-Infinity','Aileron [deg]','Rudder [deg]','Morphing [%]','locatio
 ylabel('Roll Angle [deg]')
 
 exportgraphics(fig,'figure/lat_bode.png','resolution',300)
-savefig(fig,'figure/lat_bode.fig')
+% savefig(fig,'figure/lat_bode.fig')

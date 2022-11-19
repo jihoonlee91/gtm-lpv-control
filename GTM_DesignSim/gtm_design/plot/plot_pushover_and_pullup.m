@@ -107,7 +107,7 @@ view([90 0])
 ylim([-200 1600])
 zlim([0 1500])
 exportgraphics(fig1_1,'figure/pushover_and_pullup_trajectory_1.png','resolution',300)
-savefig(fig1_1,'figure/pushover_and_pullup_trajectory_1.fig')
+% savefig(fig1_1,'figure/pushover_and_pullup_trajectory_1.fig')
 
 %% Nonlinear simulation
 FlightMode = 2.1;
@@ -215,7 +215,7 @@ view([90 0])
 ylim([-200 1600])
 zlim([0 1500])
 exportgraphics(fig1_2,'figure/pushover_and_pullup_trajectory_2.png','resolution',300)
-savefig(fig1_2,'figure/pushover_and_pullup_trajectory_2.fig')
+% savefig(fig1_2,'figure/pushover_and_pullup_trajectory_2.fig')
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
@@ -224,7 +224,7 @@ grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','Comm
 subplot(2,1,2), plot(SurfacePos_1.FLAPLOB.Time,(SurfacePos_1.FLAPLOB.Data+SurfacePos_1.FLAPROB.Data)/2,'b',SurfacePos_2.FLAPLOB.Time,(SurfacePos_2.FLAPLOB.Data+SurfacePos_2.FLAPROB.Data)/2,'--r'), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
 exportgraphics(fig2,'figure/pushover_and_pullup_command.png','resolution',300)
-savefig(fig2,'figure/pushover_and_pullup_command.fig')
+% savefig(fig2,'figure/pushover_and_pullup_command.fig')
 
 %%
 fig3 = figure('units','centimeters','position',[13*2 2 13 20]);
@@ -237,4 +237,4 @@ grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','loca
 subplot(4,1,4), plot(SurfacePos_1.AILL.Time,SurfacePos_1.ELLOB.Data,'b',SurfacePos_2.AILL.Time,SurfacePos_2.ELLOB.Data,'--r'), ylabel('Elevator [deg]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
 exportgraphics(fig3,'figure/pushover_and_pullup_state.png','resolution',300)
-savefig(fig3,'figure/pushover_and_pullup_state.fig')
+% savefig(fig3,'figure/pushover_and_pullup_state.fig')

@@ -18,5 +18,5 @@ end
 grid on, grid minor
 xlabel('True Airspeed [kt]')
 exportgraphics(fig,'figure/trim_condition.png','resolution',300)
-savefig(fig,'figure/trim_condition.fig')
+% savefig(fig,'figure/trim_condition.fig')
 

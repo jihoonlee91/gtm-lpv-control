@@ -33,7 +33,7 @@ end
 end
 end
 exportgraphics(fig1,'figure/lon_step_lin_tas_state.png','resolution',300)
-savefig(fig1,'figure/lon_step_lin_tas_state.fig')
+% savefig(fig1,'figure/lon_step_lin_tas_state.fig')
 
 %% tas step input response
 fig2 = figure('units','centimeters','position',[13 6 13 20]);
@@ -56,7 +56,7 @@ end
 end
 end
 exportgraphics(fig2,'figure/lon_step_lin_tas_input.png','resolution',300)
-savefig(fig2,'figure/lon_step_lin_tas_input.fig')
+% savefig(fig2,'figure/lon_step_lin_tas_input.fig')
 
 %% alt step state response
 fig3 = figure('units','centimeters','position',[26 6 13 20]);
@@ -91,7 +91,7 @@ end
 end
 end
 exportgraphics(fig3,'figure/lon_step_lin_alt_state.png','resolution',300)
-savefig(fig3,'figure/lon_step_lin_alt_state.fig')
+% savefig(fig3,'figure/lon_step_lin_alt_state.fig')
 
 %% alt step input response
 fig4 = figure('units','centimeters','position',[39 6 13 20]);
@@ -114,4 +114,4 @@ end
 end
 end
 exportgraphics(fig4,'figure/lon_step_lin_alt_input.png','resolution',300)
-savefig(fig4,'figure/lon_step_lin_alt_input.fig')
+% savefig(fig4,'figure/lon_step_lin_alt_input.fig')

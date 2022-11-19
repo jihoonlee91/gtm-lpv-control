@@ -18,7 +18,7 @@ p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
 exportgraphics(fig1,'figure/mode_lon.png','resolution',300)
-savefig(fig1,'figure/mode_lon.fig')
+% savefig(fig1,'figure/mode_lon.fig')
 
 fig2 = figure('units','centimeters','position',[13 2 13 10]);
 h = pzplot(LTI_lat); grid on, axis equal
@@ -40,4 +40,4 @@ p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
 exportgraphics(fig2,'figure/mode_lat.png','resolution',300)
-savefig(fig2,'figure/mode_lat.fig')
+% savefig(fig2,'figure/mode_lat.fig')

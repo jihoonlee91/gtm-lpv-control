@@ -15,5 +15,5 @@ xlim([50 100])
 ylim([-1000 11000])
 box on
 exportgraphics(fig,'figure/parameter_grid.png','resolution',300)
-savefig(fig,'figure/parameter_grid.fig')
+% savefig(fig,'figure/parameter_grid.fig')
 
