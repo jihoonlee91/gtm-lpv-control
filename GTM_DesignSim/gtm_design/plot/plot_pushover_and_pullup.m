@@ -6,7 +6,7 @@ phi_to_eta = 12.5/45;
 etas0 = -25; % [%]
 etas1 = -0;
 
-tas0  = 50; % [kt]
+tas0  = 60; % [kt]
 deltc = 90;
 t_final = 10;
 set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','off')
@@ -36,9 +36,10 @@ set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-3')
 set_param('gtm_design','MinStep','0.0049')
 
-set_param('gtm_design/Guidance/Autopilot Step','commented','off')
+set_param('gtm_design/Guidance/Autopilot Step','commented','on')
 set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
 set_param('gtm_design/Guidance/Heading Control','commented','on')
+set_param('gtm_design/Guidance/CAS Maneuver','commented','off')
 
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
 
@@ -116,7 +117,7 @@ ControlMode = 2;
 etas0 = -0; % [%]
 etas1 = -25;
 
-tas0  = 50; % [kt]
+tas0  = 60; % [kt]
 deltc = 90;
 set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','off')
 set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','on')
@@ -134,7 +135,7 @@ set_param('gtm_design','MinStep','auto')
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-MWS.SurfaceDeadbandOn = 1;
+% MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -145,9 +146,10 @@ set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-2')
 set_param('gtm_design','MinStep','0.002')
 
-set_param('gtm_design/Guidance/Autopilot Step','commented','off')
+set_param('gtm_design/Guidance/Autopilot Step','commented','on')
 set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
 set_param('gtm_design/Guidance/Heading Control','commented','on')
+set_param('gtm_design/Guidance/CAS Maneuver','commented','off')
 
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
 

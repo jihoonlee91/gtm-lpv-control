@@ -9,8 +9,8 @@ lon_imag_vec = lon_imag(:);
 lon_real_vec_sort = lon_real_vec(lon_real_vec>-0.1);
 lon_imag_vec_sort = lon_imag_vec(lon_real_vec>-0.1);
 scatter(lon_real_vec_sort(1:num_sas*num_alt*num_mor*2),lon_imag_vec_sort(1:num_sas*num_alt*num_mor*2),'x')
-xlim([-1.5*max(abs(lon_real_vec_sort)) 0])
-ylim(1.5*max(abs(lon_imag_vec_sort))*[-1 1])
+xlim([-1.2*max(abs(lon_real_vec_sort)) max((lon_real_vec_sort))+0.2*max(abs(lon_real_vec_sort))])
+ylim(1.2*max(abs(lon_imag_vec_sort))*[-1 1])
 box on % put box around new pair of axes
 grid on
 grid minor
@@ -31,7 +31,7 @@ lat_imag_vec = lat_imag(:);
 lat_real_vec_sort = lat_real_vec(abs(lat_imag_vec)<0.1);
 lat_imag_vec_sort = lat_imag_vec(abs(lat_imag_vec)<0.1);
 scatter(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2),lat_imag_vec_sort(2:2:num_sas*num_alt*num_mor*2),'x')
-xlim([2.5*min((lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2))) 1.5*max(abs(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2)))])
+xlim([min((lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2)))-0.2*max(abs(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2))) 1.2*max(abs(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2)))])
 ylim([-1 1]), yticks(0)
 box on % put box around new pair of axes
 grid on
@@ -41,3 +41,5 @@ p.Title.String = '';
 setoptions(h,p)
 exportgraphics(fig2,'figure/mode_lat.png','resolution',300)
 % savefig(fig2,'figure/mode_lat.fig')
+
+clearvars fig1 fig2

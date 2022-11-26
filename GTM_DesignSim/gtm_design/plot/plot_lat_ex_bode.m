@@ -50,3 +50,5 @@ ylabel('Roll Rate [deg/s]')
 
 exportgraphics(fig,'figure/lat_ex_bode.png','resolution',300)
 % savefig(fig,'figure/lat_ex_bode.fig')
+
+clearvars fig

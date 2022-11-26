@@ -23,6 +23,10 @@ for k = 1:num_mor
     [y,t] = step(CL_lon_hinf_point,30);
     subplot(5,1,1), plot(t,y(:,1,1),'--','color',[0 0.4470 0.7410]), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
     [y_r,t_r] = step(W_m_tas,tlim);
+    if isempty(t_r)
+        t_r = linspace(0,tlim,numel(y_r)).';
+        y_r = ones(numel(t_r),1);
+    end
     plot(t_r,y_r*W_r_tas*P_lon_scl(1,1),'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best'), xlim([0 tlim])
     subplot(5,1,2), plot(t,y(:,2,1),'--','color',[0 0.4470 0.7410]), ylabel('Angle of Attack [deg]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
     subplot(5,1,3), plot(t,y(:,3,1),'--','color',[0 0.4470 0.7410]), ylabel('Pitch Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
@@ -86,6 +90,10 @@ for k = 1:num_mor
     subplot(5,1,4), plot(t,y(:,4,2),'--','color',[0 0.4470 0.7410]), ylabel('Pitch Angle [deg]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
     subplot(5,1,5), plot(t,y(:,5,2),'--','color',[0 0.4470 0.7410]), xlabel('Time [sec]'), ylabel('Altitude [ft]')
     [y_r,t_r] = step(W_m_alt,tlim);
+    if isempty(t_r)
+        t_r = linspace(0,tlim,numel(y_r)).';
+        y_r = ones(numel(t_r),1);
+    end
     plot(t_r,y_r*W_r_alt*P_lon_scl(5,5),'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best'), xlim([0 tlim])
 end
 end
@@ -115,3 +123,5 @@ end
 end
 exportgraphics(fig4,'figure/lon_step_lin_alt_input.png','resolution',300)
 % savefig(fig4,'figure/lon_step_lin_alt_input.fig')
+
+clearvars fig1 fig2 fig3 fig4

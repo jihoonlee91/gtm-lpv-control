@@ -110,3 +110,5 @@ end
 end
 exportgraphics(fig4,'figure/lat_ex_step_lin_p_input.png','resolution',300)
 % savefig(fig4,'figure/lat_ex_step_lin_p_input.fig')
+
+clearvars fig1 fig2 fig3 fig4

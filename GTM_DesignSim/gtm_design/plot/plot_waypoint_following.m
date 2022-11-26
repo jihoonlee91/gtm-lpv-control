@@ -20,6 +20,7 @@ MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
+set_param('gtm_design/Guidance/CAS Maneuver','commented','on')
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')

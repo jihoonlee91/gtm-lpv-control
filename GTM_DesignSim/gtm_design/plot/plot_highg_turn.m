@@ -39,6 +39,7 @@ set_param('gtm_design','MinStep','0.0049')
 set_param('gtm_design/Guidance/Autopilot Step','commented','off')
 set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
 set_param('gtm_design/Guidance/Heading Control','commented','on')
+set_param('gtm_design/Guidance/CAS Maneuver','commented','off')
 
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
 
@@ -146,7 +147,7 @@ set_param('gtm_design','MinStep','auto')
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
-MWS.SurfaceDeadbandOn = 1;
+% MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -160,6 +161,7 @@ set_param('gtm_design','MinStep','0.002')
 set_param('gtm_design/Guidance/Autopilot Step','commented','off')
 set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
 set_param('gtm_design/Guidance/Heading Control','commented','on')
+set_param('gtm_design/Guidance/CAS Maneuver','commented','off')
 
 [tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
 

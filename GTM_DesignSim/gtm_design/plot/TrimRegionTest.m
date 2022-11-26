@@ -6,6 +6,12 @@ mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
 
 configs = combvec(tas_grid,alt_grid,mor_grid);
 
+set_param('gtm_design','MinStep','auto')
+set_param('gtm_design','ReturnWorkspaceOutputs','off')
+set_param('gtm_design/Control/Controller','commented','on') % switch off controller
+set_param('gtm_design/Guidance','commented','on') % switch off controller
+set_param('gtm_design/Monitor','commented','on') % switch off controller
+
 %% Trim calculation
 clearvars MWS_configs Xtrim_configs Trimcond_configs Err_configs
 i = 1;

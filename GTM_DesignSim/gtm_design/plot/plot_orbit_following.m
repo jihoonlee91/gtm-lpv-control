@@ -1,7 +1,8 @@
 %% Nonlinear simulation
 FlightMode = 4.2;
 ControlMode = 4;
-phi_to_eta = 12.5/45;
+% phi_to_eta = 12.5/45;
+phi_to_eta = 0;
 
 etas0 = -12.5; % [%]
 tas0  = 75; % [kt]
@@ -19,6 +20,7 @@ MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
+set_param('gtm_design/Guidance/CAS Maneuver','commented','on')
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')

@@ -21,6 +21,10 @@ for k = 1:num_mor
     [y,t] = step(CL_lat_hinf_point,tlim);
     subplot(4,1,1), plot(t,y(:,1,1),'--','color',[0 0.4470 0.7410]), ylabel('Angle of Sideslip [deg]'), xlabel('Time [sec]')
     [y_r,t_r] = step(W_m_bet,tlim);
+    if isempty(t_r)
+        t_r = linspace(0,tlim,numel(y_r)).';
+        y_r = ones(numel(t_r),1);
+    end
     plot(t_r,y_r*W_r_bet*P_lat_scl(1,1),'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best')
     subplot(4,1,2), plot(t,y(:,2,1),'--','color',[0 0.4470 0.7410]), ylabel('Roll Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
     subplot(4,1,3), plot(t,y(:,3,1),'--','color',[0 0.4470 0.7410]), ylabel('Yaw Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
@@ -83,6 +87,10 @@ for k = 1:num_mor
     subplot(4,1,3), plot(t,y(:,3,2),'--','color',[0 0.4470 0.7410]), ylabel('Yaw Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
     subplot(4,1,4), plot(t,y(:,4,2),'--','color',[0 0.4470 0.7410]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
     [y_r,t_r] = step(W_m_phi,tlim);
+    if isempty(t_r)
+        t_r = linspace(0,tlim,numel(y_r)).';
+        y_r = ones(numel(t_r),1);
+    end
     plot(t_r,y_r*W_r_phi*P_lat_scl(4,4),'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best'), xlim([0 tlim])
 end
 end
@@ -115,3 +123,5 @@ end
 end
 exportgraphics(fig4,'figure/lat_step_lin_phi_input.png','resolution',300)
 % savefig(fig4,'figure/lat_step_lin_phi_input.fig')
+
+clearvars fig1 fig2 fig3 fig4
