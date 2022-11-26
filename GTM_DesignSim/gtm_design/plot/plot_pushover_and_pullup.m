@@ -221,22 +221,25 @@ exportgraphics(fig1_2,'figure/pushover_and_pullup_trajectory_2.png','resolution'
 
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
-subplot(2,1,1), plot(t_1,-Az_g_1,'b',t_2,-Az_g_2,'--r',t_2,an_c_g_2,'-.'), ylabel('Normal Acceleration [g]'), xlabel('Time [sec]')
+subplot(3,1,1), plot(t_1,-Az_g_1,'b',t_2,-Az_g_2,'--r',t_2,an_c_g_2,'-.'), ylabel('Normal Acceleration [g]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','Command','location','best')
-subplot(2,1,2), plot(SurfacePos_1.FLAPLOB.Time,(SurfacePos_1.FLAPLOB.Data+SurfacePos_1.FLAPROB.Data)/2,'b',SurfacePos_2.FLAPLOB.Time,(SurfacePos_2.FLAPLOB.Data+SurfacePos_2.FLAPROB.Data)/2,'--r'), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
+% ylim([-1 5])
+subplot(3,1,2), plot(SurfacePos_1.FLAPLOB.Time,(SurfacePos_1.FLAPLOB.Data+SurfacePos_1.FLAPROB.Data)/2,'b',SurfacePos_2.FLAPLOB.Time,(SurfacePos_2.FLAPLOB.Data+SurfacePos_2.FLAPROB.Data)/2,'--r'), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
+ylim([-30 5])
+subplot(3,1,3), plot(SurfacePos_1.AILL.Time,SurfacePos_1.ELLOB.Data,'b',SurfacePos_2.AILL.Time,SurfacePos_2.ELLOB.Data,'--r'), ylabel('Elevator [deg]'), xlabel('Time [sec]')
+grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
+% ylim([-10 15])
 exportgraphics(fig2,'figure/pushover_and_pullup_command.png','resolution',300)
 % savefig(fig2,'figure/pushover_and_pullup_command.fig')
 
 %%
 fig3 = figure('units','centimeters','position',[13*2 2 13 20]);
-subplot(4,1,1), plot(t_1,tas_kt_1,'b',t_2,tas_kt_2,'--r'), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
+subplot(3,1,1), plot(t_1,tas_kt_1,'b',t_2,tas_kt_2,'--r'), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
-subplot(4,1,2), plot(t_1,alt_ft_1,'b',t_2,alt_ft_2,'--r'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
+subplot(3,1,2), plot(t_1,alt_ft_1,'b',t_2,alt_ft_2,'--r'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
-subplot(4,1,3), plot(t_1,alp_deg_1,'b',t_2,alp_deg_2,'--r'), ylabel('Angle of Attack [deg]'), xlabel('Time [sec]')
-grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
-subplot(4,1,4), plot(SurfacePos_1.AILL.Time,SurfacePos_1.ELLOB.Data,'b',SurfacePos_2.AILL.Time,SurfacePos_2.ELLOB.Data,'--r'), ylabel('Elevator [deg]'), xlabel('Time [sec]')
+subplot(3,1,3), plot(t_1,alp_deg_1,'b',t_2,alp_deg_2,'--r'), ylabel('Angle of Attack [deg]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
 exportgraphics(fig3,'figure/pushover_and_pullup_state.png','resolution',300)
 % savefig(fig3,'figure/pushover_and_pullup_state.fig')

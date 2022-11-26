@@ -298,11 +298,35 @@ TD30ms = pade(exp(-30e-3*s),1);
 TD70ms = pade(exp(-70e-3*s),1);
 TD5 = blkdiag(TD30ms,TD30ms,TD30ms,TD70ms,TD70ms);
 
+% TD_UL = eye(2)*pade(exp(-5e-3*s),1);
+% TD_Act = eye(2)*pade(exp(-10e-3*s),1);
+% TD_DL = blkdiag(pade(exp(-15e-3*s),1),pade(exp(-15e-3*s),1),pade(exp(-15e-3*s),1),pade(exp(-45e-3*s),1),pade(exp(-45e-3*s),1));
+% TD_UL = eye(2);
+% TD_Act = eye(2);
+% TD_DL = eye(5);
+
 % D_eng = 0.01;
 % D_ele = 0.01;
 % D_lon = blkdiag(D_eng,D_ele);
 
 % control interconnection
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD_UL TD_Act TD_DL';
+% inputvar            = '[r{2} ; n{5} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD_DL(1)-W_n_lon(1) ; W_r_lon(2)-TD_DL(5)-W_n_lon(5) ; TD_DL(2)+W_n_lon(2) ; TD_DL(3)+W_n_lon(3) ; TD_DL(4)+W_n_lon(4)]';
+% input_to_P_lon      = '[TD_Act]';
+% input_to_TD_Act     = '[P_a_lon]';
+% input_to_P_a_lon    = '[TD_UL]';
+% input_to_W_m_lon    = '[W_r_lon]';
+% input_to_W_n_lon    = '[n]';
+% input_to_W_c_lon    = '[u]';
+% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_TD_UL      = '[u]';
+% input_to_TD_DL      = '[P_lon]';
+% sysoutname          = 'G_lon';
+% cleanupsysic        = 'yes';
+% sysic
+
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
 inputvar            = '[r{2} ; n{5} ; u{2}]';
 outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
@@ -317,6 +341,22 @@ input_to_TD5        = '[P_lon+W_n_lon]';
 sysoutname          = 'G_lon';
 cleanupsysic        = 'yes';
 sysic
+
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
+% inputvar            = '[r{2} ; n{5} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1)-W_n_lon(1) ; W_r_lon(2)-TD5(5)-W_n_lon(5) ; TD5(2)+W_n_lon(2) ; TD5(3)+W_n_lon(3) ; TD5(4)+W_n_lon(4)]';
+% input_to_P_lon      = '[P_a_lon]';
+% input_to_W_m_lon    = '[W_r_lon]';
+% input_to_W_n_lon    = '[n]';
+% input_to_W_c_lon    = '[u]';
+% input_to_W_p_lon    = '[W_m_lon(1)-TD5(1) ; W_m_lon(2)-TD5(5)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_P_a_lon    = '[u]';
+% input_to_TD5        = '[P_lon]';
+% sysoutname          = 'G_lon';
+% cleanupsysic        = 'yes';
+% sysic
+
 num_state_G_lon  = width(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)).A);
 num_input_G_lon  = width(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)).B);
 num_output_G_lon = height(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)).C);
@@ -873,18 +913,27 @@ save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','tim
 save('data/lpv_design_data.mat')
 
 %%
-% plot_parameter_grid
-% plot_trim_condition
-% plot_mode
+plot_parameter_grid
+plot_trim_condition
+plot_mode
 
-% plot_lon_ex_step_lin
-% plot_lon_ex_bode
-% 
-% plot_lat_ex_step_lin
-% plot_lat_ex_bode
-% 
-% plot_lon_step_lin
-% plot_lon_bode
-% 
-% plot_lat_step_lin
-% plot_lat_bode
+plot_lon_ex_step_lin
+plot_lon_ex_bode
+
+plot_lat_ex_step_lin
+plot_lat_ex_bode
+
+plot_lon_step_lin
+plot_lon_bode
+
+plot_lat_step_lin
+plot_lat_bode
+
+%%
+% plot_pushover_and_pullup
+% plot_highg_turn
+% plot_waypoint_following
+% plot_orbit_following
+% plot_helix
+% plot_helix_dive
+% plot_autopilot_straight

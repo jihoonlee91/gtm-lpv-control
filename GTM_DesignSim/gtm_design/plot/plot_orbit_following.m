@@ -1,8 +1,8 @@
 %% Nonlinear simulation
 FlightMode = 4.2;
 ControlMode = 4;
-% phi_to_eta = 12.5/45;
-phi_to_eta = 0;
+phi_to_eta = 12.5/45;
+% phi_to_eta = 0;
 
 etas0 = -12.5; % [%]
 tas0  = 75; % [kt]
@@ -113,7 +113,7 @@ etas_c_percent = command(:,7); %
 % delmr_percent = SurfacePos(:,16);
 % delms_percent = (delml_percent+delmr_percent)/2;
 % delma_percent = (delml_percent-delmr_percent)/2;
-% delt_percent  = Throttle;
+delt_percent  = Throttle;
 
 p_N_ft = NED(:,1);
 p_E_ft = NED(:,2);
@@ -124,15 +124,15 @@ fig1 = figure('units','centimeters','position',[0 2 26 20]);
 trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
-zlabel('Up [ft]')
+zlabel('Elevation [ft]')
 box on
 grid on
 grid minor, hold on
 view([45 30])
 axis equal
 view([45 30])
-% xlim([0 7000])
-% ylim([-500 3500])
+ylim([-500 6000])
+xlim([-2500 2500])
 x = linspace(0,2*pi,100);
 plot3(2000*cos(x),3500+2000*sin(x),x*0+1000,'--r')
 legend('Trajectory','Waypoint','location','best')
@@ -143,15 +143,15 @@ fig1 = figure('units','centimeters','position',[0 2 26 20]);
 trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
-zlabel('Up [ft]')
+zlabel('Elevation [ft]')
 box on
 grid on
 grid minor, hold on
 view([45 30])
 axis equal
 view([0 90])
-% xlim([0 7000])
-% ylim([-500 3500])
+ylim([-500 6000])
+xlim([-2500 2500])
 x = linspace(0,2*pi,100);
 plot3(2000*cos(x),3500+2000*sin(x),x*0+1000,'--r')
 legend('Trajectory','Waypoint','location','best')
@@ -161,16 +161,34 @@ exportgraphics(fig1,'figure/orbit_following_trajectory_top.png','resolution',300
 %%
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
 
-subplot(5,1,1), plot(t,tas_kt,t,t*0+75), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
+subplot(5,1,1), plot(t,tas_kt,t,t*0+tas0,'--'), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
 grid on, grid minor, legend('V','V_c','location','best'), xlim([0 t_final])
-subplot(5,1,2), plot(t,alt_ft,t,t*0+1000), ylabel('Altitude [ft]'), xlabel('Time [sec]')
+subplot(5,1,2), plot(t,alt_ft,t,-t*0+alt0,'--'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
 grid on, grid minor, legend('h','h_c','location','best'), xlim([0 t_final])
-subplot(5,1,3), plot(t,bet_deg,t,t*0), ylabel('Sideslip [deg]'), xlabel('Time [sec]')
-grid on, grid minor, legend('\beta','\beta_c','location','best'), xlim([0 t_final])
-subplot(5,1,4), plot(t,phi_rad*r2d,t,phi_c_deg), ylabel('Roll [deg]'), xlabel('Time [sec]')
+subplot(5,1,3), plot(t,bet_deg,t,t*0,'--'), ylabel('Sideslip [deg]'), xlabel('Time [sec]')
+grid on, grid minor, legend('\beta','\beta_c','location','northeast'), xlim([0 t_final])
+subplot(5,1,4), plot(t,phi_rad*r2d,t,phi_c_deg,'--'), ylabel('Roll [deg]'), xlabel('Time [sec]')
 grid on, grid minor, legend('\phi','\phi_c','location','best'), xlim([0 t_final])
 subplot(5,1,5), plot(SurfacePos.FLAPLOB.Time,(SurfacePos.FLAPLOB.Data+SurfacePos.FLAPROB.Data)/2), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, xlim([0 t_final])
 
 exportgraphics(fig2,'figure/orbit_following_command.png','resolution',300)
-% savefig(fig2,'figure/orbit_following_command.fig')
+
+%%
+fig2 = figure('units','centimeters','position',[13 2 13 20]);
+
+subplot(4,1,1), plot(SurfacePos.AILL.Time,SurfacePos.AILR.Data), ylabel('Aileron [deg]'), xlabel('Time [sec]')
+grid on, grid minor, hold on
+xlim([0 t_final])
+subplot(4,1,2), plot(SurfacePos.AILL.Time,SurfacePos.ELLOB.Data), ylabel('Elevator [deg]'), xlabel('Time [sec]')
+grid on, grid minor, hold on
+xlim([0 t_final])
+subplot(4,1,3), plot(SurfacePos.AILL.Time,SurfacePos.RUDL.Data), ylabel('Rudder [deg]'), xlabel('Time [sec]')
+grid on, grid minor, hold on
+xlim([0 t_final])
+subplot(4,1,4), plot(SurfacePos.AILL.Time,(SurfacePos.FLAPLOB.Data-SurfacePos.FLAPROB.Data)/2), ylabel('Asy. Morphing [%]'), xlabel('Time [sec]')
+grid on, grid minor, hold on
+xlim([0 t_final])
+exportgraphics(fig2,'figure/orbit_following_input.png','resolution',300)
+
+clearvars fig fig1 fig2 fig3 fig4

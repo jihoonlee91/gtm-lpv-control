@@ -246,10 +246,13 @@ exportgraphics(fig1_2,'figure/highg_turn_trajectory_2_side.png','resolution',300
 fig2 = figure('units','centimeters','position',[13 2 13 20]);
 subplot(3,1,1), plot(t_1,-Az_g_1,'b',t_2,-Az_g_2,'--r',t_2,an_c_g_2,'-.'), ylabel('Normal Acceleration [g]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','Command','location','best')
+ylim([-1 6])
 subplot(3,1,2), plot(t_1,p_rad_1*r2d,'b',t_2,p_rad_2*r2d,'--r',t_2,p_c_deg_2,'-.'), ylabel('Roll Rate [deg/s]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
+ylim([-10 20])
 subplot(3,1,3), plot(SurfacePos_1.FLAPLOB.Time,(SurfacePos_1.FLAPLOB.Data+SurfacePos_1.FLAPROB.Data)/2,'b',SurfacePos_2.FLAPLOB.Time,(SurfacePos_2.FLAPLOB.Data+SurfacePos_2.FLAPROB.Data)/2,'--r'), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('Configuration #1','Configuration #2','location','best')
+ylim([-25 0])
 exportgraphics(fig2,'figure/highg_turn_command.png','resolution',300)
 % savefig(fig2,'figure/highg_turn_command.fig')
 

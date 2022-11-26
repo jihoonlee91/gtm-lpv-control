@@ -1,3 +1,4 @@
+set(0,'DefaultLineLineWidth',1)
 fig = figure('units','centimeters','position',[0 2 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
