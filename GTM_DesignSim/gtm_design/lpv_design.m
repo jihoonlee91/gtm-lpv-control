@@ -5,30 +5,32 @@ set(0,'DefaultLineLineWidth',1)
 % simulink model setup
 setup
 
-%% Domain definition
 % unit conversion parameters
 knots2fps = 1.68781; % knots to feet per seconds
 fps2knots = 1/knots2fps; % knots to feet per seconds
 m2ft      = 3.28084; % meters to feet
+ft2m      = 1/m2ft; % meters to feet
 d2r       = pi/180; % degrees to radians
-r2d       = 180/pi;
-g = 32.174; % gravitational acceleration [ft/s^2]
+r2d       = 1/d2r;
+g         = 32.174; % gravitational acceleration [ft/s^2]
 % Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
 % Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
 % T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
 
+%% Domain definition
+
 % scheduling parameter gridding
-sas_grid  = [60 70 80 90]; % [kt]
-alt_grid  = [0 5000 10000]; % 700~1100 [ft]
-mor_grid  = [-25 -12.5 0]; % between -25 and 0 [%]
+sas_grid  = 60:10:120; % [kt]
+alt_grid  = 0:5000:10000; % 700~1100 [ft]
+mor_grid  = -25:12.5:0; % between -25 and 0 [%]
 num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
 
 % parameters for rate-bounded design
-sas_RateBound = 5; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
-alt_RateBound = 5; % convvel([100],'kts','ft/s')
-mor_RateBound = 5; % 10 sec for full deployment
+sas_RateBound = 10; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
+alt_RateBound = 20; % convvel([100],'kts','ft/s')
+mor_RateBound = 30; % 10 sec for full deployment
 
 % construct Domain 
 Domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid});
@@ -40,40 +42,34 @@ Domain_RB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid
 set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % switch off controller
+set_param('gtm_design/Guidance','commented','on') % switch off controller
+set_param('gtm_design/Monitor','commented','on') % switch off controller
 
 clearvars MWS_grid sas_trim tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
 clearvars sys_sas_trim sys_tas_trim sys_alt_trim sys_mor_trim sys_alp_trim sys_pitch_trim sys_throttle_trim sys_aileron_trim sys_elevator_trim sys_rudder_trim
-for i = 1:num_sas
-for j = 1:num_alt
 for k = 1:num_mor
+for j = 1:num_alt
+for i = 1:num_sas
     sas = sas_grid(i); % trim sas [kt]
     alt = alt_grid(j); % trim alt [ft]
     mor = mor_grid(k); % trim mor [%]
     tas = sas2tas(sas,alt); % [kts]
 
-    target = struct('tas',tas,'gamma',0); % target trim condition [kt] x [deg]
-    MWS = grabmws('gtm_design');
-    MWS.StatesInp(9)  = alt; % set trim altitude [ft]
-    MWS.bias.morphing = mor; % set trim symmetric morphing parameter [%]
-    loadmws(MWS,'gtm_design');
-
-    [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',0); % trim calculation (attempt #1)
-    if (Err > 1e-3)
-        loadmws(init_design(),'gtm_design');
-        warning('Poor convergence, trying again.\n');
-        [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',0); % trim calculation (attempt #2)
-        if (Err > 1e-3)
-            loadmws(init_design(),'gtm_design');
+    fprintf('trimming... #%d @ TAS: %d kt (SAS: %d kt), Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_sas num_alt num_mor],i,j,k),tas,sas,alt,mor)
+    trial = 1;
+    while 1
+        [MWS,Xtrim,Trimcond,Err] = trimgtm_morph(tas,alt,mor);
+        if (Err < 1e-3)
+            break
+        elseif trial >= 10
+            error('TRIM FAIL')
+        else
             warning('Poor convergence, trying again.\n');
-            [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',0); % trim calculation (attempt #3)
-            if (Err > 1e-3)
-                error('TRIM FAIL')
-            end
+            trial = trial+1;
         end
     end
     MWS_grid(i,j,k) = MWS;
-    fprintf('trimming #%d @ tas: %d kt, alt: %d ft, mor: %.3g %%\n',sub2ind([num_mor num_alt num_sas],k,j,i),tas,alt,mor)
-
+    
     % extract trim condition
     sas_trim(i,j,k)      = sas; % [kts]
     tas_trim(i,j,k)      = tas; % [kts]
@@ -126,7 +122,8 @@ sch_param.sch_elevator_trim = sch_elevator_trim;
 sch_param.sch_rudder_trim   = sch_rudder_trim;
 
 % save scheduled trim condition
-save('data/trim_data.mat','sch_param')
+save('data/sch_param.mat','sch_param')
+% save('data/trim_data.mat')
 
 % plot_trim_condition
 
@@ -134,20 +131,22 @@ save('data/trim_data.mat','sch_param')
 set_param('gtm_design','MinStep','auto')
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % switch off controller
+set_param('gtm_design/Guidance','commented','on') % switch off controller
+set_param('gtm_design/Monitor','commented','on') % switch off controller
 
 clearvars GTM_lon GTM_lat GTM_lon_ex GTM_lat_ex
-for i = 1:num_sas
-for j = 1:num_alt
 for k = 1:num_mor 
+for j = 1:num_alt
+for i = 1:num_sas
     sas = sas_grid(i); % trim sas [kt]
     alt = alt_grid(j); % trim alt [ft]
     mor = mor_grid(k); % trim mor [%]
     tas = sas2tas(sas,alt); % [kt]
 
     % linearization
+    fprintf('Linearizing... #%d @ TAS: %d kt (SAS: %d kt), Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_sas num_alt num_mor],i,j,k),tas,sas,alt,mor)
     [sys,londyn,latdyn]=linmodel(MWS_grid(i,j,k),1,0,0);
-    fprintf('Linearization #%d @ TAS: %d kt, Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_mor num_alt num_sas],k,j,i),tas,alt,mor)
-
+    
     % stack LTI model
     LTI_lon(:,:,i,j,k) = londyn;
     LTI_lat(:,:,i,j,k) = latdyn;
@@ -224,13 +223,13 @@ P_lon_ex = pss(GTM_lon_ex,Domain);
 P_lat_ex = pss(GTM_lat_ex,Domain);
 
 % save LPV model
-save('data/linear_model_data.mat','P_lon','P_lat','P_lon_ex','P_lat_ex')
+save('data/lpv_model.mat','P_lon','P_lat','P_lon_ex','P_lat_ex')
+% save('data/linearization_data.mat')
 
+% plot_ol_bode
 % plot_mode
 
-save('data/trim_and_linearize.mat')
-
-%% longitudinal control design
+%% longitudinal autopilot
 s = tf('s'); % Laplace variable
 
 % actuator model
@@ -247,19 +246,19 @@ P_a_lon = blkdiag(P_a_eng,P_a_ele); % actuator model
 % legend('$Pa\_t$','$Pa\_e$','location','best','interpreter','latex')
 
 % reference scale (maximum expected command)
-W_r_tas = 10*knots2fps; % tas reference scale [ft/s]
+W_r_tas = 4*knots2fps; % tas reference scale [ft/s]
 W_r_alt = 10; % altitude reference scale [ft]
 W_r_lon = blkdiag(W_r_tas,W_r_alt);
 
 % ideal response
 omega_tas = 2; % ideal tas model natural frequency [rad/s]
 omega_alt = 2; % ideal alt model natural frequency [rad/s]
-% omega_tas = .2; % ideal tas model natural frequency [rad/s]
-% omega_alt = .4; % ideal alt model natural frequency [rad/s]
-zeta_tas = 1; % ideal tas model damping ratio []
-zeta_alt = 1; % ideal alt model damping ratio []
+zeta_tas = .8; % ideal tas model damping ratio []
+zeta_alt = .8; % ideal alt model damping ratio []
 W_m_tas = tf(omega_tas^2,[1 2*zeta_tas*omega_tas omega_tas^2]); % ideal tas model (2nd-order system)
 W_m_alt = tf(omega_alt^2,[1 2*zeta_alt*omega_alt omega_alt^2]); % ideal alt model (2nd-order system)
+% W_m_tas = 1;
+% W_m_alt = 1;
 W_m_lon = blkdiag(W_m_tas,W_m_alt); % ideal response
 % figure('units','centimeters','position',[13 2 13 10])
 % step(W_m_tas,W_m_alt)
@@ -271,12 +270,12 @@ W_n_tas   = 0.06*knots2fps; % 0.06 kt tas white noise (ADS)
 W_n_alp   = 0.031*d2r; % 0.031 deg alp white noise (ADS)
 W_n_q     = 0.3857*d2r; % 0.3857 deg/s q white noise (MAG3)
 W_n_theta = 0.02*d2r; % 0.02 deg theta white noise (MIDG II)
-W_n_alt   = 0.1; % altitude white noise [ft] (MIDG II GPS)
+W_n_alt   = 0.01*m2ft; % altitude white noise, sensor fusion (barometer + MAG3 IMU) [ft]
 W_n_lon = blkdiag(W_n_tas,W_n_alp,W_n_q,W_n_theta,W_n_alt);
 
 % control weight
-W_c_eng = (s/0.8552+1)/(s/2+1)*0.001; % throttle weight [%]
-W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
+W_c_eng = (s/0.5+1)/(s/120+1)*0.001; % throttle weight [%]
+W_c_ele = (s/0.5+1)/(s/120+1)*0.001; % elevator weight [deg]
 W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % figure('units','centimeters','position',[26 2 13 10])
 % bodemag(W_c_eng,W_c_ele)
@@ -284,10 +283,10 @@ W_c_lon = blkdiag(W_c_eng,W_c_ele);
 % legend('$Wc\_t$','$Wc\_e$','location','best','interpreter','latex')
 
 % performance weight
-% W_p_tas = (s/100+1)/(s/0.005+1)/(knots2fps*10)*100; % tas tracking error weight
-% W_p_alt = (s/100+1)/(s/0.005+1)/(knots2fps*10)*10; % alt tracking error weight
-W_p_tas = 1/(s/0.001+1)*fps2knots*10; % tas tracking error weight
-W_p_alt = 1/(s/0.001+1)*10; % alt tracking error weight
+% W_p_tas = (s/omega_tas+1)/(s/0.01+1)/(W_n_tas); % tas tracking error weight
+% W_p_alt = (s/omega_alt+1)/(s/0.01+1)/(W_n_alt); % alt tracking error weight
+W_p_tas = (s/120+1)/(s/0.005+1)/(0.06*knots2fps*2); % tas tracking error weight
+W_p_alt = (s/120+1)/(s/0.005+1)/(0.01*m2ft*2); % alt tracking error weight
 W_p_lon = blkdiag(W_p_tas,W_p_alt);
 % figure('units','centimeters','position',[39 2 13 10])
 % bodemag(W_p_tas,W_p_alt)
@@ -299,7 +298,35 @@ TD30ms = pade(exp(-30e-3*s),1);
 TD70ms = pade(exp(-70e-3*s),1);
 TD5 = blkdiag(TD30ms,TD30ms,TD30ms,TD70ms,TD70ms);
 
+% TD_UL = eye(2)*pade(exp(-5e-3*s),1);
+% TD_Act = eye(2)*pade(exp(-10e-3*s),1);
+% TD_DL = blkdiag(pade(exp(-15e-3*s),1),pade(exp(-15e-3*s),1),pade(exp(-15e-3*s),1),pade(exp(-45e-3*s),1),pade(exp(-45e-3*s),1));
+% TD_UL = eye(2);
+% TD_Act = eye(2);
+% TD_DL = eye(5);
+
+% D_eng = 0.01;
+% D_ele = 0.01;
+% D_lon = blkdiag(D_eng,D_ele);
+
 % control interconnection
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD_UL TD_Act TD_DL';
+% inputvar            = '[r{2} ; n{5} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD_DL(1)-W_n_lon(1) ; W_r_lon(2)-TD_DL(5)-W_n_lon(5) ; TD_DL(2)+W_n_lon(2) ; TD_DL(3)+W_n_lon(3) ; TD_DL(4)+W_n_lon(4)]';
+% input_to_P_lon      = '[TD_Act]';
+% input_to_TD_Act     = '[P_a_lon]';
+% input_to_P_a_lon    = '[TD_UL]';
+% input_to_W_m_lon    = '[W_r_lon]';
+% input_to_W_n_lon    = '[n]';
+% input_to_W_c_lon    = '[u]';
+% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_TD_UL      = '[u]';
+% input_to_TD_DL      = '[P_lon]';
+% sysoutname          = 'G_lon';
+% cleanupsysic        = 'yes';
+% sysic
+
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
 inputvar            = '[r{2} ; n{5} ; u{2}]';
 outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
@@ -314,6 +341,22 @@ input_to_TD5        = '[P_lon+W_n_lon]';
 sysoutname          = 'G_lon';
 cleanupsysic        = 'yes';
 sysic
+
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
+% inputvar            = '[r{2} ; n{5} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1)-W_n_lon(1) ; W_r_lon(2)-TD5(5)-W_n_lon(5) ; TD5(2)+W_n_lon(2) ; TD5(3)+W_n_lon(3) ; TD5(4)+W_n_lon(4)]';
+% input_to_P_lon      = '[P_a_lon]';
+% input_to_W_m_lon    = '[W_r_lon]';
+% input_to_W_n_lon    = '[n]';
+% input_to_W_c_lon    = '[u]';
+% input_to_W_p_lon    = '[W_m_lon(1)-TD5(1) ; W_m_lon(2)-TD5(5)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_P_a_lon    = '[u]';
+% input_to_TD5        = '[P_lon]';
+% sysoutname          = 'G_lon';
+% cleanupsysic        = 'yes';
+% sysic
+
 num_state_G_lon  = width(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)).A);
 num_input_G_lon  = width(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)).B);
 num_output_G_lon = height(G_lon.value('rho1_sas_param',sas_grid(1),'rho2_alt_param',alt_grid(1),'rho3_mor_param',mor_grid(1)).C);
@@ -330,21 +373,21 @@ for k = 1:num_mor
     G_lon_point = G_lon.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
     [~,~,gamma_lon_hinf_point_optimal]        = hinfsyn(G_lon_point,nmeas_lon,ncont_lon);
     [K_lon_hinf_point,~,gamma_lon_hinf_point] = hinfsyn(G_lon_point,nmeas_lon,ncont_lon,1.2*gamma_lon_hinf_point_optimal);
-    fprintf('lon Hinf gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_hinf_point,(gamma_lon_hinf_point/gamma_lon_hinf_point_optimal-1)*100,gamma_lon_hinf_point_optimal)
+    fprintf('lon Hinf #%d gamma = %.5g (%.3g%% back-off from %.5g)\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamma_lon_hinf_point,(gamma_lon_hinf_point/gamma_lon_hinf_point_optimal-1)*100,gamma_lon_hinf_point_optimal)
     K_lon_hinf_grid(:,:,i,j,k) = K_lon_hinf_point;
     gamma_lon_hinf(i,j,k) = gamma_lon_hinf_point;
 end
 end
 end
 time_lon_hinf = toc;
+fprintf('Lon Hinf Synthesis Time: %.1f seconds \n',time_lon_hinf)
 K_lon_hinf = pss(K_lon_hinf_grid,Domain);
-save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
 
 % LPV synthesis
 tic
 [K_lon_lpv,gamma_lon_lpv,info_lon_lpv] = lpvsyn(G_lon,nmeas_lon,ncont_lon);
 time_lon_lpv = toc;
-save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
+fprintf('Lon LPV  Synthesis Time: %.1f seconds \n',time_lon_lpv)
 fprintf('Lon LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
 
 % closed-loop interconnection with Longitudinal H_infinity controller
@@ -379,10 +422,14 @@ sysoutname          = 'CL_lon_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
+save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
+save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
+
+% plot_airspeed_step
 % plot_lon_step_lin
 % plot_lon_bode
 
-%% lateral-directional control design
+%% lateral-directional autopilot
 % actuator model
 P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
@@ -395,15 +442,15 @@ P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
 
 % maximum expected command
 W_r_bet = 3*d2r;
-W_r_phi = 45*d2r;
+W_r_phi = 30*d2r;
 W_r_lat = blkdiag(W_r_bet,W_r_phi);
 
 % ideal model
 omega_bet = 2; % [rad/s]
-zeta_bet = 1; % []
+zeta_bet = .8; % []
 W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
-omega_phi = 6; % [rad/s]
-zeta_phi = 1; % []
+omega_phi = 5; % [rad/s]
+zeta_phi = .8; % []
 W_m_phi = tf(omega_phi^2,[1 2*zeta_phi*omega_phi omega_phi^2]);
 W_m_lat = blkdiag(W_m_bet,W_m_phi);
 % figure('units','centimeters','position',[13 2 13 10])
@@ -419,9 +466,9 @@ W_n_phi = 0.02*d2r; % 0.02 deg
 W_n_lat = blkdiag(W_n_bet,W_n_p,W_n_r,W_n_phi);
 
 % control weight
-W_c_ail = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_rud = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
+W_c_ail = (s/.1+1)/(s/120+1)*0.0001; % [deg]
+W_c_rud = (s/.1+1)/(s/120+1)*0.0005; % [deg]
+W_c_mor = (s/.1+1)/(s/120+1)*0.01; % [deg]
 W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % figure('units','centimeters','position',[26 2 13 10])
 % bode(W_c_ail)
@@ -431,8 +478,8 @@ W_c_lat = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 % legend('$Wa\_a$','$Wa\_r$','$Wa\_m$','location','best','interpreter','latex')
 
 % performance weight
-W_p_bet = 1/(s/0.001+1)*r2d*20;
-W_p_phi = 1/(s/0.001+1)*r2d*50;
+W_p_bet = (s/120+1)/(s/0.1+1)/(W_n_bet*2);
+W_p_phi = (s/120+1)/(s/0.003+1)/(W_n_phi*2);
 W_p_lat = blkdiag(W_p_bet,W_p_phi);
 % figure('units','centimeters','position',[39 2 13 10])
 % bode(W_p_bet)
@@ -475,21 +522,21 @@ for k = 1:num_mor
     G_lat_point = G_lat.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
     [~,~,gamma_lat_hinf_point_optimal]        = hinfsyn(G_lat_point,nmeas_lat,ncont_lat);
     [K_lat_hinf_point,~,gamma_lat_hinf_point] = hinfsyn(G_lat_point,nmeas_lat,ncont_lat,1.2*gamma_lat_hinf_point_optimal);
-    fprintf('lat Hinf gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_hinf_point,(gamma_lat_hinf_point/gamma_lat_hinf_point_optimal-1)*100,gamma_lat_hinf_point_optimal)
+    fprintf('lat Hinf #%d gamma = %.5g (%.3g%% back-off from %.5g)\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamma_lat_hinf_point,(gamma_lat_hinf_point/gamma_lat_hinf_point_optimal-1)*100,gamma_lat_hinf_point_optimal)
     K_lat_hinf_grid(:,:,i,j,k) = K_lat_hinf_point;
     gamma_lat_hinf(i,j,k) = gamma_lat_hinf_point;
 end
 end
 end
 time_lat_hinf = toc;
+fprintf('Lat Hinf Synthesis Time: %.1f seconds \n',time_lat_hinf)
 K_lat_hinf = pss(K_lat_hinf_grid,Domain);
-save('data/lat_hinf.mat','K_lat_hinf','gamma_lat_hinf','time_lat_hinf')
 
 % LPV synthesis
 tic
 [K_lat_lpv,gamma_lat_lpv,info_lat_lpv] = lpvsyn(G_lat,nmeas_lat,ncont_lat);
 time_lat_lpv = toc;
-save('data/lat_lpv.mat','K_lat_lpv','gamma_lat_lpv','info_lat_lpv','time_lat_lpv')
+fprintf('Lat LPV  Synthesis Time: %.1f seconds \n',time_lat_lpv)
 fprintf('lat LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_lpv,(gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100,info_lat_lpv.MinGamma)
 
 % closed-loop interconnection with lateral-directional H_infinity controller
@@ -524,10 +571,14 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
+save('data/lat_hinf.mat','K_lat_hinf','gamma_lat_hinf','time_lat_hinf')
+save('data/lat_lpv.mat','K_lat_lpv','gamma_lat_lpv','info_lat_lpv','time_lat_lpv')
+
+% plot_airspeed_step
 % plot_lat_step_lin
 % plot_lat_bode
 
-%% longitudinal control design
+%% longitudinal CAS
 s = tf('s'); % Laplace variable
 
 % actuator model
@@ -535,12 +586,13 @@ P_a_ele = 2*pi*5/(s+2*pi*5); % elevator model
 P_a_lon_ex = blkdiag(P_a_ele); % actuator model
 
 % reference scale (maximum expected command)
-W_r_an  = 2*g; % an reference scale [ft/s^2]
+W_r_an  = 3*g; % an reference scale [ft/s^2]
 W_r_lon_ex = blkdiag(W_r_an);
 
 % ideal response
-% W_m_an  = 1/(s/1+1); % ideal an model (1st-order system)
-W_m_an  = 16/(s^2+5.6*s+16); % ideal an model (1st-order system)
+omega_an = 2.5;
+zeta_an = .8;
+W_m_an  = omega_an^2/(s^2+2*zeta_an*omega_an*s+omega_an^2); % ideal an model (1st-order system)
 W_m_lon_ex = blkdiag(W_m_an); % ideal response
 
 % sensor measurement noise
@@ -550,12 +602,11 @@ W_n_an  = 0.0082*g; % 0.0082g white noise (MAG3)
 W_n_lon_ex = blkdiag(W_n_alp,W_n_q,W_n_an);
 
 % control weight
-W_c_ele = (s/31.4+1)/(s/120+1)*0.01; % elevator weight [deg]
+W_c_ele = (s/0.5+1)/(s/120+1)*0.0001; % elevator weight [deg]
 W_c_lon_ex = blkdiag(W_c_ele);
 
 % performance weight
-% W_p_an = (1)/(s/0.001+1)/g*100; % an tracking error weight
-W_p_an = (s/59.73+1)/(s/1.76+1)/10*59.73/0.176; % an tracking error weight
+W_p_an = (s/omega_an+1)/(s/0.04+1)/(0.0082*g*5); % an tracking error weight
 W_p_lon_ex = blkdiag(W_p_an);
 
 % time delay
@@ -593,21 +644,21 @@ for k = 1:num_mor
     G_lon_ex_point = G_lon_ex.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
     [~,~,gamma_lon_ex_hinf_point_optimal]        = hinfsyn(G_lon_ex_point,nmeas_lon_ex,ncont_lon_ex);
     [Klonexhinf_point,~,gamma_lon_ex_hinf_point] = hinfsyn(G_lon_ex_point,nmeas_lon_ex,ncont_lon_ex,1.2*gamma_lon_ex_hinf_point_optimal);
-    fprintf('lon Ex Hinf gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_ex_hinf_point,(gamma_lon_ex_hinf_point/gamma_lon_ex_hinf_point_optimal-1)*100,gamma_lon_ex_hinf_point_optimal)
+    fprintf('lon Ex Hinf #%d gamma = %.5g (%.3g%% back-off from %.5g)\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamma_lon_ex_hinf_point,(gamma_lon_ex_hinf_point/gamma_lon_ex_hinf_point_optimal-1)*100,gamma_lon_ex_hinf_point_optimal)
     Klonexhinf_grid(:,:,i,j,k) = Klonexhinf_point;
     gamma_lon_ex_hinf(i,j,k) = gamma_lon_ex_hinf_point;
 end
 end
 end
 time_lon_ex_hinf = toc;
+fprintf('Lon Ex Hinf Synthesis Time: %.1f seconds \n',time_lon_ex_hinf)
 Klonexhinf = pss(Klonexhinf_grid,Domain);
-save('data/lon_ex_hinf.mat','Klonexhinf','gamma_lon_ex_hinf','time_lon_ex_hinf')
 
 % LPV synthesis
 tic
 [Klonexlpv,gamma_lon_ex_lpv,info_lon_ex_lpv] = lpvsyn(G_lon_ex,nmeas_lon_ex,ncont_lon_ex);
 time_lon_ex_lpv = toc;
-save('data/lon_ex_lpv.mat','Klonexlpv','gamma_lon_ex_lpv','info_lon_ex_lpv','time_lon_ex_lpv')
+fprintf('Lon Ex LPV  Synthesis Time: %.1f seconds \n',time_lon_ex_lpv)
 fprintf('Lon Ex LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_ex_lpv,(gamma_lon_ex_lpv/info_lon_ex_lpv.MinGamma-1)*100,info_lon_ex_lpv.MinGamma)
 
 % closed-loop interconnection with Longitudinal H_infinity controller
@@ -642,10 +693,15 @@ sysoutname          = 'CL_lon_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
+save('data/lon_ex_hinf.mat','Klonexhinf','gamma_lon_ex_hinf','time_lon_ex_hinf')
+save('data/lon_ex_lpv.mat','Klonexlpv','gamma_lon_ex_lpv','info_lon_ex_lpv','time_lon_ex_lpv')
+
+% plot_cas_step
+% plot_pushover_and_pullup
 % plot_lon_ex_step_lin
 % plot_lon_ex_bode
 
-%% lateral-directional control design
+%% lateral-directional CAS
 % actuator model
 P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
@@ -659,14 +715,14 @@ W_r_lat_ex = blkdiag(W_r_bet,W_r_p);
 
 % ideal model
 omega_bet = 2; % [rad/s]
-zeta_bet = 1; % []
+zeta_bet = .8; % []
 W_m_bet = tf(omega_bet^2,[1 2*zeta_bet*omega_bet omega_bet^2]);
 omega_p = 10; % [rad/s]
-zeta_p = 1; % []
+zeta_p = .8; % []
 W_m_p = tf(omega_p^2,[1 2*zeta_p*omega_p omega_p^2]);
-% W_m_bet = 5.78/(s^2+3.92*s+5.78);
-% W_m_p = 39.06/(s^2+8.75+39.06);
 W_m_lat_ex = blkdiag(W_m_bet,W_m_p);
+% figure
+% step(W_m_p)
 
 % noise model
 W_n_bet = 0.033*d2r; % 0.033 deg
@@ -675,16 +731,19 @@ W_n_r   = 0.3330*d2r; % 0.3330 deg/sec
 W_n_lat_ex = blkdiag(W_n_bet,W_n_p,W_n_r);
 
 % control weight
-W_c_ail = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_rud = (s/31.4+1)/(s/100+1)*0.01; % [deg]
-W_c_mor = (s/3.14+1)/(s/10+1)*0.03; % [deg]
+% W_c_ail = (s/31.4+1)/(s/120+1)*0.008; % [deg]
+% W_c_rud = (s/.1+1)/(s/120+1)*0.0001; % [deg]
+% W_c_mor = (s/3.14+1)/(s/120+1)*0.01; % [deg]
+
+W_c_ail = (s/.1+1)/(s/120+1)*0.0001; % [deg]
+W_c_rud = (s/.1+1)/(s/120+1)*0.0005; % [deg]
+W_c_mor = (s/.1+1)/(s/120+1)*0.01; % [deg]
+
 W_c_lat_ex = blkdiag(W_c_ail,W_c_rud,W_c_mor);
 
 % performance weight
-% W_p_bet = 1/(s/0.001+1)*r2d*20;
-% W_p_p   = 1/(s/0.001+1)*r2d*1;
-W_p_bet = (s/59.73+1)/(s/0.299+1)/10*59.73/0.299*10;
-W_p_p   = (s/59.73+1)/(s/0.001+1)/10*59.73/0.299*100;
+W_p_bet = (s/120+1)/(s/0.1+1)/(W_n_bet*2);
+W_p_p = (s/120+1)/(s/0.1+1)/(W_n_p*2);
 W_p_lat_ex = blkdiag(W_p_bet,W_p_p);
 
 % time delay
@@ -721,21 +780,21 @@ for k = 1:num_mor
     G_lat_ex_point = G_lat_ex.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
     [~,~,gamma_lat_ex_hinf_point_optimal]        = hinfsyn(G_lat_ex_point,nmeas_lat_ex,ncont_lat_ex);
     [Klatexhinf_point,~,gamma_lat_ex_hinf_point] = hinfsyn(G_lat_ex_point,nmeas_lat_ex,ncont_lat_ex,1.2*gamma_lat_ex_hinf_point_optimal);
-    fprintf('lat Ex Hinf gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_hinf_point,(gamma_lat_ex_hinf_point/gamma_lat_ex_hinf_point_optimal-1)*100,gamma_lat_ex_hinf_point_optimal)
+    fprintf('lat Ex Hinf #%d gamma = %.5g (%.3g%% back-off from %.5g)\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamma_lat_ex_hinf_point,(gamma_lat_ex_hinf_point/gamma_lat_ex_hinf_point_optimal-1)*100,gamma_lat_ex_hinf_point_optimal)
     Klatexhinf_grid(:,:,i,j,k) = Klatexhinf_point;
     gamma_lat_ex_hinf(i,j,k) = gamma_lat_ex_hinf_point;
 end
 end
 end
 time_lat_ex_hinf = toc;
+fprintf('Lat Ex Hinf Synthesis Time: %.1f seconds \n',time_lat_ex_hinf)
 Klatexhinf = pss(Klatexhinf_grid,Domain);
-save('data/lat_ex_hinf.mat','Klatexhinf','gamma_lat_ex_hinf','time_lat_ex_hinf')
 
 % LPV synthesis
 tic
 [Klatexlpv,gamma_lat_ex_lpv,info_lat_ex_lpv] = lpvsyn(G_lat_ex,nmeas_lat_ex,ncont_lat_ex);
 time_lat_ex_lpv = toc;
-save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','time_lat_ex_lpv')
+fprintf('Lat Ex LPV  Synthesis Time: %.1f seconds \n',time_lat_ex_lpv)
 fprintf('lat Ex LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_lpv,(gamma_lat_ex_lpv/info_lat_ex_lpv.MinGamma-1)*100,info_lat_ex_lpv.MinGamma)
 
 % closed-loop interconnection with lateral-directional H_infinity controller
@@ -770,6 +829,10 @@ sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
+save('data/lat_ex_hinf.mat','Klatexhinf','gamma_lat_ex_hinf','time_lat_ex_hinf')
+save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','time_lat_ex_lpv')
+
+% plot_highg_turn
 % plot_lat_ex_step_lin
 % plot_lat_ex_bode
 
@@ -849,14 +912,28 @@ sysic
 %%
 save('data/lpv_design_data.mat')
 
+%%
 plot_parameter_grid
 plot_trim_condition
 plot_mode
-plot_lon_bode
-plot_lon_ex_bode
-plot_lon_step_lin
+
 plot_lon_ex_step_lin
-plot_lat_bode
-plot_lat_ex_bode
-plot_lat_step_lin
+plot_lon_ex_bode
+
 plot_lat_ex_step_lin
+plot_lat_ex_bode
+
+plot_lon_step_lin
+plot_lon_bode
+
+plot_lat_step_lin
+plot_lat_bode
+
+%%
+% plot_pushover_and_pullup
+% plot_highg_turn
+% plot_waypoint_following
+% plot_orbit_following
+% plot_helix
+% plot_helix_dive
+% plot_autopilot_straight
