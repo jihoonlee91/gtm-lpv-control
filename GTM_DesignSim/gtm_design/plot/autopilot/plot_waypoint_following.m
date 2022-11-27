@@ -1,24 +1,31 @@
 %% Nonlinear simulation
-FlightMode = 4.2;
+FlightMode = 4.1;
 ControlMode = 4;
 phi_to_eta = 12.5/45;
+tas0  = 75; % [kt]
+t_final = 85;
+LookaheadDistance = 1200;
+TransitionRadius = 1200*0.3048;
+alt0  = 1000; % [ft]
+Waypoints = [0 0 -alt0;
+             3000 0 -alt0;
+             3000 3000 -alt0;
+             0 3000 -alt0;
+             0 0 -alt0];
 
 etas0 = -12.5; % [%]
-tas0  = 75; % [kt]
+etas1 = 0;
 deltc = MWS.bias.throttle;
-t_final = 360;
-LookaheadDistance = 700;
-TransitionRadius = 1000*0.3048; % not used
-Radius = 2000;
-TurnDirection = 1;
+Radius = 2000; % not used
+TurnDirection = 1; % not used
 
-alt0  = 1000; % [ft]
 MWS               = init_design('GTM',1);
 MWS.bias.morphing = etas0; % set morphing parameter
 MWS.StatesInp(9)  = alt0; % set altitude [ft]
 target            = struct('gamma',0,'tas',tas0); % start trim condition target [knot]
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','on') % control off
+set_param('gtm_design/Guidance/CAS Maneuver','commented','on')
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
@@ -27,50 +34,20 @@ loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
-
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
 set_param('gtm_design/Control/Controller','commented','off') % control on
 set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-3')
-% set_param('gtm_design','MinStep','0.0049')
 set_param('gtm_design','MinStep','0.0049')
+set_param('gtm_design/Guidance/Autopilot Step','commented','on')
+set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','off')
+set_param('gtm_design/Guidance/Heading Control','commented','off')
 
-% FlightMode
-% Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)
-% Maneuver: 2.1 (push-over and pull-up), 2.2 (high-g turn)
-% Step: 3.0 (zero), 3.1 (airspeed), 3.2 (altitude), 3.3 (sideslip), 3.4 (roll)
-% Trajectory: 4.1 (waypoint following), 4.2 (orbit following)
-
-% ControlMode
-% Off: 0
-% Hinf CAS: 1
-% LPV CAS: 2
-% Hinf Autopilot: 3
-% LPV Autopilot: 4
-
-if FlightMode < 4
-    set_param('gtm_design/Guidance/Autopilot Step','commented','off')
-    set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
-    set_param('gtm_design/Guidance/Heading Control','commented','on')
-else
-    set_param('gtm_design/Guidance/Autopilot Step','commented','on')
-    set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','off')
-    set_param('gtm_design/Guidance/Heading Control','commented','off')
-end
-Waypoints = [0 0 -alt0;
-             3000 0 -alt0;
-             3000 3000 -alt0;
-             0 3000 -alt0;
-             0 0 -alt0];
-
-[tsim,xsim,ysim]=sim('gtm_design',[0 t_final]);
+[tsim,~,ysim]=sim('gtm_design',[0 t_final]);
 
 %%
-
-set(0,'DefaultLineLineWidth',1)
-
 t       = tsim; % [sec]
 
 eas_kt  = ysim(:,1); % [knot]
@@ -103,14 +80,6 @@ an_c_g         = command(:,5); %
 p_c_deg        = command(:,6); % 
 etas_c_percent = command(:,7); % 
 
-% SurfacePos = SurfacePos;
-% dele_deg      = SurfacePos(:,1);
-% dela_deg      = SurfacePos(:,6);
-% delr_deg      = SurfacePos(:,7);
-% delml_percent = SurfacePos(:,14);
-% delmr_percent = SurfacePos(:,16);
-% delms_percent = (delml_percent+delmr_percent)/2;
-% delma_percent = (delml_percent-delmr_percent)/2;
 delt_percent  = Throttle;
 
 p_N_ft = NED(:,1);
@@ -118,7 +87,10 @@ p_E_ft = NED(:,2);
 p_D_ft = NED(:,3);
 
 %%
+set(0,'DefaultLineLineWidth',1)
+
 fig1 = figure('units','centimeters','position',[0 2 26 20]);
+
 trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
 ylabel('North [ft]')
@@ -129,20 +101,39 @@ grid minor, hold on
 view([45 30])
 axis equal
 view([45 30])
-% xlim([0 7000])
-% ylim([-500 3500])
-% t = linspace(0,2*pi,100);
-% plot3(2000*cos(t),3500+2000*sin(t),t*0+1000,'--r')
-% legend('Trajectory','Waypoint','location','best')
-exportgraphics(fig1,'figure/helix_trajectory.png','resolution',300)
-% savefig(fig1,'figure/helix_trajectory.fig')
+xlim([-500 3500])
+ylim([-500 3500])
+plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'--or')
+legend('Trajectory','Waypoint','location','best')
+
+exportgraphics(fig1,'figure/waypoint_following_trajectory.png','resolution',300)
 
 %%
-fig2 = figure('units','centimeters','position',[13 2 13 20]);
+fig1 = figure('units','centimeters','position',[0 2 26 20]);
+
+trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
+xlabel('East [ft]')
+ylabel('North [ft]')
+zlabel('Elevation [ft]')
+box on
+grid on
+grid minor, hold on
+view([45 30])
+axis equal
+view([0 90])
+xlim([-500 3500])
+ylim([-500 3500])
+plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'--or')
+legend('Trajectory','Waypoint','location','best')
+
+exportgraphics(fig1,'figure/waypoint_following_trajectory_top.png','resolution',300)
+
+%%
+figure('units','centimeters','position',[13 2 13 20]);
 
 subplot(5,1,1), plot(t,tas_kt,t,t*0+tas0,'--'), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
 grid on, grid minor, legend('V','V_c','location','best'), xlim([0 t_final])
-subplot(5,1,2), plot(t,alt_ft,t,t*6+alt0,'--'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
+subplot(5,1,2), plot(t,alt_ft,t,-t*0+alt0,'--'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
 grid on, grid minor, legend('h','h_c','location','best'), xlim([0 t_final])
 subplot(5,1,3), plot(t,bet_deg,t,t*0,'--'), ylabel('Sideslip [deg]'), xlabel('Time [sec]')
 grid on, grid minor, legend('\beta','\beta_c','location','northeast'), xlim([0 t_final])
@@ -151,27 +142,18 @@ grid on, grid minor, legend('\phi','\phi_c','location','best'), xlim([0 t_final]
 subplot(5,1,5), plot(SurfacePos.FLAPLOB.Time,(SurfacePos.FLAPLOB.Data+SurfacePos.FLAPROB.Data)/2), ylabel('Sym. Morphing [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, xlim([0 t_final])
 
-exportgraphics(fig2,'figure/helix_command.png','resolution',300)
+exportgraphics(gcf,'figure/waypoint_following_command.png','resolution',300)
 
 %%
-fig2 = figure('units','centimeters','position',[13 2 13 20]);
+figure('units','centimeters','position',[13 2 13 20]);
 
 subplot(4,1,1), plot(SurfacePos.AILL.Time,SurfacePos.AILR.Data), ylabel('Aileron [deg]'), xlabel('Time [sec]')
-grid on, grid minor, hold on
-xlim([0 t_final])
-
+grid on, grid minor, hold on, xlim([0 t_final])
 subplot(4,1,2), plot(SurfacePos.AILL.Time,SurfacePos.ELLOB.Data), ylabel('Elevator [deg]'), xlabel('Time [sec]')
-grid on, grid minor, hold on
-xlim([0 t_final])
-
+grid on, grid minor, hold on, xlim([0 t_final])
 subplot(4,1,3), plot(SurfacePos.AILL.Time,SurfacePos.RUDL.Data), ylabel('Rudder [deg]'), xlabel('Time [sec]')
-grid on, grid minor, hold on
-xlim([0 t_final])
-
+grid on, grid minor, hold on, xlim([0 t_final])
 subplot(4,1,4), plot(SurfacePos.AILL.Time,(SurfacePos.FLAPLOB.Data-SurfacePos.FLAPROB.Data)/2), ylabel('Asy. Morphing [%]'), xlabel('Time [sec]')
-grid on, grid minor, hold on
-xlim([0 t_final])
+grid on, grid minor, hold on, xlim([0 t_final])
 
-exportgraphics(fig2,'figure/helix_input.png','resolution',300)
-
-clearvars fig fig1 fig2 fig3 fig4
+exportgraphics(gcf,'figure/waypoint_following_input.png','resolution',300)

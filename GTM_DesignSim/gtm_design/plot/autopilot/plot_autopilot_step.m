@@ -1,7 +1,6 @@
 %% Nonlinear simulation
 FlightMode = 3.0;
 ControlMode = 3;
-% phi_to_eta = 12.5/45;
 phi_to_eta = 0;
 
 etas0 = -12.5; % [%]
@@ -36,21 +35,7 @@ set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-3')
-% set_param('gtm_design','MinStep','0.0049')
 set_param('gtm_design','MinStep','0.0049')
-
-% FlightMode
-% Step: 1.0 (zero), 1.1 (normal acceleration), 1.2 (sideslip), 1.3 (roll rate)
-% Maneuver: 2.1 (push-over and pull-up), 2.2 (high-g turn)
-% Step: 3.0 (zero), 3.1 (airspeed), 3.2 (altitude), 3.3 (sideslip), 3.4 (roll)
-% Trajectory: 4.1 (waypoint following), 4.2 (orbit following)
-
-% ControlMode
-% Off: 0
-% Hinf CAS: 1
-% LPV CAS: 2
-% Hinf Autopilot: 3
-% LPV Autopilot: 4
 
 if FlightMode < 4
     set_param('gtm_design/Guidance/Autopilot Step','commented','off')
