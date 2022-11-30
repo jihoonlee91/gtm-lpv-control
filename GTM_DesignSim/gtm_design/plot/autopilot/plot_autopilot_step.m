@@ -1,8 +1,8 @@
 %% Nonlinear simulation
-FlightMode = 3.0;
+FlightMode = 3.1;
 ControlMode = 3;
-phi_to_eta = 0;
 
+phi_to_eta = 0;
 etas0 = -12.5; % [%]
 tas0  = 75; % [kt]
 deltc = MWS.bias.throttle;
@@ -11,6 +11,11 @@ LookaheadDistance = 700;
 TransitionRadius = 1000*0.3048; % not used
 Radius = 2000;
 TurnDirection = 1;
+Waypoints = [0 0 -alt0;
+             3000 0 -alt0;
+             3000 3000 -alt0;
+             0 3000 -alt0;
+             0 0 -alt0];
 
 alt0  = 1000; % [ft]
 MWS               = init_design('GTM',1);
@@ -35,22 +40,10 @@ set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-3')
-set_param('gtm_design','MinStep','0.0049')
-
-if FlightMode < 4
-    set_param('gtm_design/Guidance/Autopilot Step','commented','off')
-    set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
-    set_param('gtm_design/Guidance/Heading Control','commented','on')
-else
-    set_param('gtm_design/Guidance/Autopilot Step','commented','on')
-    set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','off')
-    set_param('gtm_design/Guidance/Heading Control','commented','off')
-end
-Waypoints = [0 0 -alt0;
-             3000 0 -alt0;
-             3000 3000 -alt0;
-             0 3000 -alt0;
-             0 0 -alt0];
+set_param('gtm_design','MinStep',num2str(MWS.Timestep-0.00001))
+set_param('gtm_design/Guidance/Autopilot Step','commented','off')
+set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','on')
+set_param('gtm_design/Guidance/Heading Control','commented','on')
 
 set_param('gtm_design/Guidance/CAS Step','commented','on')
 

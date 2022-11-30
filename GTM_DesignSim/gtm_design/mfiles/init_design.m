@@ -41,7 +41,7 @@ MWS.WindSpd = 0;    %kts,   wind speed
 MWS.WindShearOn = 1;
 
 % Sim timestep
-MWS.Timestep = 1/200; % sec
+MWS.Timestep = 1/100; % sec
 
 % Initial Conditions
 ini.Altitude =     1000; % ft

@@ -305,27 +305,9 @@ TD5 = blkdiag(TD30ms,TD30ms,TD30ms,TD70ms,TD70ms);
 % TD_Act = eye(2);
 % TD_DL = eye(5);
 
-% D_eng = 0.01;
-% D_ele = 0.01;
-% D_lon = blkdiag(D_eng,D_ele);
-
-% control interconnection
-% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD_UL TD_Act TD_DL';
-% inputvar            = '[r{2} ; n{5} ; u{2}]';
-% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD_DL(1)-W_n_lon(1) ; W_r_lon(2)-TD_DL(5)-W_n_lon(5) ; TD_DL(2)+W_n_lon(2) ; TD_DL(3)+W_n_lon(3) ; TD_DL(4)+W_n_lon(4)]';
-% input_to_P_lon      = '[TD_Act]';
-% input_to_TD_Act     = '[P_a_lon]';
-% input_to_P_a_lon    = '[TD_UL]';
-% input_to_W_m_lon    = '[W_r_lon]';
-% input_to_W_n_lon    = '[n]';
-% input_to_W_c_lon    = '[u]';
-% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
-% input_to_W_r_lon    = '[r]';
-% input_to_TD_UL      = '[u]';
-% input_to_TD_DL      = '[P_lon]';
-% sysoutname          = 'G_lon';
-% cleanupsysic        = 'yes';
-% sysic
+D_eng = 0.01/(s/0.5+1);
+D_ele = 0.01/(s/0.5+1);
+D_lon = blkdiag(D_eng,D_ele);
 
 systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
 inputvar            = '[r{2} ; n{5} ; u{2}]';
@@ -342,17 +324,50 @@ sysoutname          = 'G_lon';
 cleanupsysic        = 'yes';
 sysic
 
-% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
-% inputvar            = '[r{2} ; n{5} ; u{2}]';
-% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1)-W_n_lon(1) ; W_r_lon(2)-TD5(5)-W_n_lon(5) ; TD5(2)+W_n_lon(2) ; TD5(3)+W_n_lon(3) ; TD5(4)+W_n_lon(4)]';
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
+% inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
 % input_to_P_lon      = '[P_a_lon]';
 % input_to_W_m_lon    = '[W_r_lon]';
 % input_to_W_n_lon    = '[n]';
 % input_to_W_c_lon    = '[u]';
-% input_to_W_p_lon    = '[W_m_lon(1)-TD5(1) ; W_m_lon(2)-TD5(5)]';
+% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_P_a_lon    = '[u+D_lon]';
+% input_to_TD5        = '[P_lon+W_n_lon]';
+% input_to_D_lon      = '[d]';
+% sysoutname          = 'G_lon';
+% cleanupsysic        = 'yes';
+% sysic
+
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
+% inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
+% input_to_P_lon      = '[P_a_lon+D_lon]';
+% input_to_W_m_lon    = '[W_r_lon]';
+% input_to_W_n_lon    = '[n]';
+% input_to_W_c_lon    = '[u]';
+% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
 % input_to_W_r_lon    = '[r]';
 % input_to_P_a_lon    = '[u]';
-% input_to_TD5        = '[P_lon]';
+% input_to_TD5        = '[P_lon+W_n_lon]';
+% input_to_D_lon      = '[d]';
+% sysoutname          = 'G_lon';
+% cleanupsysic        = 'yes';
+% sysic
+
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
+% inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
+% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
+% input_to_P_lon      = '[P_a_lon+D_lon]';
+% input_to_W_m_lon    = '[W_r_lon]';
+% input_to_W_n_lon    = '[n]';
+% input_to_W_c_lon    = '[u]';
+% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_P_a_lon    = '[u+D_lon]';
+% input_to_TD5        = '[P_lon+W_n_lon]';
+% input_to_D_lon      = '[d]';
 % sysoutname          = 'G_lon';
 % cleanupsysic        = 'yes';
 % sysic
@@ -408,24 +423,24 @@ cleanupsysic        = 'yes';
 sysic
 
 % closed-loop interconnection with Longitudinal LPV controller
-systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon TD5 P_lon_scl K_lon_scl';
-inputvar            = '[r{2}]';
-outputvar           = '[P_lon_scl ; K_lon_scl]';
-input_to_P_lon      = '[P_a_lon]';
-input_to_K_lon_lpv  = '[W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
-input_to_W_r_lon    = '[r]';
-input_to_P_a_lon    = '[K_lon_lpv]';
-input_to_TD5        = '[P_lon]';
-input_to_P_lon_scl  = '[P_lon]';
-input_to_K_lon_scl  = '[K_lon_lpv]';
-sysoutname          = 'CL_lon_lpv';
-cleanupsysic        = 'yes'; 
-sysic
+% systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon TD5 P_lon_scl K_lon_scl';
+% inputvar            = '[r{2}]';
+% outputvar           = '[P_lon_scl ; K_lon_scl]';
+% input_to_P_lon      = '[P_a_lon]';
+% input_to_K_lon_lpv  = '[W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
+% input_to_W_r_lon    = '[r]';
+% input_to_P_a_lon    = '[K_lon_lpv]';
+% input_to_TD5        = '[P_lon]';
+% input_to_P_lon_scl  = '[P_lon]';
+% input_to_K_lon_scl  = '[K_lon_lpv]';
+% sysoutname          = 'CL_lon_lpv';
+% cleanupsysic        = 'yes'; 
+% sysic
 
 save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
 save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
 
-% plot_airspeed_step
+% plot_autopilot_step
 % plot_lon_step_lin
 % plot_lon_bode
 

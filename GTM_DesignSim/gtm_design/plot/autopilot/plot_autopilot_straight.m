@@ -35,7 +35,7 @@ set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-3')
-set_param('gtm_design','MinStep','0.0049')
+set_param('gtm_design','MinStep',num2str(MWS.Timestep-0.00001))
 
 if FlightMode < 4
     set_param('gtm_design/Guidance/Autopilot Step','commented','off')

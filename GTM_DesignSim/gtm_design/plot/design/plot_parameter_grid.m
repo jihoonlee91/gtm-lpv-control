@@ -1,5 +1,5 @@
 set(0,'DefaultLineLineWidth',1)
-fig = figure('units','centimeters','position',[0 2 13 15]);
+fig = figure('units','centimeters','position',[0 2 13 10]);
 [sas_mesh,alt_mesh] = meshgrid(sas_grid,alt_grid);
 tas_mesh = zeros(size(sas_mesh));
 for i = 1:num_sas

@@ -28,7 +28,6 @@ set_param('gtm_design/Guidance/CAS Maneuver','commented','on')
 set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
-MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
 MWS.SurfaceDeadbandOn = 0;
@@ -39,7 +38,7 @@ set_param('gtm_design/Guidance','commented','off')
 set_param('gtm_design/Monitor','commented','off')
 set_param('gtm_design','MaxStep','auto')
 set_param('gtm_design','RelTol','1e-3')
-set_param('gtm_design','MinStep','0.0049')
+set_param('gtm_design','MinStep',num2str(MWS.Timestep-0.00001))
 set_param('gtm_design/Guidance/Autopilot Step','commented','on')
 set_param('gtm_design/Guidance/Autopilot Trajectory Tracking','commented','off')
 set_param('gtm_design/Guidance/Heading Control','commented','off')
@@ -109,7 +108,7 @@ legend('Trajectory','Waypoint','location','best')
 exportgraphics(gcf,'figure/orbit_following_trajectory.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[0 2 26 20]);
+figure('units','centimeters','position',[0 6 26 20]);
 
 trajectory3(p_E_ft,p_N_ft,-p_D_ft,-phi_rad,the_rad,-psi_rad,1/150,round(10/str2num(get_param('gtm_design','MinStep'))),'boeing_747',[90 0],'blue','black');
 xlabel('East [ft]')
@@ -130,7 +129,7 @@ legend('Trajectory','Waypoint','location','best')
 exportgraphics(gcf,'figure/orbit_following_trajectory_top.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[13 2 13 20]);
+figure('units','centimeters','position',[26 2 13 20]);
 
 subplot(5,1,1), plot(t,tas_kt,t,t*0+tas0,'--'), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
 grid on, grid minor, legend('V','V_c','location','best'), xlim([0 t_final])
@@ -146,7 +145,7 @@ grid on, grid minor, hold on, xlim([0 t_final])
 exportgraphics(gcf,'figure/orbit_following_command.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[13 2 13 20]);
+figure('units','centimeters','position',[39 2 13 20]);
 
 subplot(4,1,1), plot(SurfacePos.AILL.Time,SurfacePos.AILR.Data), ylabel('Aileron [deg]'), xlabel('Time [sec]')
 grid on, grid minor, hold on
