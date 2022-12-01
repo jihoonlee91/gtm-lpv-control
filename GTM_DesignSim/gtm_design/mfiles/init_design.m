@@ -38,7 +38,7 @@ MWS=[];
 % Winds
 MWS.WindDir = 270;  %deg,   true heading wind is coming FROM
 MWS.WindSpd = 0;    %kts,   wind speed
-MWS.WindShearOn = 1;
+MWS.WindShearOn = 0;
 
 % Sim timestep
 MWS.Timestep = 1/100; % sec

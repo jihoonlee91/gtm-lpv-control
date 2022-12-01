@@ -22,7 +22,7 @@ set_param('gtm_design/Guidance','commented','on')
 set_param('gtm_design/Monitor','commented','on')
 set_param('gtm_design','MinStep','auto')
 loadmws(MWS,'gtm_design'); % load MWS
-[MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',1); % trim calculation
+[MWS,Xtrim,Trimcond,Err] = trimgtm_morph_try(tas0,alt0,etas0);
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 

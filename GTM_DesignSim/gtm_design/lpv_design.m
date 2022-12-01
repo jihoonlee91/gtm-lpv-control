@@ -1,4 +1,5 @@
-%% initialization
+%% Setup 
+% initialization
 close all; clear all; clc
 set(0,'DefaultLineLineWidth',1)
 
@@ -7,18 +8,12 @@ setup
 
 % unit conversion parameters
 knots2fps = 1.68781; % knots to feet per seconds
-fps2knots = 1/knots2fps; % knots to feet per seconds
 m2ft      = 3.28084; % meters to feet
-ft2m      = 1/m2ft; % meters to feet
 d2r       = pi/180; % degrees to radians
-r2d       = 1/d2r;
+r2d       = 1/d2r; % radians to degree
 g         = 32.174; % gravitational acceleration [ft/s^2]
-% Coeff_throttle = [0.000033035538475  -0.008354385314499 1.191126728328792 31.518959847101669];
-% Coeff_thrust   = [0.000014847593013,  0, 0, 0.412662356277121];
-% T_max = polyval(Coeff_thrust,polyval(Coeff_throttle,100)); % Maximum thrust in [lbf] at sea level without ram drag
 
 %% Domain definition
-
 % scheduling parameter gridding
 sas_grid  = 60:10:120; % [kt]
 alt_grid  = 0:5000:10000; % 700~1100 [ft]
@@ -27,16 +22,8 @@ num_sas   = numel(sas_grid); % number sas grid
 num_alt   = numel(alt_grid); % number alt grid
 num_mor   = numel(mor_grid); % number morphing grid
 
-% parameters for rate-bounded design
-sas_RateBound = 10; % 2*T_max/MWS.w0 = 0.53g = 17 ft/s^2
-alt_RateBound = 20; % convvel([100],'kts','ft/s')
-mor_RateBound = 30; % 10 sec for full deployment
-
 % construct Domain 
 Domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid});
-Domain_RB = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid},[[-1,1]*sas_RateBound;[-1,1]*alt_RateBound;[-1,1]*mor_RateBound]);
-
-% plot_parameter_grid
 
 %% trimming
 set_param('gtm_design','MinStep','auto')
@@ -45,7 +32,8 @@ set_param('gtm_design/Control/Controller','commented','on') % switch off control
 set_param('gtm_design/Guidance','commented','on') % switch off controller
 set_param('gtm_design/Monitor','commented','on') % switch off controller
 
-clearvars MWS_grid sas_trim tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
+clearvars MWS_grid 
+clearvars sas_trim tas_trim alt_trim mor_trim alp_trim pitch_trim throttle_trim aileron_trim elevator_trim rudder_trim
 clearvars sys_sas_trim sys_tas_trim sys_alt_trim sys_mor_trim sys_alp_trim sys_pitch_trim sys_throttle_trim sys_aileron_trim sys_elevator_trim sys_rudder_trim
 for k = 1:num_mor
 for j = 1:num_alt
@@ -56,24 +44,13 @@ for i = 1:num_sas
     tas = sas2tas(sas,alt); % [kts]
 
     fprintf('trimming... #%d @ TAS: %d kt (SAS: %d kt), Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_sas num_alt num_mor],i,j,k),tas,sas,alt,mor)
-    trial = 1;
-    while 1
-        [MWS,Xtrim,Trimcond,Err] = trimgtm_morph(tas,alt,mor);
-        if (Err < 1e-3)
-            break
-        elseif trial >= 10
-            error('TRIM FAIL')
-        else
-            warning('Poor convergence, trying again.\n');
-            trial = trial+1;
-        end
-    end
+    [MWS,Xtrim,Trimcond,Err] = trimgtm_morph_try(tas0,alt0,etas0);
     MWS_grid(i,j,k) = MWS;
     
     % extract trim condition
-    sas_trim(i,j,k)      = sas; % [kts]
-    tas_trim(i,j,k)      = tas; % [kts]
-    alt_trim(i,j,k)      = alt; % [ft]
+    sas_trim(i,j,k)      = tas2sas(Trimcond.tas,Trimcond.altitude); % [kts]
+    tas_trim(i,j,k)      = Trimcond.tas; % [kts]
+    alt_trim(i,j,k)      = Trimcond.altitude; % [ft]
     mor_trim(i,j,k)      = mor; % [%]
     alp_trim(i,j,k)      = Trimcond.alpha; % [deg]
     pitch_trim(i,j,k)    = Trimcond.pitch; % [deg]
@@ -120,12 +97,6 @@ sch_param.sch_throttle_trim = sch_throttle_trim;
 sch_param.sch_aileron_trim  = sch_aileron_trim;
 sch_param.sch_elevator_trim = sch_elevator_trim;
 sch_param.sch_rudder_trim   = sch_rudder_trim;
-
-% save scheduled trim condition
-save('data/sch_param.mat','sch_param')
-% save('data/trim_data.mat')
-
-% plot_trim_condition
 
 %% linearization
 set_param('gtm_design','MinStep','auto')
@@ -216,8 +187,21 @@ end
 end
 end
 
+for k = 1:num_mor 
+for j = 1:num_alt
+for i = 1:num_sas
+    A = GTM_lon(:,:,i,j,k).A;
+    B = [GTM_lon(:,:,i,j,k).B GTM_lon(:,:,i,j,k).A(:,1) GTM_lon(:,:,i,j,k).A(:,2)/tas_trim(i,j,k)];
+    C = GTM_lon(:,:,i,j,k).C;
+    D = [GTM_lon(:,:,i,j,k).D GTM_lon(:,:,i,j,k).C(:,[1 2])];
+    londyn_aug_w = ss(A,B,C,D);
+    GTM_lon_w(:,:,i,j,k) = londyn_aug_w;
+end
+end
+end
+
 % construct LPV model
-P_lon = pss(GTM_lon,Domain);
+P_lon = pss(GTM_lon_w,Domain);
 P_lat = pss(GTM_lat,Domain);
 P_lon_ex = pss(GTM_lon_ex,Domain);
 P_lat_ex = pss(GTM_lat_ex,Domain);
@@ -226,8 +210,7 @@ P_lat_ex = pss(GTM_lat_ex,Domain);
 save('data/lpv_model.mat','P_lon','P_lat','P_lon_ex','P_lat_ex')
 % save('data/linearization_data.mat')
 
-% plot_ol_bode
-% plot_mode
+plot_mode
 
 %% longitudinal autopilot
 s = tf('s'); % Laplace variable
@@ -305,27 +288,16 @@ TD5 = blkdiag(TD30ms,TD30ms,TD30ms,TD70ms,TD70ms);
 % TD_Act = eye(2);
 % TD_DL = eye(5);
 
-D_eng = 0.01/(s/0.5+1);
-D_ele = 0.01/(s/0.5+1);
+D_eng = 1/(s/0.5+1)*0.01;
+D_ele = 1/(s/0.5+1)*0.01;
 D_lon = blkdiag(D_eng,D_ele);
 
-systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
-inputvar            = '[r{2} ; n{5} ; u{2}]';
-outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
-input_to_P_lon      = '[P_a_lon]';
-input_to_W_m_lon    = '[W_r_lon]';
-input_to_W_n_lon    = '[n]';
-input_to_W_c_lon    = '[u]';
-input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
-input_to_W_r_lon    = '[r]';
-input_to_P_a_lon    = '[u]';
-input_to_TD5        = '[P_lon+W_n_lon]';
-sysoutname          = 'G_lon';
-cleanupsysic        = 'yes';
-sysic
+D_w_u = 1/(s/0.5+1)*0.2*1e-5;
+D_w_w = 1/(s/0.5+1)*0.017*1e-5;
+D_w_lon = blkdiag(D_w_u,D_w_w);
 
-% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
-% inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5';
+% inputvar            = '[r{2} ; n{5} ; u{2}]';
 % outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
 % input_to_P_lon      = '[P_a_lon]';
 % input_to_W_m_lon    = '[W_r_lon]';
@@ -333,17 +305,32 @@ sysic
 % input_to_W_c_lon    = '[u]';
 % input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
 % input_to_W_r_lon    = '[r]';
-% input_to_P_a_lon    = '[u+D_lon]';
+% input_to_P_a_lon    = '[u]';
 % input_to_TD5        = '[P_lon+W_n_lon]';
-% input_to_D_lon      = '[d]';
 % sysoutname          = 'G_lon';
 % cleanupsysic        = 'yes';
 % sysic
 
-% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
-% inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
+systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
+inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
+outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
+input_to_P_lon      = '[P_a_lon+D_lon]';
+input_to_W_m_lon    = '[W_r_lon]';
+input_to_W_n_lon    = '[n]';
+input_to_W_c_lon    = '[u]';
+input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
+input_to_W_r_lon    = '[r]';
+input_to_P_a_lon    = '[u]';
+input_to_TD5        = '[P_lon+W_n_lon]';
+input_to_D_lon      = '[d]';
+sysoutname          = 'G_lon';
+cleanupsysic        = 'yes';
+sysic
+
+% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon D_w_lon';
+% inputvar            = '[r{2} ; n{5} ; d{2}; d_w{2} ; u{2}]';
 % outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
-% input_to_P_lon      = '[P_a_lon+D_lon]';
+% input_to_P_lon      = '[P_a_lon+D_lon ; D_w_lon]';
 % input_to_W_m_lon    = '[W_r_lon]';
 % input_to_W_n_lon    = '[n]';
 % input_to_W_c_lon    = '[u]';
@@ -352,22 +339,7 @@ sysic
 % input_to_P_a_lon    = '[u]';
 % input_to_TD5        = '[P_lon+W_n_lon]';
 % input_to_D_lon      = '[d]';
-% sysoutname          = 'G_lon';
-% cleanupsysic        = 'yes';
-% sysic
-
-% systemnames         = 'P_lon W_m_lon W_n_lon W_c_lon W_p_lon W_r_lon P_a_lon TD5 D_lon';
-% inputvar            = '[r{2} ; n{5} ; d{2} ; u{2}]';
-% outputvar           = '[W_c_lon ; W_p_lon ; W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
-% input_to_P_lon      = '[P_a_lon+D_lon]';
-% input_to_W_m_lon    = '[W_r_lon]';
-% input_to_W_n_lon    = '[n]';
-% input_to_W_c_lon    = '[u]';
-% input_to_W_p_lon    = '[W_m_lon(1)-P_lon(1) ; W_m_lon(2)-P_lon(5)]';
-% input_to_W_r_lon    = '[r]';
-% input_to_P_a_lon    = '[u+D_lon]';
-% input_to_TD5        = '[P_lon+W_n_lon]';
-% input_to_D_lon      = '[d]';
+% input_to_D_w_lon    = '[d_w]';
 % sysoutname          = 'G_lon';
 % cleanupsysic        = 'yes';
 % sysic
@@ -406,7 +378,7 @@ fprintf('Lon LPV  Synthesis Time: %.1f seconds \n',time_lon_lpv)
 fprintf('Lon LPV  gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
 
 % closed-loop interconnection with Longitudinal H_infinity controller
-P_lon_scl = diag([fps2knots r2d r2d r2d 1]); % [kt] x [deg] x [deg] x [deg] x [ft]
+P_lon_scl = diag([1/knots2fps r2d r2d r2d 1]); % [kt] x [deg] x [deg] x [deg] x [ft]
 K_lon_scl = diag([1 1]); % [%] x [deg]
 systemnames         = 'P_lon K_lon_hinf W_r_lon P_a_lon TD5 P_lon_scl K_lon_scl';
 inputvar            = '[r{2}]';
@@ -423,26 +395,23 @@ cleanupsysic        = 'yes';
 sysic
 
 % closed-loop interconnection with Longitudinal LPV controller
-% systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon TD5 P_lon_scl K_lon_scl';
-% inputvar            = '[r{2}]';
-% outputvar           = '[P_lon_scl ; K_lon_scl]';
-% input_to_P_lon      = '[P_a_lon]';
-% input_to_K_lon_lpv  = '[W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
-% input_to_W_r_lon    = '[r]';
-% input_to_P_a_lon    = '[K_lon_lpv]';
-% input_to_TD5        = '[P_lon]';
-% input_to_P_lon_scl  = '[P_lon]';
-% input_to_K_lon_scl  = '[K_lon_lpv]';
-% sysoutname          = 'CL_lon_lpv';
-% cleanupsysic        = 'yes'; 
-% sysic
+systemnames         = 'P_lon K_lon_lpv W_r_lon P_a_lon TD5 P_lon_scl K_lon_scl';
+inputvar            = '[r{2}]';
+outputvar           = '[P_lon_scl ; K_lon_scl]';
+input_to_P_lon      = '[P_a_lon]';
+input_to_K_lon_lpv  = '[W_r_lon(1)-TD5(1) ; W_r_lon(2)-TD5(5) ; TD5(2) ; TD5(3) ; TD5(4)]';
+input_to_W_r_lon    = '[r]';
+input_to_P_a_lon    = '[K_lon_lpv]';
+input_to_TD5        = '[P_lon]';
+input_to_P_lon_scl  = '[P_lon]';
+input_to_K_lon_scl  = '[K_lon_lpv]';
+sysoutname          = 'CL_lon_lpv';
+cleanupsysic        = 'yes'; 
+sysic
 
 save('data/lon_hinf.mat','K_lon_hinf','gamma_lon_hinf','time_lon_hinf')
 save('data/lon_lpv.mat','K_lon_lpv','gamma_lon_lpv','info_lon_lpv','time_lon_lpv')
 
-% plot_autopilot_step
-% plot_lon_step_lin
-% plot_lon_bode
 
 %% lateral-directional autopilot
 % actuator model
@@ -450,10 +419,6 @@ P_a_ail = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_rud = 2*pi*5/(s+2*pi*5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_mor = 2*pi*0.5/(s+2*pi*0.5); % Bandwidth 5 Hz and 5+10 ms time delay
 P_a_lat = blkdiag(P_a_ail,P_a_rud,P_a_mor);
-% figure('units','centimeters','position',[0 2 13 10])
-% step(P_a_ail,P_a_rud,P_a_mor)
-% grid on
-% legend('$Pa\_a$','$Pa\_r$','$Pa\_m$','location','best','interpreter','latex')
 
 % maximum expected command
 W_r_bet = 3*d2r;
@@ -586,13 +551,6 @@ sysoutname          = 'CL_lat_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-save('data/lat_hinf.mat','K_lat_hinf','gamma_lat_hinf','time_lat_hinf')
-save('data/lat_lpv.mat','K_lat_lpv','gamma_lat_lpv','info_lat_lpv','time_lat_lpv')
-
-% plot_airspeed_step
-% plot_lat_step_lin
-% plot_lat_bode
-
 %% longitudinal CAS
 s = tf('s'); % Laplace variable
 
@@ -707,14 +665,6 @@ input_to_Klonexscl  = '[Klonexlpv]';
 sysoutname          = 'CL_lon_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
-
-save('data/lon_ex_hinf.mat','Klonexhinf','gamma_lon_ex_hinf','time_lon_ex_hinf')
-save('data/lon_ex_lpv.mat','Klonexlpv','gamma_lon_ex_lpv','info_lon_ex_lpv','time_lon_ex_lpv')
-
-% plot_cas_step
-% plot_pushover_and_pullup
-% plot_lon_ex_step_lin
-% plot_lon_ex_bode
 
 %% lateral-directional CAS
 % actuator model
@@ -844,111 +794,5 @@ sysoutname          = 'CL_lat_ex_lpv';
 cleanupsysic        = 'yes'; 
 sysic
 
-save('data/lat_ex_hinf.mat','Klatexhinf','gamma_lat_ex_hinf','time_lat_ex_hinf')
-save('data/lat_ex_lpv.mat','Klatexlpv','gamma_lat_ex_lpv','info_lat_ex_lpv','time_lat_ex_lpv')
-
-% plot_highg_turn
-% plot_lat_ex_step_lin
-% plot_lat_ex_bode
-
-%% rate-bounded design
-% % longitudinal rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lon_RB = G_lon;
-% G_lon_RB.Domain = Domain_RB;
-% tic
-% [K_lon_lpvr,gamma_lon_lpvr,info_lon_lpvr] = lpvsyn(G_lon_RB,nmeas_lon,ncont_lon,Xb,Yb);
-% time_lon_lpvr = toc;
-% save('data/lon_lpvr.mat','K_lon_lpvr','gamma_lon_lpvr','info_lon_lpvr','time_lon_lpvr')
-% fprintf('Lon LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_lpv,(gamma_lon_lpv/info_lon_lpv.MinGamma-1)*100,info_lon_lpv.MinGamma)
-% 
-% % lateral rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lat_RB = G_lat;
-% G_lat_RB.Domain = Domain_RB;
-% tic
-% [K_lat_lpvr,gamma_lat_lpvr,info_lat_lpvr] = lpvsyn(G_lat_RB,nmeas_lat,ncont_lat,Xb,Yb);
-% time_lat_lpvr = toc;
-% save('data/lat_lpvr.mat','K_lat_lpvr','gamma_lat_lpvr','info_lat_lpvr','time_lat_lpvr')
-% fprintf('lat LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_lpv,(gamma_lat_lpv/info_lat_lpv.MinGamma-1)*100,info_lat_lpv.MinGamma)
-% 
-% % longitudinal rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lon_ex_RB = G_lon;
-% G_lon_ex_RB.Domain = Domain_RB;
-% tic
-% [Klonelpvr,gamma_lon_ex_lpvr,info_lon_ex_lpvr] = lpvsyn(G_lon_ex_RB,nmeas_lon_ex,ncont_lon_ex,Xb,Yb);
-% time_lon_ex_lpvr = toc;
-% save('data/lon_ex_lpvr.mat','Klonelpvr','gamma_lon_ex_lpvr','info_lon_ex_lpvr','time_lon_ex_lpvr')
-% fprintf('Lon Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lon_ex_lpv,(gamma_lon_ex_lpv/info_lon_ex_lpv.MinGamma-1)*100,info_lon_ex_lpv.MinGamma)
-% 
-% % lateral rate-bounded LPV synthesis
-% b0 = basis(1,0);
-% sas_param = pgrid('rho1_sas_param',sas_grid);
-% alt_param = pgrid('rho2_alt_param',alt_grid);
-% mor_param = pgrid('rho3_mor_param',mor_grid);
-% bsas = basis(sas_param,'rho1_sas_param',1);
-% balt = basis(alt_param,'rho2_alt_param',1);
-% bmor = basis(mor_param,'rho3_mor_param',1);
-% Xb = [b0;bsas;balt;bmor;bsas^2;balt^2;bmor^2];
-% Yb = Xb;
-% G_lat_ex_RB = G_lat_ex;
-% G_lat_ex_RB.Domain = Domain_RB;
-% tic
-% [Klatelpvr,gamma_lat_ex_lpvr,info_lat_ex_lpvr] = lpvsyn(G_lat_ex_RB,nmeas_lat_ex,ncont_lat_ex,Xb,Yb);
-% time_lat_ex_lpvr = toc;
-% save('data/lat_ex_lpvr.mat','Klatelpvr','gamma_lat_ex_lpvr','info_lat_ex_lpvr','time_lat_ex_lpvr')
-% fprintf('lat Ex LPVr gamma = %.5g (%.3g%% back-off from %.5g)\n',gamma_lat_ex_lpv,(gamma_lat_ex_lpv/info_lat_ex_lpv.MinGamma-1)*100,info_lat_ex_lpv.MinGamma)
-% 
 %%
 save('data/lpv_design_data.mat')
-
-%%
-plot_parameter_grid
-plot_trim_condition
-plot_mode
-
-plot_lon_ex_step_lin
-plot_lon_ex_bode
-
-plot_lat_ex_step_lin
-plot_lat_ex_bode
-
-plot_lon_step_lin
-plot_lon_bode
-
-plot_lat_step_lin
-plot_lat_bode
-
-%%
-% plot_pushover_and_pullup
-% plot_highg_turn
-% plot_waypoint_following
-% plot_orbit_following
-% plot_helix
-% plot_helix_dive
-% plot_autopilot_straight

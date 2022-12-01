@@ -1,0 +1,4 @@
+plot_auto_lon_bode
+plot_auto_lat_bode
+plot_cas_lon_bode
+plot_cas_lat_bode

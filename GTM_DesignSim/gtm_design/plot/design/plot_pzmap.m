@@ -1,4 +1,4 @@
-fig1 = figure('units','centimeters','position',[0 2 13 10]);
+figure('units','centimeters','position',[0 2 13 10]);
 h = pzplot(LTI_lon); grid on, axis equal
 xlim([-15 10])
 axes('position',[.66 .175 .22 .25])
@@ -11,16 +11,15 @@ lon_imag_vec_sort = lon_imag_vec(lon_real_vec>-0.1);
 scatter(lon_real_vec_sort(1:num_sas*num_alt*num_mor*2),lon_imag_vec_sort(1:num_sas*num_alt*num_mor*2),'x')
 xlim([-1.2*max(abs(lon_real_vec_sort)) max((lon_real_vec_sort))+0.2*max(abs(lon_real_vec_sort))])
 ylim(1.2*max(abs(lon_imag_vec_sort))*[-1 1])
-box on % put box around new pair of axes
+box on
 grid on
 grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(fig1,'figure/mode_lon.png','resolution',300)
-% savefig(fig1,'figure/mode_lon.fig')
+exportgraphics(gcf,'figure/pzmap_lon.png','resolution',300)
 
-fig2 = figure('units','centimeters','position',[13 2 13 10]);
+figure('units','centimeters','position',[13 2 13 10]);
 h = pzplot(LTI_lat); grid on, axis equal
 xlim([-15 10])
 axes('position',[.66 .175 .22 .25])
@@ -33,13 +32,10 @@ lat_imag_vec_sort = lat_imag_vec(abs(lat_imag_vec)<0.1);
 scatter(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2),lat_imag_vec_sort(2:2:num_sas*num_alt*num_mor*2),'x')
 xlim([min((lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2)))-0.2*max(abs(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2))) 1.2*max(abs(lat_real_vec_sort(2:2:num_sas*num_alt*num_mor*2)))])
 ylim([-1 1]), yticks(0)
-box on % put box around new pair of axes
+box on
 grid on
 grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(fig2,'figure/mode_lat.png','resolution',300)
-% savefig(fig2,'figure/mode_lat.fig')
-
-clearvars fig1 fig2
+exportgraphics(gcf,'figure/pzmap_lat.png','resolution',300)
