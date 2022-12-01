@@ -1,127 +1,114 @@
+set(0,'DefaultLineLineWidth',1)
 tlim = 4;
 
-%% bet step state response
-fig1 = figure('units','centimeters','position',[0 2 13 20]);
+%% auto_lat_step_bet_state
+figure('units','centimeters','position',[0 6 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
-    CL_lat_lpv_point = CL_lat_lpv.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    CL_lat_hinf_point = CL_lat_hinf.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    [y,t] = step(CL_lat_lpv_point,tlim);
-    subplot(4,1,1), plot(t,y(:,1,1),'color',[0.8500 0.3250 0.0980]), ylabel('Angle of Sideslip [deg]'), xlabel('Time [sec]')
-    subplot(4,1,2), plot(t,y(:,2,1),'color',[0.8500 0.3250 0.0980]), ylabel('Roll Rate [deg/s]'), xlabel('Time [sec]')
-    subplot(4,1,3), plot(t,y(:,3,1),'color',[0.8500 0.3250 0.0980]), ylabel('Yaw Rate [deg/s]'), xlabel('Time [sec]')
-    subplot(4,1,4), plot(t,y(:,4,1),'color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
-    if (i==1)&&(j==1)&&(k==1)
-        subplot(4,1,1), hold on, grid on, grid minor
-        subplot(4,1,2), hold on, grid on, grid minor 
-        subplot(4,1,3), hold on, grid on, grid minor
-        subplot(4,1,4),  hold on, grid on, grid minor
-    end
-    [y,t] = step(CL_lat_hinf_point,tlim);
-    subplot(4,1,1), plot(t,y(:,1,1),'--','color',[0 0.4470 0.7410]), ylabel('Angle of Sideslip [deg]'), xlabel('Time [sec]')
-    [y_r,t_r] = step(W_m_bet,tlim);
+    [y,t] = step(CLlat4lpvu.Data(:,:,i,j,k),tlim);
+    subplot(4,1,1), plot(t,y(:,1,1),'-b'), hold on
+    subplot(4,1,2), plot(t,y(:,2,1),'-b'), hold on
+    subplot(4,1,3), plot(t,y(:,3,1),'-b'), hold on
+    subplot(4,1,4), plot(t,y(:,4,1),'-b'), hold on
+    [y,t] = step(CLlat4hinf.Data(:,:,i,j,k),tlim);
+    subplot(4,1,1), plot(t,y(:,1,1),'--r')
+    [y_r,t_r] = step(Wlat4.Wm(1,1),tlim);
     if isempty(t_r)
         t_r = linspace(0,tlim,numel(y_r)).';
         y_r = ones(numel(t_r),1);
     end
-    plot(t_r,y_r*W_r_bet*P_lat_scl(1,1),'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best')
-    subplot(4,1,2), plot(t,y(:,2,1),'--','color',[0 0.4470 0.7410]), ylabel('Roll Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
-    subplot(4,1,3), plot(t,y(:,3,1),'--','color',[0 0.4470 0.7410]), ylabel('Yaw Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
-    subplot(4,1,4), plot(t,y(:,4,1),'--','color',[0 0.4470 0.7410]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
-    plot(t,y(:,1,1)*0+0,'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best'), xlim([0 tlim])
+    plot(t_r,y_r*Wlat4.Wr(1,1)*Wlat4.Ps(1,1),'-.k')
+    subplot(4,1,2), plot(t,y(:,2,1),'--r')
+    subplot(4,1,3), plot(t,y(:,3,1),'--r')
+    subplot(4,1,4), plot(t,y(:,4,1),'--r')
+    plot(t,y(:,1,1)*0,'-.k')
 end
 end
 end
-exportgraphics(fig1,'figure/lat_step_lin_bet_state.png','resolution',300)
-% savefig(fig1,'figure/lat_step_lin_bet_state.fig')
 
-%% bet step input response
-fig2 = figure('units','centimeters','position',[13 2 13 20]);
+subplot(4,1,1), xlabel('Time [sec]'), ylabel('Sideslip [deg]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(4,1,2), xlabel('Time [sec]'), ylabel('Roll rate [deg/s]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(4,1,3), xlabel('Time [sec]'), ylabel('Yaw rate [deg/s]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(4,1,4), xlabel('Time [sec]'), ylabel('Roll [deg]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
+
+exportgraphics(gcf,'figure/auto_lat_step_bet_state.png','resolution',300)
+
+%% auto_lat_step_bet_input
+figure('units','centimeters','position',[13 6 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
-    CL_lat_lpv_point = CL_lat_lpv.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    CL_lat_hinf_point = CL_lat_hinf.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    [y,t] = step(CL_lat_lpv_point,tlim);
-    subplot(3,1,1), plot(t,y(:,5,1),'color',[0.8500 0.3250 0.0980]), ylabel('Aileron [deg]'), xlabel('Time [sec]')
-    subplot(3,1,2), plot(t,y(:,6,1),'color',[0.8500 0.3250 0.0980]), ylabel('Rudder [deg]'), xlabel('Time [sec]')
-    subplot(3,1,3), plot(t,y(:,7,1),'color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Asymmetric Morphing [%]')
-    if (i==1)&&(j==1)&&(k==1)
-        subplot(3,1,1), hold on, grid on, grid minor
-        subplot(3,1,2), hold on, grid on, grid minor 
-        subplot(3,1,3), hold on, grid on, grid minor 
-    end
-    [y,t] = step(CL_lat_hinf_point,tlim);
-    subplot(3,1,1), plot(t,y(:,5,1),'--','color',[0 0.4470 0.7410]), ylabel('Aileron [deg]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
-    subplot(3,1,2), plot(t,y(:,6,1),'--','color',[0 0.4470 0.7410]), ylabel('Rudder [deg]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
-    subplot(3,1,3), plot(t,y(:,7,1),'--','color',[0 0.4470 0.7410]), xlabel('Time [sec]'), ylabel('Asymmetric Morphing [%]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
+    [y,t] = step(CLlat4lpvu.Data(:,:,i,j,k),tlim);
+    subplot(3,1,1), plot(t,y(:,5,1),'-b'), hold on
+    subplot(3,1,2), plot(t,y(:,6,1),'-b'), hold on
+    subplot(3,1,3), plot(t,y(:,7,1),'-b'), hold on
+    [y,t] = step(CLlat4hinf.Data(:,:,i,j,k),tlim);
+    subplot(3,1,1), plot(t,y(:,5,1),'--r')
+    subplot(3,1,2), plot(t,y(:,6,1),'--r')
+    subplot(3,1,3), plot(t,y(:,7,1),'--r')
 end
 end
 end
-exportgraphics(fig2,'figure/lat_step_lin_bet_input.png','resolution',300)
-% savefig(fig2,'figure/lat_step_lin_bet_input.fig')
 
-%% phi step state response
-fig3 = figure('units','centimeters','position',[26 2 13 20]);
+subplot(3,1,1), xlabel('Time [sec]'), ylabel('Aileron [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(3,1,2), xlabel('Time [sec]'), ylabel('Rudder [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+
+exportgraphics(gcf,'figure/auto_lat_step_bet_input.png','resolution',300)
+
+%% auto_lat_step_phi_state
+figure('units','centimeters','position',[26 6 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
-    CL_lat_lpv_point = CL_lat_lpv.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    CL_lat_hinf_point = CL_lat_hinf.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    [y,t] = step(CL_lat_lpv_point,tlim);
-    subplot(4,1,1), plot(t,y(:,1,2),'color',[0.8500 0.3250 0.0980]), ylabel('Angle of Sideslip [deg]'), xlabel('Time [sec]')
-    subplot(4,1,2), plot(t,y(:,2,2),'color',[0.8500 0.3250 0.0980]), ylabel('Roll Rate [deg/s]'), xlabel('Time [sec]')
-    subplot(4,1,3), plot(t,y(:,3,2),'color',[0.8500 0.3250 0.0980]), ylabel('Yaw Rate [deg/s]'), xlabel('Time [sec]')
-    subplot(4,1,4), plot(t,y(:,4,2),'color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
-    if (i==1)&&(j==1)&&(k==1)
-        subplot(4,1,1), hold on, grid on, grid minor
-        subplot(4,1,2), hold on, grid on, grid minor 
-        subplot(4,1,3), hold on, grid on, grid minor
-        subplot(4,1,4), hold on, grid on, grid minor
-    end
-    [y,t] = step(CL_lat_hinf_point,tlim);
-    subplot(4,1,1), plot(t,y(:,1,2),'--','color',[0 0.4470 0.7410]), ylabel('Angle of Sideslip [deg]'), xlabel('Time [sec]')
-    plot(t,y(:,1,1)*0+0,'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best')
-    subplot(4,1,2), plot(t,y(:,2,2),'--','color',[0 0.4470 0.7410]), ylabel('Roll Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
-    subplot(4,1,3), plot(t,y(:,3,2),'--','color',[0 0.4470 0.7410]), ylabel('Yaw Rate [deg/s]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best')
-    subplot(4,1,4), plot(t,y(:,4,2),'--','color',[0 0.4470 0.7410]), xlabel('Time [sec]'), ylabel('Roll Angle [deg]')
-    [y_r,t_r] = step(W_m_phi,tlim);
+    [y,t] = step(CLlat4lpvu.Data(:,:,i,j,k),tlim);
+    subplot(4,1,1), plot(t,y(:,1,2),'-b'), hold on
+    subplot(4,1,2), plot(t,y(:,2,2),'-b'), hold on
+    subplot(4,1,3), plot(t,y(:,3,2),'-b'), hold on
+    subplot(4,1,4), plot(t,y(:,4,2),'-b'), hold on
+    [y,t] = step(CLlat4hinf.Data(:,:,i,j,k),tlim);
+    subplot(4,1,1), plot(t,y(:,1,2),'--r')
+    plot(t,y(:,1,1)*0,'-.k')    
+    subplot(4,1,2), plot(t,y(:,2,2),'--r')
+    subplot(4,1,3), plot(t,y(:,3,2),'--r')
+    subplot(4,1,4), plot(t,y(:,4,2),'--r')
+    [y_r,t_r] = step(Wlat4.Wm(2,2),tlim);
     if isempty(t_r)
         t_r = linspace(0,tlim,numel(y_r)).';
         y_r = ones(numel(t_r),1);
     end
-    plot(t_r,y_r*W_r_phi*P_lat_scl(4,4),'-.','color','k','linewidth',1.5), legend('LPV','H_\infty','Reference','location','best'), xlim([0 tlim])
+    plot(t_r,y_r*Wlat4.Wr(2,2)*Wlat4.Ps(4,4),'-.k')
 end
 end
 end
-exportgraphics(fig3,'figure/lat_step_lin_phi_state.png','resolution',300)
-% savefig(fig3,'figure/lat_step_lin_phi_state.fig')
 
-%% phi step input response
-fig4 = figure('units','centimeters','position',[39 2 13 20]);
+subplot(4,1,1), xlabel('Time [sec]'), ylabel('Sideslip [deg]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(4,1,2), xlabel('Time [sec]'), ylabel('Roll rate [deg/s]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(4,1,3), xlabel('Time [sec]'), ylabel('Yaw rate [deg/s]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(4,1,4), xlabel('Time [sec]'), ylabel('Roll [deg]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
+
+exportgraphics(gcf,'figure/auto_lat_step_phi_state.png','resolution',300)
+
+%% auto_lat_step_phi_input
+figure('units','centimeters','position',[39 6 13 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
-    CL_lat_lpv_point = CL_lat_lpv.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    CL_lat_hinf_point = CL_lat_hinf.value('rho1_sas_param',sas_grid(i),'rho2_alt_param',alt_grid(j),'rho3_mor_param',mor_grid(k));
-    [y,t] = step(CL_lat_lpv_point,tlim);
-    subplot(3,1,1), plot(t,y(:,5,2),'color',[0.8500 0.3250 0.0980]), ylabel('Aileron [deg]'), xlabel('Time [sec]')
-    subplot(3,1,2), plot(t,y(:,6,2),'color',[0.8500 0.3250 0.0980]), ylabel('Rudder [deg]'), xlabel('Time [sec]')
-    subplot(3,1,3), plot(t,y(:,7,2),'color',[0.8500 0.3250 0.0980]), xlabel('Time [sec]'), ylabel('Asymmetric Morphing [%]')
-    if (i==1)&&(j==1)&&(k==1)
-        subplot(3,1,1), hold on, grid on, grid minor
-        subplot(3,1,2), hold on, grid on, grid minor 
-        subplot(3,1,3), hold on, grid on, grid minor 
-    end
-    [y,t] = step(CL_lat_hinf_point,tlim);
-    subplot(3,1,1), plot(t,y(:,5,2),'--','color',[0 0.4470 0.7410]), ylabel('Aileron [deg]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
-    subplot(3,1,2), plot(t,y(:,6,2),'--','color',[0 0.4470 0.7410]), ylabel('Rudder [deg]'), xlabel('Time [sec]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
-    subplot(3,1,3), plot(t,y(:,7,2),'--','color',[0 0.4470 0.7410]), xlabel('Time [sec]'), ylabel('Asymmetric Morphing [%]'), legend('LPV','H_\infty','location','best'), xlim([0 tlim])
+    [y,t] = step(CLlat4lpvu.Data(:,:,i,j,k),tlim);
+    subplot(3,1,1), plot(t,y(:,5,2),'-b'), hold on
+    subplot(3,1,2), plot(t,y(:,6,2),'-b'), hold on
+    subplot(3,1,3), plot(t,y(:,7,2),'-b'), hold on
+    [y,t] = step(CLlat4hinf.Data(:,:,i,j,k),tlim);
+    subplot(3,1,1), plot(t,y(:,5,2),'--r')
+    subplot(3,1,2), plot(t,y(:,6,2),'--r')
+    subplot(3,1,3), plot(t,y(:,7,2),'--r')
 end
 end
 end
-exportgraphics(fig4,'figure/lat_step_lin_phi_input.png','resolution',300)
-% savefig(fig4,'figure/lat_step_lin_phi_input.fig')
 
-clearvars fig1 fig2 fig3 fig4
+subplot(3,1,1), xlabel('Time [sec]'), ylabel('Aileron [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(3,1,2), xlabel('Time [sec]'), ylabel('Rudder [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+
+exportgraphics(gcf,'figure/auto_lat_step_phi_input.png','resolution',300)

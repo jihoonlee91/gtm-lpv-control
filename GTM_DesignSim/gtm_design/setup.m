@@ -95,6 +95,13 @@ loadmws(init_design('GTM'),'gtm_design');
 
 warning('on','Simulink:SL_MdlFileNotOnPath');
 
+% unit conversion parameters
+knots2fps = 1.68781; % kt to ft/s
+m2ft      = 3.28084; % m to ft
+d2r       = pi/180; % deg to rad
+r2d       = 1/d2r; % rad to deg
+g         = 32.174; % gravitational acceleration [ft/s^2]
+s = tf('s'); % Laplace variable
 
 
 

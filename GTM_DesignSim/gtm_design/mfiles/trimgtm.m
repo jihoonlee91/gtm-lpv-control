@@ -264,9 +264,10 @@ Trimcond.rudder   =MWS.bias.rudder;
 Trimcond.elevator =MWS.bias.elevator;
 Trimcond.spdbrake =MWS.bias.speedbrake;
 Trimcond.flaps    =MWS.bias.flaps;
-Trimcond.morphing =MWS.bias.morphing;
 Trimcond.geardown =MWS.bias.geardown;
 Trimcond.Xo       =Xtrim(Index.EOM);
+Trimcond.morphing =MWS.bias.morphing;
+Trimcond.sas      =tas2sas(yout(2),Xtrim(Index.EOM(9)));
 
 % return model to initial parameters
 set_param('gtm_design','InlineParams',inlineflag);

@@ -20,4 +20,8 @@ MWS.StatesInp = SetICs(ini);
 
 loadmws(MWS,'gtm_design');
 
+set_param('gtm_design/Control/Controller','commented','on')
+set_param('gtm_design/Guidance','commented','on')
+set_param('gtm_design/Monitor','commented','on')
+
 [MWS,Xtrim,Trimcond,Err] = trimgtm(target,'elev',0);
