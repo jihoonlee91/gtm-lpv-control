@@ -2,7 +2,7 @@ function plot_bode(CLlpvu,CLhinf,Weights,inum,onum,w)
 
 set(0,'DefaultLineLineWidth',1)
 
-figure('units','centimeters','position',[6 6 13 10]);
+figure('units','centimeters','position',[6 6 13 8]);
 
 domain_size = size(CLlpvu.Domain);
 num_sas = domain_size(1);

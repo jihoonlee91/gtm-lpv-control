@@ -81,7 +81,7 @@ fprintf('lon2 LPVu Syn Time: %.1f sec \n',timelon2lpvu)
 fprintf('lon2 LPVu Gam = %.5g (%.3g%% back-off from %.5g)\n',gamlon2lpvu,(gamlon2lpvu/infolon2lpvu.MinGamma-1)*100,infolon2lpvu.MinGamma)
 
 % input & output scaling
-Ps = diag([r2d r2d 1/g]); % [deg] x [deg] x [g]
+Ps = diag([r2d r2d -1/g]); % [deg] x [deg] x [g]
 Ks = diag([1]); % [deg]
 
 % loop closing with hinf

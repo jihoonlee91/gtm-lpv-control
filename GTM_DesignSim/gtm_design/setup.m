@@ -9,6 +9,7 @@ addpath(genpath('./trajectory3/'));
 
 % Add mfiles directories.
 addpath('./mfiles');
+addpath('./design');
 
 % Add compilex code directory
 addpath('./obj');
@@ -86,6 +87,8 @@ set_param('gtm_design/Control/Controller','commented','on') % control off
 load FixedWingBus.mat
 GuidanceMode = 1;
 ControlMode = 0;
+etasc_feedthrough = 1;
+phi_lim = 30;
 
 % load nominal starting point
 loadmws(init_design('GTM'),'gtm_design');

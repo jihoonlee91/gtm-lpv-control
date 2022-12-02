@@ -6,7 +6,9 @@ tas0  = 75; % [kt]
 deltc = MWS.bias.throttle;
 t_final = 180;
 alt0  = 1000; % [ft]
+etasc_feedthrough = 0;
 
+RateofClimb = 10;
 phi_to_eta = 0;
 LookaheadDistance = 700;
 TransitionRadius = 1000*0.3048; % not used
@@ -26,7 +28,7 @@ set_param('gtm_design','MinStep','auto')
 MWS.SurfaceDeadbandOn = 0;
 loadmws(MWS,'gtm_design'); % load MWS
 [MWS,Xtrim,Trimcond,Err] = trimgtm_morph_try(tas0,alt0,etas0);
-MWS.SurfaceDeadbandOn = 0;
+MWS.SurfaceDeadbandOn = 1;
 loadmws(MWS,'gtm_design'); % load MWS
 
 set_param('gtm_design','ReturnWorkspaceOutputs','off')
@@ -146,13 +148,13 @@ p_D_ft_2 = NED(:,3);
 
 %%
 figure('units','centimeters','position',[13 2 13 20]);
-subplot(5,1,1), plot(t_1,tas_kt_1,'b',t_2,tas_kt_2,'--r',t_2,t_2*0+tas0,'-.'), ylabel('True Airspeed [kt]'), xlabel('Time [sec]')
+subplot(5,1,1), plot(t_1,tas_kt_1,'b',t_2,tas_kt_2,'--r',t_2,t_2*0+tas0,'-.'), ylabel('True airspeed [kt]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','Command','location','best')
-subplot(5,1,2), plot(t_1,alp_deg_1,'b',t_2,alp_deg_2,'--r'), ylabel('Angle of Attack [deg]'), xlabel('Time [sec]')
+subplot(5,1,2), plot(t_1,alp_deg_1,'b',t_2,alp_deg_2,'--r'), ylabel('Angle of attack [deg]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','location','best')
-subplot(5,1,3), plot(t_1,q_rad_1*r2d,'b',t_2,q_rad_2*r2d,'--r'), ylabel('Angle of Attack [deg]'), xlabel('Time [sec]')
+subplot(5,1,3), plot(t_1,q_rad_1*r2d,'b',t_2,q_rad_2*r2d,'--r'), ylabel('Pitch rate [deg/s]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','location','best')
-subplot(5,1,4), plot(t_1,the_rad_1*r2d,'b',t_2,the_rad_2*r2d,'--r'), ylabel('Angle of Attack [deg]'), xlabel('Time [sec]')
+subplot(5,1,4), plot(t_1,the_rad_1*r2d,'b',t_2,the_rad_2*r2d,'--r'), ylabel('Pitch [deg]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','location','best')
 subplot(5,1,5), plot(t_1,alt_ft_1,'b',t_2,alt_ft_2,'--r',t_2,t_2*0+alt0,'-.'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','Command','location','best')

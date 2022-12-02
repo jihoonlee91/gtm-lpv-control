@@ -2,7 +2,7 @@ set(0,'DefaultLineLineWidth',1)
 tlim = 4;
 
 %% auto_lat_step_bet_state
-figure('units','centimeters','position',[0 6 13 20]);
+figure('units','centimeters','position',[0 6 13 16]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -35,7 +35,7 @@ subplot(4,1,4), xlabel('Time [sec]'), ylabel('Roll [deg]'), legend('LPV','H_\inf
 exportgraphics(gcf,'figure/auto_lat_step_bet_state.png','resolution',300)
 
 %% auto_lat_step_bet_input
-figure('units','centimeters','position',[13 6 13 20]);
+figure('units','centimeters','position',[13 6 13 13]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -53,12 +53,12 @@ end
 
 subplot(3,1,1), xlabel('Time [sec]'), ylabel('Aileron [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
 subplot(3,1,2), xlabel('Time [sec]'), ylabel('Rudder [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
 
 exportgraphics(gcf,'figure/auto_lat_step_bet_input.png','resolution',300)
 
 %% auto_lat_step_phi_state
-figure('units','centimeters','position',[26 6 13 20]);
+figure('units','centimeters','position',[26 6 13 16]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -91,7 +91,7 @@ subplot(4,1,4), xlabel('Time [sec]'), ylabel('Roll [deg]'), legend('LPV','H_\inf
 exportgraphics(gcf,'figure/auto_lat_step_phi_state.png','resolution',300)
 
 %% auto_lat_step_phi_input
-figure('units','centimeters','position',[39 6 13 20]);
+figure('units','centimeters','position',[39 6 13 13]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -109,6 +109,6 @@ end
 
 subplot(3,1,1), xlabel('Time [sec]'), ylabel('Aileron [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
 subplot(3,1,2), xlabel('Time [sec]'), ylabel('Rudder [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
 
 exportgraphics(gcf,'figure/auto_lat_step_phi_input.png','resolution',300)

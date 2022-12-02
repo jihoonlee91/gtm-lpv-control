@@ -219,6 +219,7 @@ if mov | (i == 1)
       clf;
 patch('FaceColor','blue','EdgeColor','none'), hold on
 patch('FaceColor','red','EdgeColor','none')
+plot3(x(1),y(1),z(1),'--ok')
       plot3(x,y,z,line_color);
       grid on;
       hold on;

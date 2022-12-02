@@ -2,6 +2,7 @@
 FlightMode = 3.1;
 ControlMode = 3;
 
+RateofClimb = 0;
 phi_to_eta = 0;
 etas0 = -12.5; % [%]
 tas0  = 75; % [kt]

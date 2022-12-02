@@ -38,7 +38,7 @@ subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\
 exportgraphics(gcf,'figure/auto_lon_step_tas_state.png','resolution',300)
 
 %% auto_lon_step_tas_input
-figure('units','centimeters','position',[13 6 13 20]);
+figure('units','centimeters','position',[13 6 13 8]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -94,7 +94,7 @@ subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\
 exportgraphics(gcf,'figure/auto_lon_step_alt_state.png','resolution',300)
 
 %% auto_lon_step_alt_input
-figure('units','centimeters','position',[39 6 13 20]);
+figure('units','centimeters','position',[39 6 13 8]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
