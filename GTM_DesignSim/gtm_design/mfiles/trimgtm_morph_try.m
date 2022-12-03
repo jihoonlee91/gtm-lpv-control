@@ -5,8 +5,9 @@ while 1
     [MWS,Xtrim,Trimcond,Err] = trimgtm_morph(tas,alt,mor);
     if (Err < 1e-3)
         break
-    elseif trial >= 10
-        error('TRIM FAIL')
+    elseif trial >= 4
+        warning('TRIM FAIL')
+        break
     else
         warning('Poor convergence, trying again.\n');
         trial = trial+1;

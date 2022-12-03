@@ -57,5 +57,3 @@ Plon5 = pss(londyn5_grid,domain);
 Plat4 = pss(latdyn4_grid,domain);
 Plon2 = pss(londyn2_grid,domain);
 Plat3 = pss(latdyn3_grid,domain);
-
-save lpv_design_data.mat
