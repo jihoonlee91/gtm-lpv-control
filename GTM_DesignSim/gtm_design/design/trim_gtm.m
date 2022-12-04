@@ -23,15 +23,23 @@ for i = 1:num_sas
     MWS_grid(i,j,k) = MWS; % keep MWS for linearization
     
     % convert trim conditions to 'y=x' systems
-    sys_sas_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.sas); % [kts]
-    sys_tas_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.tas); % [kts]
+    sys_sas_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.sas); % [kt]
     sys_alt_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.altitude); % [ft]
     sys_mor_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.morphing); % [%]
+
+    sys_tas_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.tas); % [kt]
     sys_alp_trim(:,:,i,j,k)      = ss(0,0,0,Trimcond.alpha); % [deg]
+    sys_qdeg_trim(:,:,i,j,k)     = ss(0,0,0,Trimcond.qdeg); % [deg/s]
     sys_pitch_trim(:,:,i,j,k)    = ss(0,0,0,Trimcond.pitch); % [deg]
+
+    sys_beta_trim(:,:,i,j,k)     = ss(0,0,0,Trimcond.beta); % [deg]
+    sys_pdeg_trim(:,:,i,j,k)     = ss(0,0,0,Trimcond.pdeg); % [deg/s]
+    sys_rdeg_trim(:,:,i,j,k)     = ss(0,0,0,Trimcond.rdeg); % [deg/s]
+    sys_roll_trim(:,:,i,j,k)     = ss(0,0,0,Trimcond.roll); % [deg]
+
     sys_throttle_trim(:,:,i,j,k) = ss(0,0,0,Trimcond.throttle); % [%]
-    sys_aileron_trim(:,:,i,j,k)  = ss(0,0,0,Trimcond.aileron); % [deg]
     sys_elevator_trim(:,:,i,j,k) = ss(0,0,0,Trimcond.elevator); % [deg]
+    sys_aileron_trim(:,:,i,j,k)  = ss(0,0,0,Trimcond.aileron); % [deg]
     sys_rudder_trim(:,:,i,j,k)   = ss(0,0,0,Trimcond.rudder); % [deg]
 end
 end
@@ -39,11 +47,19 @@ end
 
 % scheduled trim parameter
 sch_sas_trim      = pss(sys_sas_trim,domain); % [deg]
-sch_tas_trim      = pss(sys_tas_trim,domain); % [deg]
 sch_alt_trim      = pss(sys_alt_trim,domain); % [deg]
 sch_mor_trim      = pss(sys_mor_trim,domain); % [deg]
+
+sch_tas_trim      = pss(sys_tas_trim,domain); % [deg]
 sch_alp_trim      = pss(sys_alp_trim,domain); % [deg]
+sch_qdeg_trim     = pss(sys_qdeg_trim,domain); % [deg/s]
 sch_pitch_trim    = pss(sys_pitch_trim,domain); % [deg]
+
+sch_beta_trim    = pss(sys_beta_trim,domain); % [deg]
+sch_pdeg_trim    = pss(sys_pdeg_trim,domain); % [deg/s]
+sch_rdeg_trim    = pss(sys_rdeg_trim,domain); % [deg/s]
+sch_roll_trim    = pss(sys_roll_trim,domain); % [deg]
+
 sch_throttle_trim = pss(sys_throttle_trim,domain); % [%]
 sch_aileron_trim  = pss(sys_aileron_trim,domain); % [deg]
 sch_elevator_trim = pss(sys_elevator_trim,domain); % [deg]
@@ -51,11 +67,19 @@ sch_rudder_trim   = pss(sys_rudder_trim,domain); % [deg]
 
 % parameter packaging
 sch_param.sch_sas_trim      = sch_sas_trim;
-sch_param.sch_tas_trim      = sch_tas_trim;
 sch_param.sch_alt_trim      = sch_alt_trim;
 sch_param.sch_mor_trim      = sch_mor_trim;
+
+sch_param.sch_tas_trim      = sch_tas_trim;
 sch_param.sch_alp_trim      = sch_alp_trim;
+sch_param.sch_qdeg_trim     = sch_qdeg_trim;
 sch_param.sch_pitch_trim    = sch_pitch_trim;
+
+sch_param.sch_beta_trim     = sch_beta_trim;
+sch_param.sch_pdeg_trim     = sch_pdeg_trim;
+sch_param.sch_rdeg_trim     = sch_rdeg_trim;
+sch_param.sch_roll_trim     = sch_roll_trim;
+
 sch_param.sch_throttle_trim = sch_throttle_trim;
 sch_param.sch_aileron_trim  = sch_aileron_trim;
 sch_param.sch_elevator_trim = sch_elevator_trim;
