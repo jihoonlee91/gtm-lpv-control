@@ -24,8 +24,8 @@ Iyy0 = 4.655;  % slg-ft^2,
 Izz0 = 5.587;  % slg-ft^2,
 Ixz0 = 0.274;  % slg-ft^2,
 Iyz0 = 0.0;    % slg-ft^2,
-% Ixy0 = 0.006;  % slg-ft^2,
-Ixy0 = 0;  % slg-ft^2,
+Ixy0 = 0.006;  % slg-ft^2,
+% Ixy0 = 0;  % slg-ft^2,
 MWS.Inertia0 = [Ixx0 Iyy0 Izz0 Ixz0 Iyz0 Ixy0];
 
 % Shift in CG and Inertia when gear are down
@@ -45,8 +45,8 @@ MWS.S       = 5.9018;   % ft^2,  reference wing area
 MWS.Cbar    = 0.9153;   % ft,    mean aerodynamic chord
 MWS.b       = 6.8488;   % ft,    wing span
 MWS.le_mac  = 4.5462;   % ft,    leading edge of MAC
-% MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) -0.1416/12 -0.9761]; % ft, initial CG (21.99% MAC), gear up
-MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) 0 -0.9761]; % ft, initial CG (21.99% MAC), gear up
+MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) -0.1416/12 -0.9761]; % ft, initial CG (21.99% MAC), gear up
+% MWS.cg_pos0 = [-(MWS.le_mac + MWS.Cbar*0.2199) 0 -0.9761]; % ft, initial CG (21.99% MAC), gear up
 MWS.ref_cg  = [-(MWS.le_mac + MWS.Cbar*0.25) 0 -0.9401];  %ft, reference CG: 25% MAC in ARS coordinates 
 
 % Fuel Location and weight
@@ -59,8 +59,8 @@ MWS.aftfuel_pos    = [-62.30    0.00 -13.86]/12;    % ft,   aft fuel tank positi
 MWS.engl_pos       = [-51.903 -14.20  -7.71]/12;    % ft,   location of right engine, not part of 9/8/09 measurements
 MWS.engr_pos       = [-51.903  14.20  -7.71]/12;    % ft,   location of left engine, not part of 9/8/09 measurements
 MWS.engl_ang       = [  0       1.98   2.22];       % deg,  angluar offsets of left engine
-% MWS.engr_ang       = [  0       1.95  -1.18];       % deg,  angluar offsets of right engine
-MWS.engr_ang       = [  0       1.98  -2.22];       % deg,  angluar offsets of right engine
+MWS.engr_ang       = [  0       1.95  -1.18];       % deg,  angluar offsets of right engine
+% MWS.engr_ang       = [  0       1.98  -2.22];       % deg,  angluar offsets of right engine
 
 % Landing Gear Parameters
 %   Units ft, ft/sec and lbs
