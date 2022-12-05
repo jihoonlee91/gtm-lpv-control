@@ -4,6 +4,7 @@ load lpv_design_result.mat
 set(groot,'DefaultLineLineWidth',1)
 
 %% model investigation
+plot_morphing_effect % CM and inertia
 plot_eta % aerodynamic coefficient
 plot_trim_map % flight envelope
 

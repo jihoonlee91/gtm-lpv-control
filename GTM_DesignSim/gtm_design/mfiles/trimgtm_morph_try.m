@@ -1,11 +1,11 @@
-function [MWS,Xtrim,Trimcond,Err,trial] = trimgtm_morph_try(tas,alt,mor)
+function [MWS,Xtrim,Trimcond,Err,trial] = trimgtm_morph_try(tas,alt,mor,maxTry)
 
 trial = 1;
 while 1
     [MWS,Xtrim,Trimcond,Err] = trimgtm_morph(tas,alt,mor);
     if (Err < 1e-3)
         break
-    elseif trial >= 10
+    elseif trial > maxTry
         warning('TRIM FAIL')
         break
     else

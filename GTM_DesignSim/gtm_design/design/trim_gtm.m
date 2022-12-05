@@ -19,7 +19,7 @@ for i = 1:num_sas
     tas0 = sas2tas(sas0,alt0); % target tas [kts]
 
     fprintf('trimming... #%d @ TAS: %d kt (SAS: %d kt), Alt: %d ft, Mor: %.3g %%\n',sub2ind([num_sas num_alt num_mor],i,j,k),tas0,sas0,alt0,mor0) % display progress
-    [MWS,Xtrim,Trimcond,Err] = trimgtm_morph_try(tas0,alt0,mor0); % trim calculation
+    [MWS,Xtrim,Trimcond,Err] = trimgtm_morph_try(tas0,alt0,mor0,10); % trim calculation
     MWS_grid(i,j,k) = MWS; % keep MWS for linearization
     
     % convert trim conditions to 'y=x' systems
