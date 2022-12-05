@@ -6,6 +6,7 @@ num_sas   = numel(sas_grid); % number of sas grid points
 num_alt   = numel(alt_grid); % number of alt grid points
 num_mor   = numel(mor_grid); % number of mor grid points
 domain = rgrid({'rho1_sas_param','rho2_alt_param','rho3_mor_param'},{sas_grid,alt_grid,mor_grid}); % parameter grid
+fprintf('trimming started for a total of %d configuraitons \n',num_sas*num_alt*num_mor) % display progress
 
 clearvars MWS_grid sys_sas_trim sys_tas_trim sys_alt_trim sys_mor_trim sys_alp_trim sys_pitch_trim sys_throttle_trim sys_aileron_trim sys_elevator_trim sys_rudder_trim % clear old variables
 

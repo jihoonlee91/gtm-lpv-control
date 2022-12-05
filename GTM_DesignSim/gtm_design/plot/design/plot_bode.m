@@ -2,7 +2,7 @@ function plot_bode(CLlpvu,CLhinf,Weights,inum,onum,w)
 
 set(0,'DefaultLineLineWidth',1)
 
-figure('units','centimeters','position',[6 6 13 8]);
+figure('units','centimeters','position',[6 6 20 14]);
 
 domain_size = size(CLlpvu.Domain);
 num_sas = domain_size(1);
@@ -17,10 +17,10 @@ for k = 1:num_mor
     CLlpvu_pt = CLlpvu.Data(:,:,i,j,k);
     CLhinf_pt = CLhinf.Data(:,:,i,j,k);
     [mag,~,wout] = bode(CLlpvu_pt(onum,inum),w);
-    semilogx(wout/(2*pi),mag2db(squeeze(mag)/(Weights.Wr(inum,inum)*Weights.Ps(onum,onum))),'r')
+    semilogx(wout/(2*pi),mag2db(squeeze(mag)/abs((Weights.Wr(inum,inum)*Weights.Ps(onum,onum)))),'r')
     hold on
     [mag,~,wout] = bode(CLhinf_pt(onum,inum),w);
-    semilogx(wout/(2*pi),mag2db(squeeze(mag)/(Weights.Wr(inum,inum)*Weights.Ps(onum,onum))),'--b')
+    semilogx(wout/(2*pi),mag2db(squeeze(mag)/abs((Weights.Wr(inum,inum)*Weights.Ps(onum,onum)))),'--b')
     drawnow
 end
 end

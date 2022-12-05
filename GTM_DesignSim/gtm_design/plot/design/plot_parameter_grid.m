@@ -7,8 +7,8 @@ for j = 1:num_alt
     tas_mesh(j,i) = sas2tas(sas_grid(i),alt_grid(j));
 end
 end
-scatter(tas_mesh(:),alt_mesh(:),'filled'), hold on
-scatter(sas_mesh(:),alt_mesh(:))
+scatter(tas_mesh(:),alt_mesh(:),20,'b','filled'), hold on
+scatter(sas_mesh(:),alt_mesh(:),'r')
 xlabel('Airspeed [kt]'), ylabel('Altitude [ft]')
 grid on, grid minor
 xlim([min(sas_grid)-10 max(sas_grid)+10])

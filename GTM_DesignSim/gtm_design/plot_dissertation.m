@@ -6,7 +6,7 @@ set(groot,'DefaultLineLineWidth',1)
 %% model investigation
 plot_morphing_effect % CM and inertia
 plot_eta % aerodynamic coefficient
-plot_trim_map % flight envelope
+% plot_trim_map % flight envelope
 
 %% modeling
 plot_parameter_grid % scheduling parameter grid

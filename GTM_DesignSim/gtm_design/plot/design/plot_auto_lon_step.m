@@ -2,7 +2,7 @@ set(0,'DefaultLineLineWidth',1)
 tlim = 15;
 
 %% auto_lon_step_tas_state
-figure('units','centimeters','position',[0 6 13 20]);
+figure('units','centimeters','position',[0 10 20 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -29,16 +29,16 @@ end
 end
 end
 
-subplot(5,1,1), xlabel('Time [sec]'), ylabel('True airspeed [kt]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,2), xlabel('Time [sec]'), ylabel('Angle of attack [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,3), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,4), xlabel('Time [sec]'), ylabel('Pitch [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,1), xlabel('Time [sec]'), ylabel('True airspeed [kt]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,2), xlabel('Time [sec]'), ylabel('Angle of attack [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,3), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,4), xlabel('Time [sec]'), ylabel('Pitch [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\infty','Model','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 
 exportgraphics(gcf,'figure/auto_lon_step_tas_state.png','resolution',300)
 
 %% auto_lon_step_tas_input
-figure('units','centimeters','position',[13 6 13 8]);
+figure('units','centimeters','position',[0 2 20 8]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -52,13 +52,13 @@ end
 end
 end
 
-subplot(2,1,1), xlabel('Time [sec]'), ylabel('Throttle [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(2,1,2), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(2,1,1), xlabel('Time [sec]'), ylabel('Throttle [%]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(2,1,2), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 
 exportgraphics(gcf,'figure/auto_lon_step_tas_input.png','resolution',300)
 
 %% auto_lon_step_alt_state
-figure('units','centimeters','position',[26 6 13 20]);
+figure('units','centimeters','position',[20 10 20 20]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -85,16 +85,16 @@ end
 end
 end
 
-subplot(5,1,1), xlabel('Time [sec]'), ylabel('True airspeed [kt]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,2), xlabel('Time [sec]'), ylabel('Angle of attack [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,3), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,4), xlabel('Time [sec]'), ylabel('Pitch [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\infty','Model','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,1), xlabel('Time [sec]'), ylabel('True airspeed [kt]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,2), xlabel('Time [sec]'), ylabel('Angle of attack [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,3), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,4), xlabel('Time [sec]'), ylabel('Pitch [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 
 exportgraphics(gcf,'figure/auto_lon_step_alt_state.png','resolution',300)
 
 %% auto_lon_step_alt_input
-figure('units','centimeters','position',[39 6 13 8]);
+figure('units','centimeters','position',[20 2 20 8]);
 for i = 1:num_sas
 for j = 1:num_alt
 for k = 1:num_mor
@@ -108,7 +108,7 @@ end
 end
 end
 
-subplot(2,1,1), xlabel('Time [sec]'), ylabel('Throttle [%]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
-subplot(2,1,2), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','best'), grid on, grid minor, xlim tight, ylim padded
+subplot(2,1,1), xlabel('Time [sec]'), ylabel('Throttle [%]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
+subplot(2,1,2), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 
 exportgraphics(gcf,'figure/auto_lon_step_alt_input.png','resolution',300)
