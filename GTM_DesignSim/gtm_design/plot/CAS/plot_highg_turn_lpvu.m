@@ -1,14 +1,16 @@
 %% Nonlinear simulation
 FlightMode = 2.2;
 ControlMode = 2;
-etas0 = -20; % [%]
-etas1 = -5;
+etas0 = -25; % [%]
+etas1 = -0;
 tas0  = 100; % [kt]
 deltc = 100;
 t_final = 20;
 alt0  = 1000; % [ft]
 
 phi_to_eta = 0;
+RateofClimb = 0;
+etasc_feedthrough = 1;
 
 set_param('gtm_design/Guidance/CAS Maneuver/Push-over and Pull-up','commented','on')
 set_param('gtm_design/Guidance/CAS Maneuver/High-g Turn','commented','off')
@@ -95,8 +97,8 @@ etaa_1 = (etar_1-etal_1)/2;
 etas_1 = (etar_1+etal_1)/2;
 
 %% Nonlinear simulation
-etas0 = -5;
-etas1 = -20;
+etas0 = -0;
+etas1 = -25;
 
 MWS.bias.morphing = etas0; % set morphing parameter
 loadmws(MWS,'gtm_design'); % load MWS
@@ -157,42 +159,42 @@ etaa_2 = (etar_2-etal_2)/2;
 etas_2 = (etar_2+etal_2)/2;
 
 %%
-figure('units','centimeters','position',[0 13 16 11]);
+figure('units','centimeters','position',[0 13 20 11]);
 trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/100,floor(numel(tsim1)/10-1),'boeing_747',[90 90],'blue','blue');
 xlim([-200 1200]), ylim([-400 2000])
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','west')
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','northeast')
 exportgraphics(gcf,'figure/highg_turn_trajectory_1_lpvu.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[0 2 16 11]);
+figure('units','centimeters','position',[0 2 20 11]);
 trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/100,floor(numel(tsim2)/10-1),'boeing_747',[90 90],'red','red');
 xlim([-200 1200]), ylim([-400 2000])
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','west')
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','northeast')
 exportgraphics(gcf,'figure/highg_turn_trajectory_2_lpvu.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[13 13 13 10]);
-trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/100,floor(min(numel(tsim1),numel(tsim2))/10-1),'boeing_747',[0 0],'blue','blue');
-xlim([-200 1200]), ylim([-400 2000]), zlim([400 1200])
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','west')
+figure('units','centimeters','position',[13 13 20 12]);
+trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/100,floor(numel(tsim1)/10-1),'boeing_747',[0 0],'blue','blue');
+xlim([-200 1200]), ylim([-400 2000]), zlim([400 1300])
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','northeast')
 exportgraphics(gcf,'figure/highg_turn_trajectory_1_side_lpvu.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[13 2 13 10]);
-trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/100,floor(min(numel(tsim1),numel(tsim2))/10-1),'boeing_747',[0 0],'red','red');
-xlim([-200 1200]), ylim([-400 2000]), zlim([400 1200])
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','west')
+figure('units','centimeters','position',[13 2 20 12]);
+trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/100,floor(numel(tsim2)/10-1),'boeing_747',[0 0],'red','red');
+xlim([-200 1200]), ylim([-400 2000]), zlim([400 1300])
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('Case 1','Case 2','location','northeast')
 exportgraphics(gcf,'figure/highg_turn_trajectory_2_side_lpvu.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[26 2 13 20]);
+figure('units','centimeters','position',[26 2 20 12]);
 subplot(3,1,1), plot(tsim1,-Az_g_1,'b',tsim2,-Az_g_2,'--r',tsim2,an_c_g_2,'-.k'), xlabel('Time [sec]'), grid on, grid minor, legend('Case 1','Case 2','Command','location','best'), ylim padded, xlim tight, ylabel('Normal Acceleration [g]')
 subplot(3,1,2), plot(tsim1,p_rad_1*r2d,'b',tsim2,p_rad_2*r2d,'--r',tsim2,p_c_deg_2,'-.k'), xlabel('Time [sec]'), grid on, grid minor, legend('Case 1','Case 2','Command','location','best'), ylim padded, xlim tight, ylabel('Roll Rate [deg/s]')
-subplot(3,1,3), plot(tsim1,etas_1,'b',tsim1,etasc_1,'--b',tsim2,etas_2,'r',tsim2,etasc_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, legend('Actual (Case 1)','Command (Case 1)','Actual (Case 2)','Command (Case 2)','location','best'), ylim padded, xlim tight, ylabel('Sym. Morphing [%]')
+subplot(3,1,3), plot(tsim1,etas_1,'b',tsim1,etasc_1,'--b',tsim2,etas_2,'r',tsim2,etasc_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, legend('Actual (Case 1)','Command (Case 1)','Actual (Case 2)','Command (Case 2)','location','east'), ylim padded, xlim tight, ylabel('Sym. Morphing [%]')
 exportgraphics(gcf,'figure/highg_turn_command_lpvu.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[26+13/2 2 13 20]);
+figure('units','centimeters','position',[26+13/2 2 20 16]);
 subplot(4,1,1), plot(tsim1,tas_kt_1,'b',tsim2,tas_kt_2,'--r'),           xlabel('Time [sec]'), grid on, grid minor, legend('Case 1','Case 2','location','best'), ylim padded, xlim tight, ylabel('True Airspeed [kt]')
 subplot(4,1,2), plot(tsim1,alt_ft_1,'b',tsim2,alt_ft_2,'--r'),           xlabel('Time [sec]'), grid on, grid minor, legend('Case 1','Case 2','location','best'), ylim padded, xlim tight, ylabel('Altitude [ft]')
 subplot(4,1,3), plot(tsim1,alp_deg_1,'b',tsim2,alp_deg_2,'--r'),         xlabel('Time [sec]'), grid on, grid minor, legend('Case 1','Case 2','location','best'), ylim padded, xlim tight, ylabel('Angle of Attack [deg]')
@@ -200,7 +202,7 @@ subplot(4,1,4), plot(tsim1,phi_rad_1*r2d,'b',tsim2,phi_rad_2*r2d,'--r'), xlabel(
 exportgraphics(gcf,'figure/highg_turn_state_lpvu.png','resolution',300)
 
 %%
-figure('units','centimeters','position',[13*3 2 13 20]);
+figure('units','centimeters','position',[13*3 2 20 16]);
 subplot(4,1,1), plot(tsim1,dela_1,'b',tsim1,delac_1,'--b',tsim2,dela_2,'r',tsim2,delac_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, legend('Actual (Case 1)','Command (Case 1)','Actual (Case 2)','Command (Case 2)','location','best'), ylim padded, xlim tight, ylabel('Aileron [deg]')
 subplot(4,1,2), plot(tsim1,dele_1,'b',tsim1,delec_1,'--b',tsim2,dele_2,'r',tsim2,delec_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, legend('Actual (Case 1)','Command (Case 1)','Actual (Case 2)','Command (Case 2)','location','best'), ylim padded, xlim tight, ylabel('Elevator [deg]')
 subplot(4,1,3), plot(tsim1,delr_1,'b',tsim1,delrc_1,'--b',tsim2,delr_2,'r',tsim2,delrc_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, legend('Actual (Case 1)','Command (Case 1)','Actual (Case 2)','Command (Case 2)','location','best'), ylim padded, xlim tight, ylabel('Rudder [deg]')

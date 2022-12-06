@@ -4,7 +4,7 @@ FlightMode = 4.2;
 ControlMode = 4;
 phi_to_eta = 12.5/30;
 tas0  = 110; % [kt]
-t_final = 70;
+t_final = 80;
 LookaheadDistance = 1000;
 Radius = 2000;
 TurnDirection = 1;
@@ -160,16 +160,16 @@ etas_2 = (etar_2+etal_2)/2;
 
 %%
 figure('units','centimeters','position',[0 2 20 16]);
-trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/250,1000,'boeing_747',[45 30],'blue','blue');
+trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/250,1000,'boeing_747',[-45 20],'blue','blue');
 ylim([-500 6500]), xlim([-2500 2500]), zlim([0 3300])
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','location','north')
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','location','east')
 exportgraphics(gcf,'figure/helical_climb_trajectory_lpvu.png','resolution',300)
 
 %%
 figure('units','centimeters','position',[5 2 20 16]);
-trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/250,1000,'boeing_747',[45 30],'red','red');
+trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/250,1000,'boeing_747',[-45 20],'red','red');
 ylim([-500 6500]), xlim([-2500 2500]), zlim([0 3300])
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','location','north')
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','location','east')
 exportgraphics(gcf,'figure/helical_climb_trajectory_hinf.png','resolution',300)
 
 %%

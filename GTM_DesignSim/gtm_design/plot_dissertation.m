@@ -28,3 +28,4 @@ plot_highg_turn_hinf % high-g turn with h-infinity controller
 plot_waypoint_following % waypoint following with lpv and h-infinity controllers
 plot_orbit_following % circular trajectory tracking with lpv and h-infinity controllers
 plot_helical_climb % helical climbing with lpv and h-infinity controllers under fast morphing
+% plot_helical_descent

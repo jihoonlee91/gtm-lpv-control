@@ -167,7 +167,7 @@ exportgraphics(gcf,'figure/waypoint_following_trajectory_top_lpvu.png','resoluti
 figure('units','centimeters','position',[15 2 20 19]);
 trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/150,1500,'boeing_747',[90 90],'red','red');
 xlim([-600 3600]), ylim([-600 3600]), plot3([0 0 3000 3000 0],[0 3000 3000 0 0],[1000 1000 1000 1000 1000],'-.ok')
-xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','Waypoint','location','north')
+xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','Waypoint','location','northeast')
 exportgraphics(gcf,'figure/waypoint_following_trajectory_top_hinf.png','resolution',300)
 
 %%
@@ -186,4 +186,4 @@ subplot(6,1,3), plot(tsim1,delr_1,'b',tsim1,delrc_1,'--b',tsim2,delr_2,'r',tsim2
 subplot(6,1,4), plot(tsim1,delt_1,'b',tsim1,deltc_1,'--b',tsim2,delt_2,'r',tsim2,deltc_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('Actual (LPV)','Command (LPV)','Actual (H_\infty)','Command (H_\infty)','location','best'), ylabel('Throttle [%]')
 subplot(6,1,5), plot(tsim1,etas_1,'k',tsim1,etasc_1,'--k'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('Actual','Command','location','best'), ylabel('Sym. Morphing [%]')
 subplot(6,1,6), plot(tsim1,etaa_1,'b',tsim1,etaac_1,'--b',tsim2,etaa_2,'r',tsim2,etaac_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('Actual (LPV)','Command (LPV)','Actual (H_\infty)','Command (H_\infty)','location','best'), ylabel('Asy. Morphing [%]')
-exportgraphics(gcf,'figure/helical_climb_input.png','resolution',300)
+exportgraphics(gcf,'figure/waypoint_following_input.png','resolution',300)

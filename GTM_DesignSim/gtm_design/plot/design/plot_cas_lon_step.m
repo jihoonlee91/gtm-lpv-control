@@ -31,4 +31,4 @@ subplot(4,1,2), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV'
 subplot(4,1,3), xlabel('Time [sec]'), ylabel('Normal acceleration [kt]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(4,1,4), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/auto_lon_step_tas_state.png','resolution',300)
+exportgraphics(gcf,'figure/cas_lon_step.png','resolution',300)
