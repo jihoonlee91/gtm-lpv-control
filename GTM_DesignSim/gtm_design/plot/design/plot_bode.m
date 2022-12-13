@@ -25,7 +25,7 @@ for k = 1:num_mor
 end
 end
 end
-legend('$LPV$','$H_\infty$','interpreter','latex','location','northeast')
+legend('LPV','H_\infty','location','northeast')
 xlabel('Frequency [Hz]')
 ylabel('Magnitude [dB]')
 grid on, grid minor
