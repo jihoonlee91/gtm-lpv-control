@@ -84,6 +84,24 @@ timelon5hinf = toc;
 fprintf('Lon5 Hinf Syn Time: %.1f sec \n',timelon5hinf)
 Klon5hinf = pss(Klon5hinf_grid,domain);
 
+% H2op synthesis
+clearvars Klon5h2op_grid gamlon5h2op_grid % clear old variables
+tic
+for i = 1:num_sas
+for j = 1:num_alt
+for k = 1:num_mor 
+    OLlon5_pt = OLlon5.Data(:,:,i,j,k);
+    [Klon5h2op_pt,~,gamlon5h2op_pt] = h2syn(OLlon5_pt,nmeaslon5,ncontlon5);
+    fprintf('lon5 H2op #%d Gam = %.5g\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamlon5h2op_pt)
+    Klon5h2op_grid(:,:,i,j,k) = Klon5h2op_pt;
+    gamlon5h2op_grid(i,j,k) = gamlon5h2op_pt;
+end
+end
+end
+timelon5h2op = toc;
+fprintf('lon5 H2op Syn Time: %.1f sec \n',timelon5h2op)
+Klon5h2op = pss(Klon5h2op_grid,domain);
+
 % LPVu synthesis
 tic
 [Klon5lpvu,gamlon5lpvu,infolon5lpvu] = lpvsyn(OLlon5,nmeaslon5,ncontlon5);
@@ -107,6 +125,21 @@ input_to_Td        = '[Plon5]';
 input_to_Ps        = '[Plon5]';
 input_to_Ks        = '[Klon5hinf]';
 sysoutname         = 'CLlon5hinf';
+cleanupsysic       = 'yes'; 
+sysic
+
+% loop closing with h2op
+systemnames        = 'Plon5 Klon5h2op Wr Pa Td Ps Ks';
+inputvar           = '[r{2}]';
+outputvar          = '[Ps ; Ks]';
+input_to_Plon5     = '[Pa]';
+input_to_Klon5h2op = '[Wr(1)-Td(1) ; Wr(2)-Td(5) ; Td(2) ; Td(3) ; Td(4)]';
+input_to_Wr        = '[r]';
+input_to_Pa        = '[Klon5h2op]';
+input_to_Td        = '[Plon5]';
+input_to_Ps        = '[Plon5]';
+input_to_Ks        = '[Klon5h2op]';
+sysoutname         = 'CLlon5h2op';
 cleanupsysic       = 'yes'; 
 sysic
 

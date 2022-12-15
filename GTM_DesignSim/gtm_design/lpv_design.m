@@ -3,9 +3,9 @@ close all; clear all; clc % initialization
 setup % setup simulink model
 
 %% trim and linearize
-trim_gtm
-linearize_gtm
-save('data/lpv_design_prep.mat')
+% trim_gtm
+% linearize_gtm
+% save('data/lpv_design_prep.mat')
 
 %% control design
 design_lon_cas % longitudinal CAS

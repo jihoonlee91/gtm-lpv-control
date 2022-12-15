@@ -117,6 +117,21 @@ sysoutname         = 'CLlon2hinf';
 cleanupsysic       = 'yes'; 
 sysic
 
+% loop closing with h2op
+systemnames        = 'Plon2 Klon2h2op Wr Pa Td Ps Ks';
+inputvar           = '[r{1}]';
+outputvar          = '[Ps ; Ks]';
+input_to_Plon2     = '[Pa]';
+input_to_Klon2h2op = '[Wr(1)+Td(3) ; Td(1) ; Td(2)]';
+input_to_Wr        = '[r]';
+input_to_Pa        = '[Klon2h2op]';
+input_to_Td        = '[Plon2]';
+input_to_Ps        = '[Plon2]';
+input_to_Ks        = '[Klon2h2op]';
+sysoutname         = 'CLlon2h2op';
+cleanupsysic       = 'yes'; 
+sysic
+
 % loop closing with lpvu
 systemnames        = 'Plon2 Klon2lpvu Wr Pa Td Ps Ks';
 inputvar           = '[r{1}]';

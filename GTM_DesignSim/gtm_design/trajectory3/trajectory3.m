@@ -217,8 +217,9 @@ frame = 0;
 for i=1:step:(ii-resto+1)
 if mov | (i == 1)
       clf;
-patch('FaceColor','blue','EdgeColor','none'), hold on
-patch('FaceColor','red','EdgeColor','none')
+patch('FaceColor','b','EdgeColor','none'), hold on
+patch('FaceColor','r','EdgeColor','none')
+patch('FaceColor','g','EdgeColor','none')
 plot3(x(1),y(1),z(1),'-.ok')
       plot3(x,y,z,line_color);
       grid on;

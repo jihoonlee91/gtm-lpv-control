@@ -85,6 +85,24 @@ timelat4hinf = toc;
 fprintf('lat4 Hinf Syn Time: %.1f sec \n',timelat4hinf)
 Klat4hinf = pss(Klat4hinf_grid,domain);
 
+% H2op synthesis
+clearvars Klat4h2op_grid gamlat4h2op_grid % clear old variables
+tic
+for i = 1:num_sas
+for j = 1:num_alt
+for k = 1:num_mor 
+    OLlat4_pt = OLlat4.Data(:,:,i,j,k);
+    [Klat4h2op_pt,~,gamlat4h2op_pt] = h2syn(OLlat4_pt,nmeaslat4,ncontlat4);
+    fprintf('lat4 H2op #%d Gam = %.5g\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamlat4h2op_pt)
+    Klat4h2op_grid(:,:,i,j,k) = Klat4h2op_pt;
+    gamlat4h2op_grid(i,j,k) = gamlat4h2op_pt;
+end
+end
+end
+timelat4h2op = toc;
+fprintf('lat4 H2op Syn Time: %.1f sec \n',timelat4h2op)
+Klat4h2op = pss(Klat4h2op_grid,domain);
+
 % LPVu synthesis
 tic
 [Klat4lpvu,gamlat4lpvu,infolat4lpvu] = lpvsyn(OLlat4,nmeaslat4,ncontlat4);
@@ -108,6 +126,21 @@ input_to_Td        = '[Plat4]';
 input_to_Ps        = '[Plat4]';
 input_to_Ks        = '[Klat4hinf]';
 sysoutname         = 'CLlat4hinf';
+cleanupsysic       = 'yes'; 
+sysic
+
+% loop closing with h2op
+systemnames        = 'Plat4 Klat4h2op Wr Pa Td Ps Ks';
+inputvar           = '[r{2}]';
+outputvar          = '[Ps ; Ks]';
+input_to_Plat4     = '[Pa]';
+input_to_Klat4h2op = '[Wr(1)-Td(1) ; Wr(2)-Td(4) ; Td(2) ; Td(3)]';
+input_to_Wr        = '[r]';
+input_to_Pa        = '[Klat4h2op]';
+input_to_Td        = '[Plat4]';
+input_to_Ps        = '[Plat4]';
+input_to_Ks        = '[Klat4h2op]';
+sysoutname         = 'CLlat4h2op';
 cleanupsysic       = 'yes'; 
 sysic
 

@@ -21,10 +21,16 @@ plot_auto_lon_step % longitudinal autopilot step response
 plot_auto_lat_step % lateral-directional autopilot step response
 
 %% simulation
-plot_pushover_and_pullup_lpvu % push-over and pull-up maneuver with lpv controller
-plot_pushover_and_pullup_hinf % push-over and pull-up maneuver with h-infinity controller
-plot_highg_turn_lpvu % high-g turn with lpv controller
-plot_highg_turn_hinf % high-g turn with h-infinity controller
+% plot_pushover_and_pullup_lpvu % push-over and pull-up maneuver with lpv controller
+% plot_pushover_and_pullup_hinf % push-over and pull-up maneuver with h-infinity controller
+% plot_pushover_and_pullup_h2op % push-over and pull-up maneuver with h-2 controller
+plot_pushover_and_pullup_case1 % push-over and pull-up maneuver
+plot_pushover_and_pullup_case2 % push-over and pull-up maneuver
+% plot_highg_turn_lpvu % high-g turn with lpv controller
+% plot_highg_turn_hinf % high-g turn with h-infinity controller
+% plot_highg_turn_h2op % high-g turn with h-2 controller
+plot_highg_turn_case1 % high-g turn
+plot_highg_turn_case2 % high-g turn
 plot_waypoint_following % waypoint following with lpv and h-infinity controllers
 plot_orbit_following % circular trajectory tracking with lpv and h-infinity controllers
 plot_helical_climb % helical climbing with lpv and h-infinity controllers under fast morphing
