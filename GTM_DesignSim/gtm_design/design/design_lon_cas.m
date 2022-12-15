@@ -73,24 +73,6 @@ timelon2hinf = toc;
 fprintf('lon2 Hinf Syn Time: %.1f sec \n',timelon2hinf)
 Klon2hinf = pss(Klon2hinf_grid,domain);
 
-% H2op synthesis
-clearvars Klon2h2op_grid gamlon2h2op_grid % clear old variables
-tic
-for i = 1:num_sas
-for j = 1:num_alt
-for k = 1:num_mor 
-    OLlon2_pt = OLlon2.Data(:,:,i,j,k);
-    [Klon2h2op_pt,~,gamlon2h2op_pt] = h2syn(OLlon2_pt,nmeaslon2,ncontlon2);
-    fprintf('lon2 H2op #%d Gam = %.5g\n',sub2ind([num_mor num_alt num_sas],k,j,i),gamlon2h2op_pt)
-    Klon2h2op_grid(:,:,i,j,k) = Klon2h2op_pt;
-    gamlon2h2op_grid(i,j,k) = gamlon2h2op_pt;
-end
-end
-end
-timelon2h2op = toc;
-fprintf('lon2 H2op Syn Time: %.1f sec \n',timelon2h2op)
-Klon2h2op = pss(Klon2h2op_grid,domain);
-
 % LPVu synthesis
 tic
 [Klon2lpvu,gamlon2lpvu,infolon2lpvu] = lpvsyn(OLlon2,nmeaslon2,ncontlon2);

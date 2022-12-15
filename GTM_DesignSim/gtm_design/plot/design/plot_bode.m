@@ -17,10 +17,10 @@ for k = 1:num_mor
     CLlpvu_pt = CLlpvu.Data(:,:,i,j,k);
     CLhinf_pt = CLhinf.Data(:,:,i,j,k);
     [mag,~,wout] = bode(CLlpvu_pt(onum,inum),w);
-    semilogx(wout/(2*pi),mag2db(squeeze(mag)/abs((Weights.Wr(inum,inum)*Weights.Ps(onum,onum)))),'r')
+    semilogx(wout/(2*pi),mag2db(squeeze(mag)/abs((Weights.Wr(inum,inum)*Weights.Ps(onum,onum)))),'b')
     hold on
     [mag,~,wout] = bode(CLhinf_pt(onum,inum),w);
-    semilogx(wout/(2*pi),mag2db(squeeze(mag)/abs((Weights.Wr(inum,inum)*Weights.Ps(onum,onum)))),'--b')
+    semilogx(wout/(2*pi),mag2db(squeeze(mag)/abs((Weights.Wr(inum,inum)*Weights.Ps(onum,onum)))),'--r')
     drawnow
 end
 end
