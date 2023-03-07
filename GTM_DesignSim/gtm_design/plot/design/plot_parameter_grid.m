@@ -20,4 +20,4 @@ plot([sas_grid(1) sas_grid(1) sas_grid(end) sas_grid(end) sas_grid(1)],[alt_grid
 plot([sas_grid(1) tas_grid(1) tas_grid(end) sas_grid(end) sas_grid(1)],[alt_grid(1) alt_grid(end) alt_grid(end) alt_grid(1) alt_grid(1)],'--','color',[0 0.4470 0.7410])
 legend('True Airspeed','Synthetic Airspeed','location','best')
 
-exportgraphics(gcf,'figure/parameter_grid.png','resolution',300)
+exportgraphics(gcf,'figure/parameter_grid.png','resolution',600)

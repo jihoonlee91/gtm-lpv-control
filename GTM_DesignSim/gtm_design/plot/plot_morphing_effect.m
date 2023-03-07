@@ -24,7 +24,7 @@ plot(etal,dCG(:,1),'b',etal,dCG(:,2),'--k',etal,dCG(:,3),'-.r')
 xlabel('\eta_l [%]'), ylabel('Center of mass [ft]'), grid on, grid minor, ylim padded, xlim tight
 legend('\Deltax_{cm}','\Deltay_{cm}','\Deltaz_{cm}','location','northeast')
 
-exportgraphics(gcf,'figure/etal_property_effect.png','resolution',300)
+exportgraphics(gcf,'figure/etal_property_effect.png','resolution',600)
 
 %%
 etas = linspace(-25,0,100);
@@ -52,7 +52,7 @@ plot(etal,dCG(:,1),'b',etal,dCG(:,2),'--k',etal,dCG(:,3),'-.r')
 xlabel('\eta_s [%]'), ylabel('Center of mass [ft]'), grid on, grid minor, ylim padded, xlim tight
 legend('\Deltax_{cm}','\Deltay_{cm}','\Deltaz_{cm}','location','northeast')
 
-exportgraphics(gcf,'figure/etas_property_effect.png','resolution',300)
+exportgraphics(gcf,'figure/etas_property_effect.png','resolution',600)
 
 %%
 etal = linspace(-25,0,100);
@@ -77,7 +77,7 @@ plot(etal,dCG(:,1),'b',etal,dCG(:,2),'--k',etal,dCG(:,3),'-.r')
 xlabel('\eta_l [%]'), ylabel('Center of mass variation [%]'), grid on, grid minor, ylim padded, xlim tight
 legend('$\Delta x_{cm}/\bar{c}$','$\Delta y_{cm}/\bar{c}$','$\Delta z_{cm}/\bar{c}$','interpreter','latex','location','northeast')
 
-exportgraphics(gcf,'figure/etal_property_effect_ratio.png','resolution',300)
+exportgraphics(gcf,'figure/etal_property_effect_ratio.png','resolution',600)
 
 %%
 etas = linspace(-25,0,100);
@@ -103,4 +103,4 @@ plot(etal,dCG(:,1),'b',etal,dCG(:,2),'--k',etal,dCG(:,3),'-.r')
 xlabel('\eta_s [%]'), ylabel('Center of mass variation [%]'), grid on, grid minor, ylim padded, xlim tight
 legend('$\Delta x_{cm}/\bar{c}$','$\Delta y_{cm}/\bar{c}$','$\Delta z_{cm}/\bar{c}$','interpreter','latex','location','northeast')
 
-exportgraphics(gcf,'figure/etas_property_effect_ratio.png','resolution',300)
+exportgraphics(gcf,'figure/etas_property_effect_ratio.png','resolution',600)

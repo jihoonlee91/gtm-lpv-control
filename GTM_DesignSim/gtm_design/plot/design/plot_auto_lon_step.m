@@ -35,7 +35,7 @@ subplot(5,1,3), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV'
 subplot(5,1,4), xlabel('Time [sec]'), ylabel('Pitch [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\infty','Model','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/auto_lon_step_tas_state.png','resolution',300)
+exportgraphics(gcf,'figure/auto_lon_step_tas_state.png','resolution',600)
 
 %% auto_lon_step_tas_input
 figure('units','centimeters','position',[0 2 20 8]);
@@ -55,7 +55,7 @@ end
 subplot(2,1,1), xlabel('Time [sec]'), ylabel('Throttle [%]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(2,1,2), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/auto_lon_step_tas_input.png','resolution',300)
+exportgraphics(gcf,'figure/auto_lon_step_tas_input.png','resolution',600)
 
 %% auto_lon_step_alt_state
 figure('units','centimeters','position',[20 10 20 20]);
@@ -91,7 +91,7 @@ subplot(5,1,3), xlabel('Time [sec]'), ylabel('Pitch rate [deg/s]'), legend('LPV'
 subplot(5,1,4), xlabel('Time [sec]'), ylabel('Pitch [deg]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(5,1,5), xlabel('Time [sec]'), ylabel('Altitude [ft]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/auto_lon_step_alt_state.png','resolution',300)
+exportgraphics(gcf,'figure/auto_lon_step_alt_state.png','resolution',600)
 
 %% auto_lon_step_alt_input
 figure('units','centimeters','position',[20 2 20 8]);
@@ -111,4 +111,4 @@ end
 subplot(2,1,1), xlabel('Time [sec]'), ylabel('Throttle [%]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(2,1,2), xlabel('Time [sec]'), ylabel('Elevator [deg]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/auto_lon_step_alt_input.png','resolution',300)
+exportgraphics(gcf,'figure/auto_lon_step_alt_input.png','resolution',600)

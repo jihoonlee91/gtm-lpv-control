@@ -158,7 +158,7 @@ subplot(5,1,4), plot(t_1,the_rad_1*r2d,'b',t_2,the_rad_2*r2d,'--r'), ylabel('Pit
 grid on, grid minor, hold on, legend('LPV','H_\infty','location','best')
 subplot(5,1,5), plot(t_1,alt_ft_1,'b',t_2,alt_ft_2,'--r',t_2,t_2*0+alt0,'-.'), ylabel('Altitude [ft]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','Command','location','best')
-exportgraphics(gcf,'figure/autopilot_straight_state.png','resolution',300)
+exportgraphics(gcf,'figure/autopilot_straight_state.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[13*2 2 13 20]);
@@ -168,4 +168,4 @@ subplot(3,1,2), plot(SurfacePos_1.AILL.Time,SurfacePos_1.ELLOB.Data,'b',SurfaceP
 grid on, grid minor, hold on, legend('LPV','H_\infty','location','best'), xlim([0 t_final])
 subplot(3,1,3), plot(SurfacePos_1.AILL.Time,delt_percent_1,'b',SurfacePos_2.AILL.Time,delt_percent_2,'--r'), ylabel('Throttle [%]'), xlabel('Time [sec]')
 grid on, grid minor, hold on, legend('LPV','H_\infty','location','best'), xlim([0 t_final])
-exportgraphics(gcf,'figure/autopilot_straight_input.png','resolution',300)
+exportgraphics(gcf,'figure/autopilot_straight_input.png','resolution',600)

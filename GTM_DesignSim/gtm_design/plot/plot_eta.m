@@ -7,7 +7,7 @@ subplot(3,2,5), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,3)).'); s.
 subplot(3,2,2), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,4)).'); s.EdgeColor = 'flat'; xlabel('\alpha [deg]'), ylabel('\beta [deg]'), zlabel('\Delta_dC_l'), grid on, grid minor, box on, view(45,30)
 subplot(3,2,4), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,5)).'); s.EdgeColor = 'flat'; xlabel('\alpha [deg]'), ylabel('\beta [deg]'), zlabel('\Delta_dC_m'), grid on, grid minor, box on, view(45,30)
 subplot(3,2,6), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,6)).'); s.EdgeColor = 'flat'; xlabel('\alpha [deg]'), ylabel('\beta [deg]'), zlabel('\Delta_dC_n'), grid on, grid minor, box on, view(45,30)
-exportgraphics(gcf,'figure/coefficient_increment_iso.png','resolution',300)
+exportgraphics(gcf,'figure/coefficient_increment_iso.png','resolution',600)
 
 %% left wingtip loss (wrt alpha and beta)
 [Alpha,Beta] = meshgrid(dC6_damage.bas.alpha(:),dC6_damage.bas.beta);
@@ -18,7 +18,7 @@ subplot(3,2,5), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,3)).'); s.
 subplot(3,2,2), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,4)).'); s.EdgeColor = 'flat'; hold on, s = surf(Alpha,Beta,-squeeze(dC6_damage.bas.data(:,:,4,4)).'); s.EdgeColor = 'flat'; xlabel('\alpha [deg]'), ylabel('\beta [deg]'), zlabel('\DeltaC_l'), grid on, grid minor, box on, view(0,0), xlim([-5 40])
 subplot(3,2,4), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,5)).'); s.EdgeColor = 'flat'; hold on, s = surf(Alpha,Beta,-squeeze(dC6_damage.bas.data(:,:,4,5)).'); s.EdgeColor = 'flat'; xlabel('\alpha [deg]'), ylabel('\beta [deg]'), zlabel('\DeltaC_m'), grid on, grid minor, box on, view(0,0), xlim([-5 40])
 subplot(3,2,6), s = surf(Alpha,Beta,squeeze(dC6_damage.bas.data(:,:,4,6)).'); s.EdgeColor = 'flat'; hold on, s = surf(Alpha,Beta,-squeeze(dC6_damage.bas.data(:,:,4,6)).'); s.EdgeColor = 'flat'; xlabel('\alpha [deg]'), ylabel('\beta [deg]'), zlabel('\DeltaC_n'), grid on, grid minor, box on, view(0,0), xlim([-5 40])
-exportgraphics(gcf,'figure/coefficient_increment_side.png','resolution',300)
+exportgraphics(gcf,'figure/coefficient_increment_side.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[20 2 30 30]);
@@ -28,4 +28,4 @@ subplot(3,2,5), plot(0,0,'b',0,0,'--r',0,0,'-ok',0,0,'-.g'), hold on, plot(dC6_a
 subplot(3,2,2), plot(0,0,'b',0,0,'--r',0,0,'-ok',0,0,'-.g'), hold on, plot(dC6_ail.alpha,squeeze(dC6_ail.data(:,14,:,4)),'b',dC6_rud.alpha,squeeze(dC6_rud.data(:,14,:,4)),'--r',dC6_rud.alpha,-squeeze(dC6_rud.data(:,14,:,4)),'--r',dC6_damage.bas.alpha,squeeze(dC6_damage.bas.data(:,7,4,4)),'-ok',dC6_damage.bas.alpha,-squeeze(dC6_damage.bas.data(:,7,4,4)),'-ok'),                                                       xlim([-5 40]), ylim padded, xlabel('\alpha [deg]'), ylabel('\Delta_dC_l'), grid on, grid minor, legend('Aileron','Rudder','Asy. Morphing',           'location','best'), ylim(max(abs(ylim)).*[-1.1 1.1])
 subplot(3,2,4), plot(0,0,'b',0,0,'--r',0,0,'-ok',0,0,'-.g'), hold on, plot(dC6_ail.alpha,squeeze(dC6_ail.data(:,14,:,5)),'b',dC6_rud.alpha,squeeze(dC6_rud.data(:,14,:,5)),'--r',dC6_rud.alpha,-squeeze(dC6_rud.data(:,14,:,5)),'--r',dC6_damage.bas.alpha,squeeze(dC6_damage.bas.data(:,7,4,5)),'-ok',dC6_damage.bas.alpha,-squeeze(dC6_damage.bas.data(:,7,4,5)),'-ok',dC3_ele.alpha,squeeze(dC3_ele.data(:,14,3,:,3)),'-.g'), xlim([-5 40]), ylim padded, xlabel('\alpha [deg]'), ylabel('\Delta_dC_m'), grid on, grid minor, legend('Aileron','Rudder','Sym. Morphing','Elevator','location','best'), ylim(max(abs(ylim)).*[-1.1 1.1])
 subplot(3,2,6), plot(0,0,'b',0,0,'--r',0,0,'-ok',0,0,'-.g'), hold on, plot(dC6_ail.alpha,squeeze(dC6_ail.data(:,14,:,6)),'b',dC6_rud.alpha,squeeze(dC6_rud.data(:,14,:,6)),'--r',dC6_rud.alpha,-squeeze(dC6_rud.data(:,14,:,6)),'--r',dC6_damage.bas.alpha,squeeze(dC6_damage.bas.data(:,7,4,6)),'-ok',dC6_damage.bas.alpha,-squeeze(dC6_damage.bas.data(:,7,4,6)),'-ok'),                                                       xlim([-5 40]), ylim padded, xlabel('\alpha [deg]'), ylabel('\Delta_dC_n'), grid on, grid minor, legend('Aileron','Rudder','Asy. Morphing',           'location','best'), ylim(max(abs(ylim)).*[-1.1 1.1])
-exportgraphics(gcf,'figure/coefficient_increment_control.png','resolution',300)
+exportgraphics(gcf,'figure/coefficient_increment_control.png','resolution',600)

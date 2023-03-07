@@ -34,7 +34,7 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/pzmap_lon_1.png','resolution',300)
+exportgraphics(gcf,'figure/pzmap_lon_1.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[15 13 20 15]);
@@ -76,7 +76,7 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/pzmap_lon_2.png','resolution',300)
+exportgraphics(gcf,'figure/pzmap_lon_2.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[30 13 20 15]);
@@ -118,7 +118,7 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/pzmap_lon_3.png','resolution',300)
+exportgraphics(gcf,'figure/pzmap_lon_3.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[0 2 20 15]);
@@ -148,7 +148,7 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/pzmap_lat_1.png','resolution',300)
+exportgraphics(gcf,'figure/pzmap_lat_1.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[15 2 20 15]);
@@ -178,7 +178,7 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/pzmap_lat_2.png','resolution',300)
+exportgraphics(gcf,'figure/pzmap_lat_2.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[30 2 20 15]);
@@ -208,4 +208,4 @@ grid minor
 p = getoptions(h);
 p.Title.String = '';
 setoptions(h,p)
-exportgraphics(gcf,'figure/pzmap_lat_3.png','resolution',300)
+exportgraphics(gcf,'figure/pzmap_lat_3.png','resolution',600)

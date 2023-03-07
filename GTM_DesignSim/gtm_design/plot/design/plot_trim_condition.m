@@ -23,7 +23,7 @@ set(0,'DefaultLineLineWidth',1)
 %     title(['h = ',num2str(alt),' ft'],'interpreter','latex')
 % end
 % end
-% exportgraphics(gcf,'figure/trim_condition.png','resolution',300)
+% exportgraphics(gcf,'figure/trim_condition.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[0 2 24 15]);
@@ -55,4 +55,4 @@ for j = 1:num_alt
     legend('\eta_s = -25%','\eta_s = -12.5%','\eta_s = 0%','location','best')
 % end
 end
-exportgraphics(gcf,'figure/trim_condition.png','resolution',300)
+exportgraphics(gcf,'figure/trim_condition.png','resolution',600)

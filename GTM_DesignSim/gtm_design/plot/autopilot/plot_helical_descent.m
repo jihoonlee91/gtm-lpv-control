@@ -1,3 +1,5 @@
+% morphing scheduling
+
 %% Nonlinear simulation
 % used
 FlightMode = 4.2;
@@ -102,6 +104,7 @@ etas_1 = (etar_1+etal_1)/2;
 
 %%
 ControlMode = 3;
+t_final = 235;
 set_param('gtm_design','MinStep',num2str(MWS.Timestep/2))
 [tsim2,~,ysim2]=sim('gtm_design',[0 t_final]);
 

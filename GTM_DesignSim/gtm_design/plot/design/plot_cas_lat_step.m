@@ -29,7 +29,7 @@ subplot(3,1,1), xlabel('Time [sec]'), ylabel('Sideslip [deg]'), legend('LPV','H_
 subplot(3,1,2), xlabel('Time [sec]'), ylabel('Roll rate [deg/s]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(3,1,3), xlabel('Time [sec]'), ylabel('Yaw rate [deg/s]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/cas_lat_step_bet_state.png','resolution',300)
+exportgraphics(gcf,'figure/cas_lat_step_bet_state.png','resolution',600)
 
 %% cas_lat_step_bet_input
 figure('units','centimeters','position',[0 2 20 12]);
@@ -52,7 +52,7 @@ subplot(3,1,1), xlabel('Time [sec]'), ylabel('Aileron [%]'), legend('LPV','H_\in
 subplot(3,1,2), xlabel('Time [sec]'), ylabel('Rudder [deg]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [%]'), legend('LPV','H_\infty','location','east'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/cas_lat_step_bet_input.png','resolution',300)
+exportgraphics(gcf,'figure/cas_lat_step_bet_input.png','resolution',600)
 
 %% cas_lat_step_p_state
 figure('units','centimeters','position',[20 14 20 12]);
@@ -82,7 +82,7 @@ subplot(3,1,1), xlabel('Time [sec]'), ylabel('Sideslip [deg]'), legend('LPV','H_
 subplot(3,1,2), xlabel('Time [sec]'), ylabel('Roll rate [deg/s]'), legend('LPV','H_\infty','Model','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(3,1,3), xlabel('Time [sec]'), ylabel('Yaw rate [deg/s]'), legend('LPV','H_\infty','location','northeast'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/cas_lat_step_p_state.png','resolution',300)
+exportgraphics(gcf,'figure/cas_lat_step_p_state.png','resolution',600)
 
 %% cas_lat_step_p_input
 figure('units','centimeters','position',[20 2 20 12]);
@@ -105,4 +105,4 @@ subplot(3,1,1), xlabel('Time [sec]'), ylabel('Aileron [%]'), legend('LPV','H_\in
 subplot(3,1,2), xlabel('Time [sec]'), ylabel('Rudder [deg]'), legend('LPV','H_\infty','location','southeast'), grid on, grid minor, xlim tight, ylim padded
 subplot(3,1,3), xlabel('Time [sec]'), ylabel('Asy. morphing [%]'), legend('LPV','H_\infty','location','east'), grid on, grid minor, xlim tight, ylim padded
 
-exportgraphics(gcf,'figure/cas_lat_step_p_input.png','resolution',300)
+exportgraphics(gcf,'figure/cas_lat_step_p_input.png','resolution',600)

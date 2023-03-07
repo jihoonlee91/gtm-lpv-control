@@ -162,14 +162,14 @@ figure('units','centimeters','position',[0 2 20 14.5]);
 trajectory3(p_E_ft_1,p_N_ft_1,-p_D_ft_1,-phi_rad_1,the_rad_1,-psi_rad_1,1/150,1500,'boeing_747',[90 90],'blue','blue');
 ylim([-500 6000]), xlim([-2500 2500]), hold on, plot3(2000*cos(0:0.1:2*pi),3500+2000*sin(0:0.1:2*pi),(0:0.1:2*pi)*0+1000,'-.k')
 xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','Trajectory','location','northeast')
-exportgraphics(gcf,'figure/orbit_following_trajectory_lpvu.png','resolution',300)
+exportgraphics(gcf,'figure/orbit_following_trajectory_lpvu.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[5 2 20 14.5]);
 trajectory3(p_E_ft_2,p_N_ft_2,-p_D_ft_2,-phi_rad_2,the_rad_2,-psi_rad_2,1/150,1500,'boeing_747',[90 90],'red','red');
 ylim([-500 6000]), xlim([-2500 2500]), hold on, plot3(2000*cos(0:0.1:2*pi),3500+2000*sin(0:0.1:2*pi),(0:0.1:2*pi)*0+1000,'-.k')
 xlabel('East [ft]'), ylabel('North [ft]'), zlabel('Elevation [ft]'), box on, grid on, grid minor, legend('LPV','H_\infty','Trajectory','location','northeast')
-exportgraphics(gcf,'figure/orbit_following_trajectory_hinf.png','resolution',300)
+exportgraphics(gcf,'figure/orbit_following_trajectory_hinf.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[10 2 20 16]);
@@ -177,7 +177,7 @@ subplot(4,1,1), plot(tsim1,tas_kt_1,'b',tsim2,tas_kt_2,'--r',tsim1,tas_c_kt_1,'-
 subplot(4,1,2), plot(tsim1,alt_ft_1,'b',tsim2,alt_ft_2,'--r',tsim1,alt_c_ft_1,'-.k'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('LPV','H_\infty','location','best'), ylabel('Altitude [ft]')
 subplot(4,1,3), plot(tsim1,bet_deg_1,'b',tsim2,bet_deg_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('LPV','H_\infty','location','best'), ylabel('Sideslip [deg]')
 subplot(4,1,4), plot(tsim1,phi_rad_1*180/pi,'b',tsim1,phi_c_deg_1,'--b',tsim2,phi_rad_2*180/pi,'r',tsim2,phi_c_deg_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('LPV (Actual)','LPV (Command)','H_\infty (Actual)','H_\infty (Command)','location','best'), ylabel('Roll [deg]')
-exportgraphics(gcf,'figure/orbit_following_command.png','resolution',300)
+exportgraphics(gcf,'figure/orbit_following_command.png','resolution',600)
 
 %%
 figure('units','centimeters','position',[15 2 20 24]);
@@ -187,4 +187,4 @@ subplot(6,1,3), plot(tsim1,delr_1,'b',tsim1,delrc_1,'--b',tsim2,delr_2,'r',tsim2
 subplot(6,1,4), plot(tsim1,delt_1,'b',tsim1,deltc_1,'--b',tsim2,delt_2,'r',tsim2,deltc_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('Actual (LPV)','Command (LPV)','Actual (H_\infty)','Command (H_\infty)','location','best'), ylabel('Throttle [%]')
 subplot(6,1,5), plot(tsim1,etas_1,'k',tsim1,etasc_1,'--k'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('Actual','Command','location','best'), ylabel('Sym. Morphing [%]')
 subplot(6,1,6), plot(tsim1,etaa_1,'b',tsim1,etaac_1,'--b',tsim2,etaa_2,'r',tsim2,etaac_2,'--r'), xlabel('Time [sec]'), grid on, grid minor, ylim padded, xlim([0 t_final]), legend('Actual (LPV)','Command (LPV)','Actual (H_\infty)','Command (H_\infty)','location','best'), ylabel('Asy. Morphing [%]')
-exportgraphics(gcf,'figure/orbit_following_input.png','resolution',300)
+exportgraphics(gcf,'figure/orbit_following_input.png','resolution',600)

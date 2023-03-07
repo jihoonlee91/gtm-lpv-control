@@ -62,7 +62,7 @@ end
 end
 xlim([42.5 122.5])
 ylim([0 35000])
-exportgraphics(gcf,'figure/trim_map.png','resolution',300)
+exportgraphics(gcf,'figure/trim_map.png','resolution',600)
 
 % figure('units','centimeters','position',[20 2 20 20]);
 % for j = 1:num_alt
@@ -79,4 +79,4 @@ set(gcf,'units','centimeters','position',[20 2 20 12]);
 for k = 50:10:120
     plot([k 100],[0 30000],'--k')
 end
-exportgraphics(gcf,'figure/trim_map.png','resolution',300)
+exportgraphics(gcf,'figure/trim_map.png','resolution',600)
