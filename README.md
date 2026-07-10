@@ -1,9 +1,11 @@
 # LPV Control
 
-GTM(Generic Transport Model) 시뮬레이션 환경에서 LPV(Linear Parameter-Varying) 제어기를 설계하기 위한 저장소입니다.
+Repository for designing an LPV (linear parameter-varying) controller in the GTM (Generic Transport Model) simulation environment, related to "Linear Parameter-Varying Control of Variable Span-Sweep Morphing Aircraft" (AIAA SciTech Forum, 2019).
 
-- `GTM_DesignSim/`: NASA GTM_DesignSim 기반 비선형 항공기 동역학 시뮬레이션
-- `GTM_DesignSim/gtm_design/lpv_design.m`: LPV 제어기 설계 스크립트
-- `GTM_DesignSim/gtm_design/LPVToolsV1.0/`: LPV 설계에 사용한 LPVTools 툴박스
+**Content:** Designs a gain-scheduled controller that treats the aircraft's span/sweep morphing configuration as a varying parameter, using the LPVTools toolbox on top of a GTM_DesignSim-based nonlinear aircraft model.
 
-개발환경: MATLAB
+- `GTM_DesignSim/`: NASA GTM_DesignSim-based nonlinear aircraft dynamics simulation
+- `GTM_DesignSim/gtm_design/lpv_design.m`: LPV controller design script
+- `GTM_DesignSim/gtm_design/LPVToolsV1.0/`: LPVTools toolbox used for the LPV design
+
+Development environment: MATLAB
