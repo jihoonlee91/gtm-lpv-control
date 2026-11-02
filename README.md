@@ -23,3 +23,18 @@ The aircraft's span/sweep morphing configuration changes its aerodynamics contin
 Open MATLAB, `cd` into `GTM_DesignSim/gtm_design`, run `setup.m` to add the required paths (including LPVTools), then run `lpv_design.m` to trim/linearize the aircraft across the morphing grid and synthesize the scheduled controllers.
 
 Development environment: MATLAB
+
+## Citation
+
+```bibtex
+@inproceedings{lee2019lpv,
+  title     = {Linear Parameter-Varying Control of Variable Span-Sweep Morphing Aircraft},
+  author    = {Lee, Jihoon and Kim, Seong-hun and Jung, Seungyun and Lee, Hanna and Kim, Youdan},
+  booktitle = {AIAA Scitech 2019 Forum},
+  address   = {San Diego, CA},
+  year      = {2019},
+  doi       = {10.2514/6.2019-0106}
+}
+```
+
+Part of my morphing-aircraft control research — more at [jihoonlee91.github.io](https://jihoonlee91.github.io/).
