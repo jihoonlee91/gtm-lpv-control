@@ -37,20 +37,20 @@ classdef SmokeTest < matlab.unittest.TestCase
             testCase.verifyEqual(trimcond.morphing, mor, "AbsTol", 1e-6);
         end
 
-        function fliesAutopilotStepTwoSeconds(testCase)
-            % Same setup as plot/autopilot/plot_autopilot_step.m (the paper's autopilot
-            % step scenario), flown for 2 s instead of 30 s.
+        function fliesAutopilotTwoSeconds(testCase)
+            % Same setup as plot/autopilot/plot_autopilot_straight.m (the paper's
+            % straight-climb autopilot scenario), flown for 2 s instead of 180 s.
             cd(testCase.DesignDir);
             rng(0);
             evalin("base", strjoin([
-                "alt0 = 1000; etas0 = -12.5; tas0 = 75; t_final = 2;"
-                "FlightMode = 3.1; ControlMode = 3; RateofClimb = 0; phi_to_eta = 0;"
+                "alt0 = 1000; etas0 = -12.5; tas0 = 75; t_final = 2; etasc_feedthrough = 0;"
+                "FlightMode = 3.0; ControlMode = 4; RateofClimb = 10; phi_to_eta = 0;"
                 "LookaheadDistance = 700; TransitionRadius = 1000*0.3048; Radius = 2000; TurnDirection = 1;"
                 "Waypoints = [0 0 -alt0; 3000 0 -alt0; 3000 3000 -alt0; 0 3000 -alt0; 0 0 -alt0];"
                 "MWS = init_design('GTM',1); MWS.bias.morphing = etas0; MWS.StatesInp(9) = alt0;"
                 "MWS.SurfaceDeadbandOn = 0; loadmws(MWS,'gtm_design');"
                 "[MWS,Xtrim,Trimcond,Err] = trimgtm_morph_try(tas0,alt0,etas0,3);"
-                "MWS.SurfaceDeadbandOn = 0; loadmws(MWS,'gtm_design');"
+                "MWS.SurfaceDeadbandOn = 1; loadmws(MWS,'gtm_design');"
                 "deltc = MWS.bias.throttle;"
                 ], " "));
             for blk = ["Control/Controller", "Guidance", "Monitor", "Guidance/Autopilot Step"]
