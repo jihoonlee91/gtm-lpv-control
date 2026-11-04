@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the Sensors 2023 paper below."
+title: "gtm-lpv-control: Self-scheduled LPV control of an asymmetric variable-span morphing UAV"
+type: software
+authors:
+  - family-names: Lee
+    given-names: Jihoon
+    orcid: "https://orcid.org/0000-0001-5327-824X"
+repository-code: "https://github.com/jihoonlee91/gtm-lpv-control"
+url: "https://jihoonlee91.github.io/papers/2023-self-scheduled-lpv-asymmetric-morphing-uav.html"
+keywords:
+  - morphing aircraft
+  - LPV control
+  - gain scheduling
+  - flight control
+  - NASA GTM
+preferred-citation:
+  type: article
+  title: "Self-Scheduled LPV Control of Asymmetric Variable-Span Morphing UAV"
+  authors:
+    - family-names: Lee
+      given-names: Jihoon
+      orcid: "https://orcid.org/0000-0001-5327-824X"
+    - family-names: Kim
+      given-names: Seong-Hun
+    - family-names: Lee
+      given-names: Hanna
+    - family-names: Kim
+      given-names: Youdan
+  journal: "Sensors"
+  volume: 23
+  issue: 6
+  start: 3075
+  year: 2023
+  doi: "10.3390/s23063075"
+references:
+  - type: thesis
+    title: "Self-Scheduled Parameter-Varying Control of Asymmetric Variable-Span Morphing Unmanned Aerial Vehicle"
+    authors:
+      - family-names: Lee
+        given-names: Jihoon
+    thesis-type: "Ph.D. dissertation"
+    institution:
+      name: "Seoul National University"
+    year: 2023

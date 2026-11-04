@@ -6,7 +6,7 @@
 
 [![Sensors 2023](https://img.shields.io/badge/Sensors-2023-0b3d91?style=flat-square)](https://doi.org/10.3390/s23063075)
 [![DOI](https://img.shields.io/badge/DOI-10.3390%2Fs23063075-blue?style=flat-square)](https://doi.org/10.3390/s23063075)
-[![Ph.D. dissertation](https://img.shields.io/badge/Ph.D.%20dissertation-SNU%202023-6E56CF?style=flat-square)](https://jihoonlee91.github.io/papers/2023-msc-thesis-lpv-asymmetric-morphing.html)
+[![Ph.D. dissertation](https://img.shields.io/badge/Ph.D.%20dissertation-SNU%202023-6E56CF?style=flat-square)](https://jihoonlee91.github.io/papers/2023-phd-dissertation-lpv-asymmetric-morphing.html)
 ![MATLAB](https://img.shields.io/badge/MATLAB-0076A8?style=flat-square&logo=mathworks&logoColor=white)
 ![Simulink](https://img.shields.io/badge/Simulink-0076A8?style=flat-square)
 [![Built on NASA GTM_DesignSim](https://img.shields.io/badge/built%20on-NASA%20GTM__DesignSim-e03c31?style=flat-square&logo=nasa&logoColor=white)](https://github.com/nasa/GTM_DesignSim)
@@ -61,12 +61,23 @@ lpv_design   % trim + linearize across the morphing range, then synthesize the c
 
 </details>
 
+## Limitations and future work
+
+The model is quasi-static: unsteady aerodynamics during morphing are not modeled, because the base GTM model does not include them. Open items from the dissertation work (tracked as issues #15–#23 until 2026):
+
+- Refine the center-of-mass and inertia modeling, and the quadratic dependence of the rolling and yawing moment coefficients on the left/right morphing parameters
+- Close the loop with realistic sensor and actuator models in the LPV simulation, including anti-aliasing filters
+- Add model uncertainty, wind, and disturbance rejection to the synthesis and the nonlinear simulation
+- Choose the morphing configuration online (a line search with one morphing parameter; a real optimization with several)
+
+A plain-language walkthrough of the approach is on the blog: [Using wing span as a control input](https://jihoonlee91.github.io/blog/wing-span-as-a-control-input.html).
+
 ## Related publications
 
 | | Publication |
 |---|---|
 | **This code** | [Self-Scheduled LPV Control of Asymmetric Variable-Span Morphing UAV](https://jihoonlee91.github.io/papers/2023-self-scheduled-lpv-asymmetric-morphing-uav.html) — *Sensors 2023* |
-| **This code** | [Self-Scheduled Parameter-Varying Control of Asymmetric Variable-Span Morphing Unmanned Aerial Vehicle](https://jihoonlee91.github.io/papers/2023-msc-thesis-lpv-asymmetric-morphing.html) — *Ph.D. dissertation, SNU 2023* |
+| **This code** | [Self-Scheduled Parameter-Varying Control of Asymmetric Variable-Span Morphing Unmanned Aerial Vehicle](https://jihoonlee91.github.io/papers/2023-phd-dissertation-lpv-asymmetric-morphing.html) — *Ph.D. dissertation, SNU 2023* |
 | Same aircraft — modeling | [Modeling and Simulation of Asymmetric Variable-Span Morphing Aircraft](https://jihoonlee91.github.io/papers/2019-asymmetric-morphing-modeling-sim-ko.html) — *KSAS Fall 2019 (in Korean)* |
 | Same aircraft — NDI | [Flight Control of Asymmetric Variable-Span Morphing Aircraft Using Nonlinear Dynamic Inversion](https://jihoonlee91.github.io/papers/2019-flight-control-nonlinear-dynamic-inversion-gold.html) — *APISAT 2019, Gold Award* |
 | Same aircraft — NDI autopilot | [Aircraft Autopilot Design Using Asymmetric Variable-Span Wing Morphing](https://jihoonlee91.github.io/papers/2021-aircraft-autopilot-asymmetric-morphing.html) — *ICAS 2021* |
@@ -93,8 +104,10 @@ The simulation base is shared with [`gtm-morphing-sim`](https://github.com/jihoo
 }
 ```
 
-## Acknowledgements
+GitHub's **Cite this repository** button uses [`CITATION.cff`](CITATION.cff).
 
-[NASA GTM_DesignSim](https://github.com/nasa/GTM_DesignSim) (NASA Open Source Agreement — see `GTM_DesignSim/LicenseAgreement.pdf`) · LPVTools (MUSYN / University of Minnesota)
+## License and acknowledgements
+
+Built on [NASA GTM_DesignSim](https://github.com/nasa/GTM_DesignSim) and distributed under the NASA Open Source Agreement 1.3 (`GTM_DesignSim/LicenseAgreement.pdf`); the bundled LPVTools (MUSYN / University of Minnesota) is AGPL-3.0 (`GTM_DesignSim/gtm_design/LPVToolsV1.0/agpl-3.0.txt`). See [`LICENSE.md`](LICENSE.md).
 
 <sub>Ph.D. research at the Seoul National University Flight Dynamics and Control Lab — more at <a href="https://jihoonlee91.github.io/">jihoonlee91.github.io</a>.</sub>
