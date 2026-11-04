@@ -9,6 +9,7 @@
 [![Ph.D. dissertation](https://img.shields.io/badge/Ph.D.%20dissertation-SNU%202023-6E56CF?style=flat-square)](https://jihoonlee91.github.io/papers/2023-phd-dissertation-lpv-asymmetric-morphing.html)
 ![MATLAB](https://img.shields.io/badge/MATLAB-0076A8?style=flat-square&logo=mathworks&logoColor=white)
 ![Simulink](https://img.shields.io/badge/Simulink-0076A8?style=flat-square)
+[![MATLAB smoke test](https://github.com/jihoonlee91/morphing-uav-lpv-control/actions/workflows/matlab.yml/badge.svg)](https://github.com/jihoonlee91/morphing-uav-lpv-control/actions/workflows/matlab.yml)
 [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=jihoonlee91/morphing-uav-lpv-control&file=GTM_DesignSim/gtm_design/lpv_design.m)
 [![Built on NASA GTM_DesignSim](https://img.shields.io/badge/built%20on-NASA%20GTM__DesignSim-e03c31?style=flat-square&logo=nasa&logoColor=white)](https://github.com/nasa/GTM_DesignSim)
 
@@ -60,7 +61,7 @@ setup        % add paths, including LPVTools
 lpv_design   % trim + linearize across the morphing range, then synthesize the controllers
 ```
 
-A quick check that your MATLAB has everything (it also runs in CI on every push): `runtests("tests")` from the repository root — loads the saved design, trims one design point, and flies two seconds.
+A quick check that your MATLAB has everything (it also runs in CI on every push): `runtests("tests")` from the repository root — loads the saved design, trims one design point, and flies two seconds of the straight-climb autopilot scenario.
 
 <details>
 <summary><b>Repository layout</b></summary>
