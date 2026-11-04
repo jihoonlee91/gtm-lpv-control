@@ -1,0 +1,38 @@
+name: MATLAB
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2024b
+          products: >
+            Simulink
+            Control_System_Toolbox
+            Robust_Control_Toolbox
+            Aerospace_Toolbox
+          cache: true
+
+      - uses: matlab-actions/run-tests@v3
+        with:
+          select-by-folder: tests
+          test-results-junit: test-results/results.xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
