@@ -17,6 +17,12 @@
 
 </div>
 
+## Highlights
+
+- **Two wing spans, two jobs.** The left/right span ratios split into a symmetric part (an LPV scheduling parameter) and an asymmetric part (a roll-control input alongside the ailerons and rudder).
+- **Guarantees between design points.** LPV synthesis over a 63-point grid (synthetic airspeed × altitude × morphing) keeps stability for arbitrarily fast parameter variation, not just at each design point.
+- **Where it shows.** In a helical climb with extremely fast morphing, a pointwise H∞ design diverges while the LPV controller keeps tracking (*Sensors* 2023).
+
 ## Why
 
 Changing the wing span changes lift, drag, and moments. If the **left and right spans can move independently**, span morphing becomes more than a performance knob — the difference between the two sides is a roll-control effector. The left/right span ratios are decomposed into a **symmetric part, used as the LPV scheduling parameter**, and an **asymmetric part, used as a control input**.
@@ -90,7 +96,7 @@ A plain-language walkthrough of the approach is on the blog: [Using wing span as
 | Same aircraft — NDI autopilot | [Aircraft Autopilot Design Using Asymmetric Variable-Span Wing Morphing](https://jihoonlee91.github.io/papers/2021-aircraft-autopilot-asymmetric-morphing.html) — *ICAS 2021* |
 | Earlier LPV work (different aircraft: span-sweep UAV) | [Linear Parameter-Varying Control of Variable Span-Sweep Morphing Aircraft](https://jihoonlee91.github.io/papers/2019-lpv-variable-span-sweep-morphing.html) — *AIAA SciTech 2019* |
 
-The simulation base is shared with [`gtm-morphing-sim`](https://github.com/jihoonlee91/gtm-morphing-sim).
+The simulation base is shared with [`morphing-uav-gtm-sim`](https://github.com/jihoonlee91/morphing-uav-gtm-sim).
 
 ## Citation
 

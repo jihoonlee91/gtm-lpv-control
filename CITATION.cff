@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite the Sensors 2023 paper below."
-title: "gtm-lpv-control: Self-scheduled LPV control of an asymmetric variable-span morphing UAV"
+title: "morphing-uav-lpv-control: Self-scheduled LPV control of an asymmetric variable-span morphing UAV"
 type: software
 authors:
   - family-names: Lee
     given-names: Jihoon
     orcid: "https://orcid.org/0000-0001-5327-824X"
-repository-code: "https://github.com/jihoonlee91/gtm-lpv-control"
+repository-code: "https://github.com/jihoonlee91/morphing-uav-lpv-control"
 url: "https://jihoonlee91.github.io/papers/2023-self-scheduled-lpv-asymmetric-morphing-uav.html"
 keywords:
   - morphing aircraft
