@@ -92,7 +92,7 @@ A plain-language walkthrough of the approach is on the blog: [Using wing span as
 | **This code** | [Self-Scheduled LPV Control of Asymmetric Variable-Span Morphing UAV](https://jihoonlee91.github.io/papers/2023-self-scheduled-lpv-asymmetric-morphing-uav.html) — *Sensors 2023* |
 | **This code** | [Self-Scheduled Parameter-Varying Control of Asymmetric Variable-Span Morphing Unmanned Aerial Vehicle](https://jihoonlee91.github.io/papers/2023-phd-dissertation-lpv-asymmetric-morphing.html) — *Ph.D. dissertation, SNU 2023* |
 | Same aircraft — modeling | [Modeling and Simulation of Asymmetric Variable-Span Morphing Aircraft](https://jihoonlee91.github.io/papers/2019-asymmetric-morphing-modeling-sim-ko.html) — *KSAS Fall 2019 (in Korean)* |
-| Same aircraft — NDI | [Flight Control of Asymmetric Variable-Span Morphing Aircraft Using Nonlinear Dynamic Inversion](https://jihoonlee91.github.io/papers/2019-flight-control-nonlinear-dynamic-inversion-gold.html) — *APISAT 2019, Gold Award* |
+| Same aircraft — NDI | [Flight Control of Asymmetric Variable-Span Morphing Aircraft Using Nonlinear Dynamic Inversion](https://jihoonlee91.github.io/papers/2019-flight-control-nonlinear-dynamic-inversion.html) — *APISAT 2019* |
 | Same aircraft — NDI autopilot | [Aircraft Autopilot Design Using Asymmetric Variable-Span Wing Morphing](https://jihoonlee91.github.io/papers/2021-aircraft-autopilot-asymmetric-morphing.html) — *ICAS 2021* |
 | Earlier LPV work (different aircraft: span-sweep UAV) | [Linear Parameter-Varying Control of Variable Span-Sweep Morphing Aircraft](https://jihoonlee91.github.io/papers/2019-lpv-variable-span-sweep-morphing.html) — *AIAA SciTech 2019* |
 
