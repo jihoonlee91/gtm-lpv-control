@@ -37,6 +37,13 @@ flowchart LR
 - **Guidance scenarios**: waypoint following, orbit following, helical climb and descent
 - LPV vs. H∞ comparison plots for push-over/pull-up and high-g turn maneuvers
 
+## Requirements
+
+- MATLAB R2020b or later with Simulink
+- Control System Toolbox, Robust Control Toolbox (`hinfsyn`, `sysic`), Aerospace Toolbox (`atmosisa`)
+- LPVTools v1.0 is bundled (`GTM_DesignSim/gtm_design/LPVToolsV1.0/`); `setup` adds it to the path
+- Precompiled S-function MEX binaries for Windows, macOS, and Linux are included, so no C compiler is needed
+
 ## Quick start
 
 ```matlab
