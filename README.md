@@ -9,6 +9,7 @@
 [![Ph.D. dissertation](https://img.shields.io/badge/Ph.D.%20dissertation-SNU%202023-6E56CF?style=flat-square)](https://jihoonlee91.github.io/papers/2023-phd-dissertation-lpv-asymmetric-morphing.html)
 ![MATLAB](https://img.shields.io/badge/MATLAB-0076A8?style=flat-square&logo=mathworks&logoColor=white)
 ![Simulink](https://img.shields.io/badge/Simulink-0076A8?style=flat-square)
+[![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=jihoonlee91/morphing-uav-lpv-control&file=GTM_DesignSim/gtm_design/lpv_design.m)
 [![Built on NASA GTM_DesignSim](https://img.shields.io/badge/built%20on-NASA%20GTM__DesignSim-e03c31?style=flat-square&logo=nasa&logoColor=white)](https://github.com/nasa/GTM_DesignSim)
 
 <img src="https://jihoonlee91.github.io/assets/figures/2023-self-scheduled-lpv-asymmetric-morphing-uav-2.webp" width="560" alt="Parameter variation due to left-wing span morphing">
@@ -47,6 +48,7 @@ flowchart LR
 
 - MATLAB R2020b or later with Simulink
 - Control System Toolbox, Robust Control Toolbox (`hinfsyn`, `sysic`), Aerospace Toolbox (`atmosisa`)
+- For the Simulink model: Aerospace Blockset (unit-conversion and transform blocks), UAV Toolbox, and Robotics System Toolbox (guidance blocks)
 - LPVTools v1.0 is bundled (`GTM_DesignSim/gtm_design/LPVToolsV1.0/`); `setup` adds it to the path
 - Precompiled S-function MEX binaries for Windows, macOS, and Linux are included, so no C compiler is needed
 
@@ -57,6 +59,8 @@ cd GTM_DesignSim/gtm_design
 setup        % add paths, including LPVTools
 lpv_design   % trim + linearize across the morphing range, then synthesize the controllers
 ```
+
+A quick check that your MATLAB has everything (it also runs in CI on every push): `runtests("tests")` from the repository root — loads the saved design, trims one design point, and flies two seconds.
 
 <details>
 <summary><b>Repository layout</b></summary>

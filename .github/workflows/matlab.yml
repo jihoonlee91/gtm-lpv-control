@@ -24,6 +24,9 @@ jobs:
             Control_System_Toolbox
             Robust_Control_Toolbox
             Aerospace_Toolbox
+            Aerospace_Blockset
+            UAV_Toolbox
+            Robotics_System_Toolbox
           cache: true
 
       - uses: matlab-actions/run-tests@v3
